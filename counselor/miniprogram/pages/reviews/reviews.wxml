@@ -1,0 +1,22 @@
+<view class="container">
+  <view class="review-list" wx:if="{{items.length > 0}}">
+    <view class="review-card {{item.hasReview ? '' : 'unreviewed'}}" wx:for="{{items}}" wx:key="id">
+      <view class="review-header">
+        <view class="review-user">
+          <text class="user-name">{{item.userName || '匿名用户'}}</text>
+        </view>
+        <view class="review-stars" wx:if="{{item.hasReview}}">
+          <text wx:for="{{[1,2,3,4,5]}}" wx:for-item="s" wx:key="*this" class="star {{item.rating >= s ? 'active' : ''}}">★</text>
+        </view>
+        <text wx:else class="no-review-tag">未评价</text>
+      </view>
+      <text class="review-content" wx:if="{{item.hasReview}}">{{item.content || '（无文字评价）'}}</text>
+      <text class="review-time">{{item.hasReview ? item.createTime : item.date}}</text>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:else>
+    <text class="empty-icon">📝</text>
+    <text class="empty-text">暂无已完成咨询</text>
+  </view>
+</view>

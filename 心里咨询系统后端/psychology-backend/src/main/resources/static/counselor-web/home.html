@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消息列表 - 心理咨询师</title>
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* Subtle scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #E8D5C4; border-radius: 4px; }
+
+        /* Skeleton loading animation */
+        .skeleton {
+            background: linear-gradient(90deg, #f0e8e0 25%, #e8ddd3 50%, #f0e8e0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Hover effect for cards */
+        .conv-card {
+            transition: all 0.2s ease;
+        }
+        .conv-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 12px rgba(255, 126, 103, 0.1);
+        }
+
+        /* Toggle switch styles */
+        .toggle-checkbox:checked ~ .toggle-label .toggle-dot {
+            transform: translateX(100%);
+            background-color: #FF7E67;
+        }
+        .toggle-checkbox:not(:checked) ~ .toggle-label .toggle-dot {
+            background-color: #e0e0e0;
+        }
+
+        /* Pulse animation for online dot */
+        @keyframes pulse-green {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .online-pulse {
+            animation: pulse-green 2s ease-in-out infinite;
+        }
+
+        /* Unread badge bounce */
+        @keyframes badge-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+        .unread-badge {
+            animation: badge-pop 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-[#FDF8F5] min-h-screen font-sans antialiased">
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-[#FF7E67]/10">
+        <div class="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
+            <h1 class="text-lg font-semibold text-gray-800 tracking-wide">
+                <i class="fa-regular fa-message mr-2 text-[#FF7E67]"></i>消息列表
+            </h1>
+            <button
+                id="logoutBtn"
+                class="text-sm text-gray-400 hover:text-red-400 transition-colors px-3 py-1 rounded-full hover:bg-red-50"
+                title="退出登录"
+            >
+                <i class="fa-solid fa-right-from-bracket mr-1"></i>退出
+            </button>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="pt-14 pb-6 max-w-lg mx-auto px-4">
+
+        <!-- Online Status Toggle -->
+        <section class="mt-4 bg-white rounded-2xl shadow-sm border border-[#FF7E67]/5 overflow-hidden">
+            <div class="px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div id="statusIndicator" class="w-3 h-3 rounded-full bg-gray-300 flex-shrink-0"></div>
+                    <span id="statusText" class="text-sm font-medium text-gray-600">加载中...</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="onlineToggle" class="toggle-checkbox sr-only" disabled>
+                    <span class="toggle-label block w-11 h-6 rounded-full transition-colors duration-200" style="background-color: #e8e0d8;">
+                        <span class="toggle-dot absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"></span>
+                    </span>
+                </label>
+            </div>
+        </section>
+
+        <!-- Message List Section -->
+        <section class="mt-4">
+            <h2 class="text-sm text-gray-400 font-medium mb-3 pl-1">会话列表</h2>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="space-y-3">
+                <div class="skeleton h-20 w-full"></div>
+                <div class="skeleton h-20 w-full"></div>
+                <div class="skeleton h-20 w-full"></div>
+                <div class="skeleton h-20 w-full"></div>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="hidden text-center py-16">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
+                    <i class="fa-solid fa-circle-exclamation text-red-400 text-2xl"></i>
+                </div>
+                <p class="text-gray-500 text-sm mb-4" id="errorMessage">加载失败，请稍后重试</p>
+                <button id="retryBtn" class="inline-flex items-center gap-2 px-5 py-2 bg-[#FF7E67] text-white text-sm rounded-full hover:bg-[#ff6b52] transition-colors shadow-sm">
+                    <i class="fa-solid fa-rotate"></i> 重新加载
+                </button>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden text-center py-16">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#FDF8F5] flex items-center justify-center border border-[#FF7E67]/15">
+                    <i class="fa-regular fa-comment-dots text-[#FF7E67]/40 text-2xl"></i>
+                </div>
+                <p class="text-gray-400 text-sm">暂无消息</p>
+                <p class="text-gray-300 text-xs mt-1">等待用户发起新的会话</p>
+            </div>
+
+            <!-- Conversation List -->
+            <div id="conversationList" class="hidden space-y-2"></div>
+
+        </section>
+
+    </main>
+
+    <!-- ==================== SCRIPTS ==================== -->
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        // ── Login Guard ──
+        if (!checkLogin()) { /* checkLogin redirects if no token */ }
+
+        // ── DOM References ──
+        const onlineToggle   = document.getElementById('onlineToggle');
+        const statusText     = document.getElementById('statusText');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const convList       = document.getElementById('conversationList');
+        const loadingState   = document.getElementById('loadingState');
+        const errorState     = document.getElementById('errorState');
+        const errorMessage   = document.getElementById('errorMessage');
+        const emptyState     = document.getElementById('emptyState');
+        const retryBtn       = document.getElementById('retryBtn');
+        const logoutBtn      = document.getElementById('logoutBtn');
+
+        // ── State ──
+        let isOnline = false;
+        let conversations = [];
+
+        /**
+         * Format a relative time string for display.
+         * e.g., 刚刚, 5分钟前, 今天 14:30, 昨天 14:30, 5月12日
+         */
+        function relativeTime(dateStr) {
+            if (!dateStr) return '';
+            const now = new Date();
+            const d = new Date(dateStr);
+            const diffMs = now - d;
+            const diffMin = Math.floor(diffMs / 60000);
+            const diffHour = Math.floor(diffMs / 3600000);
+
+            if (diffMin < 1) return '刚刚';
+            if (diffMin < 60) return diffMin + '分钟前';
+            if (diffHour < 6) return diffHour + '小时前';
+
+            const nowDate = now.getDate();
+            const dDate = d.getDate();
+            const nowMonth = now.getMonth();
+            const dMonth = d.getMonth();
+
+            const timeStr = d.getHours().toString().padStart(2, '0') + ':' +
+                            d.getMinutes().toString().padStart(2, '0');
+
+            if (nowDate === dDate && nowMonth === dMonth) {
+                return '今天 ' + timeStr;
+            }
+            if (nowDate - dDate === 1 && nowMonth === dMonth) {
+                return '昨天 ' + timeStr;
+            }
+            return (dMonth + 1) + '月' + dDate + '日 ' + timeStr;
+        }
+
+        /**
+         * Get avatar HTML: use image if available, otherwise show fallback initial.
+         */
+        function avatarHTML(avatar, name) {
+            const initial = (name || '?').charAt(0).toUpperCase();
+            const bgColors = ['#FF7E67', '#FFB5A7', '#FCD5CE', '#F8EDEB', '#E8D5C4', '#DDB892'];
+            const bgColor = bgColors[initial.charCodeAt(0) % bgColors.length];
+
+            if (avatar) {
+                return `<img src="${avatar}" alt="${name}" class="w-11 h-11 rounded-full object-cover flex-shrink-0 border border-white shadow-sm"
+                     onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                    <span class="w-11 h-11 rounded-full flex-shrink-0 items-center justify-center text-white text-lg font-semibold"
+                          style="display:none;background-color:${bgColor}">${initial}</span>`;
+            }
+            return `<span class="w-11 h-11 rounded-full flex-shrink-0 flex items-center justify-center text-white text-lg font-semibold"
+                        style="background-color:${bgColor}">${initial}</span>`;
+        }
+
+        /**
+         * Render the conversation cards.
+         */
+        function renderConversations() {
+            if (conversations.length === 0) {
+                showState('empty');
+                return;
+            }
+
+            showState('list');
+
+            let html = '';
+            conversations.forEach(conv => {
+                const timeDisplay = relativeTime(conv.lastTime);
+                const avatar = avatarHTML(conv.userAvatar, conv.userName);
+                const lastMsg = conv.lastMessage || '暂无消息';
+                const unreadHtml = conv.unreadCount > 0
+                    ? `<span class="unread-badge min-w-[20px] h-5 flex items-center justify-center bg-[#FF7E67] text-white text-xs font-bold rounded-full px-1.5 ml-2 flex-shrink-0">${conv.unreadCount > 99 ? '99+' : conv.unreadCount}</span>`
+                    : '';
+
+                html += `
+                <div class="conv-card bg-white rounded-xl px-4 py-3 flex items-center gap-3 cursor-pointer shadow-sm border border-transparent hover:border-[#FF7E67]/15"
+                     onclick="openChat('${conv.userId}', '${escapeHtml(conv.userName)}')">
+                    ${avatar}
+                    <div class="flex-1 min-w-0 overflow-hidden">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-sm font-medium text-gray-800 truncate">${escapeHtml(conv.userName)}</span>
+                            <span class="text-xs text-gray-400 flex-shrink-0">${timeDisplay}</span>
+                        </div>
+                        <div class="flex items-center justify-between mt-1">
+                            <p class="text-xs text-gray-400 truncate flex-1">${escapeHtml(lastMsg)}</p>
+                            ${unreadHtml}
+                        </div>
+                    </div>
+                </div>`;
+            });
+            convList.innerHTML = html;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        /**
+         * Control which UI state is visible.
+         */
+        function showState(state) {
+            loadingState.classList.add('hidden');
+            errorState.classList.add('hidden');
+            emptyState.classList.add('hidden');
+            convList.classList.add('hidden');
+
+            if (state === 'loading')  loadingState.classList.remove('hidden');
+            if (state === 'error')    errorState.classList.remove('hidden');
+            if (state === 'empty')    emptyState.classList.remove('hidden');
+            if (state === 'list')     convList.classList.remove('hidden');
+        }
+
+        /**
+         * Load online status and message list.
+         */
+        async function loadData() {
+            showState('loading');
+            onlineToggle.disabled = true;
+
+            try {
+                // Fetch both in parallel
+                const [convRes, statusRes] = await Promise.all([
+                    api.get('/api/chat/list'),
+                    api.get('/api/counselors/profile')
+                ]);
+
+                // Handle conversation list
+                if (convRes && convRes.code === 200) {
+                    conversations = convRes.data || [];
+                } else if (convRes && (convRes.code === 401 || convRes.code === 403)) {
+                    // Already handled by request()
+                    return;
+                } else {
+                    conversations = convRes.data || [];
+                }
+
+                // Handle online status from profile
+                if (statusRes && (statusRes.code === 200 || statusRes.code === 0)) {
+                    const profile = statusRes.data;
+                    isOnline = typeof profile.isOnline === 'boolean' ? profile.isOnline : false;
+                } else if (statusRes && statusRes.isOnline !== undefined) {
+                    // Direct property on response
+                    isOnline = typeof statusRes.isOnline === 'boolean' ? statusRes.isOnline : false;
+                }
+
+                updateStatusUI();
+                renderConversations();
+                onlineToggle.disabled = false;
+            } catch (err) {
+                console.error('Failed to load data:', err);
+                showState('error');
+                errorMessage.textContent = '加载失败，请检查网络连接';
+                onlineToggle.disabled = true;
+            }
+        }
+
+        /**
+         * Update the online status toggle and indicator.
+         */
+        function updateStatusUI() {
+            if (isOnline) {
+                statusIndicator.className = 'w-3 h-3 rounded-full bg-green-400 online-pulse flex-shrink-0';
+                statusText.textContent = '当前在线 · 可以接收新会话';
+                statusText.className = 'text-sm font-medium text-gray-700';
+                onlineToggle.checked = true;
+            } else {
+                statusIndicator.className = 'w-3 h-3 rounded-full bg-gray-300 flex-shrink-0';
+                statusText.textContent = '当前离线 · 用户无法发起新会话';
+                statusText.className = 'text-sm font-medium text-gray-400';
+                onlineToggle.checked = false;
+            }
+            onlineToggle.disabled = false;
+        }
+
+        /**
+         * Toggle online status via PUT /api/counselors/online-status
+         */
+        async function toggleOnlineStatus() {
+            const newStatus = !isOnline;
+            // Optimistic update
+            isOnline = newStatus;
+            updateStatusUI();
+            onlineToggle.disabled = true;
+
+            try {
+                const res = await api.put('/api/counselors/online-status', { isOnline: newStatus });
+                if (res && res.code === 200) {
+                    showToast(newStatus ? '已上线，可以接收会话' : '已离线', 'success');
+                } else {
+                    // Revert on failure
+                    isOnline = !newStatus;
+                    updateStatusUI();
+                    showToast('状态切换失败，请重试', 'error');
+                }
+            } catch (err) {
+                // Revert on error
+                isOnline = !newStatus;
+                updateStatusUI();
+                showToast('网络错误，请重试', 'error');
+                console.error('Toggle online status error:', err);
+            } finally {
+                onlineToggle.disabled = false;
+            }
+        }
+
+        /**
+         * Navigate to chat page.
+         */
+        function openChat(userId, userName) {
+            if (!userId || !userName) return;
+            window.location.href = `chat.html?userId=${encodeURIComponent(userId)}&userName=${encodeURIComponent(userName)}`;
+        }
+
+        // ── Event Listeners ──
+        onlineToggle.addEventListener('change', toggleOnlineStatus);
+        retryBtn.addEventListener('click', loadData);
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('counselor_token');
+            localStorage.removeItem('user_info');
+            window.location.href = 'index.html';
+        });
+
+        // ── Initialize ──
+        document.addEventListener('DOMContentLoaded', loadData);
+
+        // Also try to load online status from localStorage cache on instant render
+        (function initFromCache() {
+            const cached = localStorage.getItem('counselor_online_status');
+            if (cached !== null) {
+                isOnline = cached === 'true';
+                updateStatusUI();
+            }
+        })();
+    </script>
+</body>
+</html>

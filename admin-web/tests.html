@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理咨询系统 - 测评管理</title>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/admin.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+    <aside class="sidebar bg-gray-800 text-white w-64 h-screen fixed left-0 top-0 overflow-y-auto">
+        <div class="p-4 border-b border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="text-3xl">🧠</div>
+                <span class="font-bold text-xl">心理咨询系统</span>
+            </div>
+        </div>
+        <nav class="p-4">
+            <div class="space-y-2">
+                <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-tachometer"></i><span>控制台</span>
+                </a>
+                <div class="menu-group">
+                    <button class="menu-toggle flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-700 rounded-lg">
+                        <i class="fa fa-users"></i><span>用户管理</span>
+                        <i class="fa fa-chevron-down ml-auto"></i>
+                    </button>
+                    <div class="submenu ml-4 mt-2 space-y-1">
+                        <a href="users.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm">用户列表</a>
+                        <a href="counselors.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm">咨询师管理</a>
+                    </div>
+                </div>
+                <a href="appointments.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-calendar"></i><span>预约管理</span>
+                </a>
+                <a href="records.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-file-text"></i><span>咨询记录</span>
+                </a>
+                <a href="tests.html" class="flex items-center gap-3 px-3 py-2 bg-purple-600 rounded-lg">
+                    <i class="fa fa-check-square"></i><span>测评管理</span>
+                </a>
+                <a href="schedule.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-clock-o"></i><span>排班管理</span>
+                </a>
+                <a href="statistics.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-bar-chart"></i><span>统计分析</span>
+                </a>
+                <a href="science.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-book"></i><span>科普管理</span></a>
+                <a href="announcement.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-bullhorn"></i><span>公告管理</span>
+                </a>
+            </div>
+        </nav>
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
+            <button id="logoutBtn" class="flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-700 rounded-lg">
+                <i class="fa fa-sign-out"></i><span>退出登录</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-64 p-6">
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">测评管理</h1>
+                <p class="text-gray-500">管理心理测评题库与查看测评记录</p>
+            </div>
+        </header>
+
+        <div class="flex gap-2 mb-6">
+            <button class="tab-btn px-4 py-2 rounded-lg bg-purple-600 text-white" data-tab="questions">题库管理</button>
+            <button class="tab-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700" data-tab="history">测评记录</button>
+        </div>
+
+        <!-- 题库管理 -->
+        <div id="tab-questions">
+            <div class="flex gap-4">
+                <div class="w-64 bg-white rounded-xl shadow-sm p-4">
+                    <h3 class="font-bold text-gray-800 mb-3">测评类型</h3>
+                    <div id="testTypeList" class="space-y-1"></div>
+                </div>
+                <div class="flex-1 bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 id="currentTestTitle" class="font-bold text-lg text-gray-800">选择题型</h3>
+                        <button id="addQuestionBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 hidden">+ 添加题目</button>
+                    </div>
+                    <div id="questionsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测评记录 -->
+        <div id="tab-history" class="hidden">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="text-left py-3 px-4 text-gray-600 font-medium">ID</th>
+                            <th class="text-left py-3 px-4 text-gray-600 font-medium">用户ID</th>
+                            <th class="text-left py-3 px-4 text-gray-600 font-medium">测评类型</th>
+                            <th class="text-left py-3 px-4 text-gray-600 font-medium">得分</th>
+                            <th class="text-left py-3 px-4 text-gray-600 font-medium">结果</th>
+                            <th class="text-left py-3 px-4 text-gray-600 font-medium">时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 编辑题目弹窗 -->
+        <div id="questionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl w-full max-w-2xl p-6 max-h-[80vh] overflow-y-auto">
+                <h2 id="modalTitle" class="text-xl font-bold text-gray-800 mb-4">编辑题目</h2>
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-600 mb-1">题目内容</label>
+                    <input id="editQuestionText" class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-600 mb-2">选项</label>
+                    <div id="optionsEditor" class="space-y-2"></div>
+                    <button id="addOptionBtn" class="mt-2 text-purple-600 text-sm hover:underline">+ 添加选项</button>
+                </div>
+                <div class="flex gap-2 justify-end">
+                    <button id="cancelQuestionBtn" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">取消</button>
+                    <button id="saveQuestionBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">保存</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        if (!localStorage.getItem('admin_token')) { window.location.href = 'index.html'; }
+        const BASE = 'http://localhost:8080';
+        const HEADERS = () => ({ 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('admin_token') });
+
+        const testTypes = [
+            { id: 1, title: '抑郁自评量表(SDS)' },
+            { id: 2, title: '焦虑自评量表(SAS)' },
+            { id: 3, title: '压力测试' },
+            { id: 4, title: '情绪管理测试' },
+            { id: 5, title: '睡眠质量测试' },
+            { id: 6, title: '人际关系测试' }
+        ];
+
+        let currentTestId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                if (confirm('确定要退出登录吗？')) {
+                    localStorage.removeItem('admin_token');
+                    localStorage.removeItem('admin_user');
+                    window.location.href = 'index.html';
+                }
+            });
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.className = 'tab-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700');
+                    this.className = 'tab-btn px-4 py-2 rounded-lg bg-purple-600 text-white';
+                    const tab = this.dataset.tab;
+                    document.getElementById('tab-questions').classList.toggle('hidden', tab !== 'questions');
+                    document.getElementById('tab-history').classList.toggle('hidden', tab !== 'history');
+                    if (tab === 'history') loadHistory();
+                });
+            });
+
+            renderTestTypes();
+            setupModal();
+        });
+
+        function renderTestTypes() {
+            const container = document.getElementById('testTypeList');
+            container.innerHTML = testTypes.map(t =>
+                `<div class="test-type-item px-3 py-2 rounded-lg cursor-pointer hover:bg-purple-50 text-gray-700" data-id="${t.id}">${t.title}</div>`
+            ).join('');
+            container.querySelectorAll('.test-type-item').forEach(el => {
+                el.addEventListener('click', function() {
+                    container.querySelectorAll('.test-type-item').forEach(e => e.className = 'test-type-item px-3 py-2 rounded-lg cursor-pointer hover:bg-purple-50 text-gray-700');
+                    this.className = 'test-type-item px-3 py-2 rounded-lg cursor-pointer bg-purple-600 text-white';
+                    currentTestId = parseInt(this.dataset.id);
+                    document.getElementById('currentTestTitle').textContent = testTypes.find(t => t.id === currentTestId).title;
+                    document.getElementById('addQuestionBtn').classList.remove('hidden');
+                    loadQuestions();
+                });
+            });
+        }
+
+        async function loadQuestions() {
+            const res = await fetch(`${BASE}/api/admin/tests/questions?testId=${currentTestId}`, { headers: HEADERS() });
+            const data = await res.json();
+            if (data.code !== 200) return;
+            const questions = data.data || [];
+            const container = document.getElementById('questionsList');
+            container.innerHTML = questions.map(q => `
+                <div class="border border-gray-200 rounded-lg p-4 mb-3">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex-1"><span class="font-medium text-gray-800">Q${q.sortOrder}.</span> ${q.questionText}</div>
+                        <div class="flex gap-2 ml-4">
+                            <button class="text-blue-600 hover:text-blue-800 text-sm" onclick="editQuestion(${q.id})"><i class="fa fa-edit"></i></button>
+                            <button class="text-red-600 hover:text-red-800 text-sm" onclick="deleteQuestion(${q.id})"><i class="fa fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="ml-4 space-y-1">
+                        ${(q.options || []).map(o =>
+                            `<div class="text-sm text-gray-600">${o.optionOrder}. ${o.optionText} <span class="text-purple-600">(${o.score}分)</span></div>`
+                        ).join('')}
+                    </div>
+                </div>
+            `).join('') || '<p class="text-gray-400 text-center py-8">暂无题目，点击上方按钮添加</p>';
+
+            document.getElementById('addQuestionBtn').onclick = () => openAddQuestion();
+        }
+
+        function setupModal() {
+            document.getElementById('cancelQuestionBtn').addEventListener('click', () => {
+                document.getElementById('questionModal').classList.add('hidden');
+            });
+            document.getElementById('saveQuestionBtn').addEventListener('click', saveQuestion);
+        }
+
+        let editingQuestionId = null;
+
+        function openAddQuestion() {
+            editingQuestionId = null;
+            document.getElementById('modalTitle').textContent = '添加题目';
+            document.getElementById('editQuestionText').value = '';
+            document.getElementById('optionsEditor').innerHTML = [1,2,3,4,5].map(i => `
+                <div class="flex gap-2 items-center opt-row">
+                    <span class="text-sm text-gray-500 w-8">${i}.</span>
+                    <input class="opt-text flex-1 border border-gray-300 rounded px-2 py-1 text-sm" value="" placeholder="选项文本" />
+                    <input class="opt-score w-16 border border-gray-300 rounded px-2 py-1 text-sm" value="${i}" type="number" />
+                    <span class="text-xs text-gray-400">分</span>
+                </div>
+            `).join('');
+            document.getElementById('questionModal').classList.remove('hidden');
+        }
+
+        async function editQuestion(id) {
+            const res = await fetch(`${BASE}/api/admin/tests/questions?testId=${currentTestId}`, { headers: HEADERS() });
+            const data = await res.json();
+            const q = (data.data || []).find(q => q.id === id);
+            if (!q) return;
+            editingQuestionId = id;
+            document.getElementById('modalTitle').textContent = '编辑题目';
+            document.getElementById('editQuestionText').value = q.questionText;
+            document.getElementById('optionsEditor').innerHTML = (q.options || []).map((o, i) => `
+                <div class="flex gap-2 items-center opt-row">
+                    <span class="text-sm text-gray-500 w-8">${i+1}.</span>
+                    <input class="opt-text flex-1 border border-gray-300 rounded px-2 py-1 text-sm" value="${o.optionText || ''}" />
+                    <input class="opt-score w-16 border border-gray-300 rounded px-2 py-1 text-sm" value="${o.score || 0}" type="number" />
+                    <span class="text-xs text-gray-400">分</span>
+                </div>
+            `).join('');
+            document.getElementById('questionModal').classList.remove('hidden');
+        }
+
+        async function saveQuestion() {
+            const questionText = document.getElementById('editQuestionText').value.trim();
+            if (!questionText) return alert('请输入题目内容');
+
+            const rows = document.querySelectorAll('#optionsEditor .opt-row');
+            const options = [];
+            rows.forEach((row, i) => {
+                const text = row.querySelector('.opt-text').value.trim();
+                const score = parseInt(row.querySelector('.opt-score').value) || 0;
+                if (text) options.push({ optionOrder: i + 1, optionText: text, score });
+            });
+
+            if (editingQuestionId) {
+                await fetch(`${BASE}/api/admin/tests/questions/${editingQuestionId}`, {
+                    method: 'PUT', headers: HEADERS(),
+                    body: JSON.stringify({ questionText })
+                });
+                // 删除旧选项再重新添加
+                const res = await fetch(`${BASE}/api/admin/tests/questions?testId=${currentTestId}`, { headers: HEADERS() });
+                const data = await res.json();
+                const q = (data.data || []).find(q => q.id === editingQuestionId);
+                if (q) {
+                    for (const opt of (q.options || [])) {
+                        await fetch(`${BASE}/api/admin/tests/options/${opt.id}`, { method: 'DELETE', headers: HEADERS() });
+                    }
+                }
+                for (const opt of options) {
+                    opt.questionId = editingQuestionId;
+                    await fetch(`${BASE}/api/admin/tests/options`, { method: 'POST', headers: HEADERS(), body: JSON.stringify(opt) });
+                }
+            } else {
+                const maxOrder = document.querySelectorAll('#questionsList .border').length;
+                const r1 = await fetch(`${BASE}/api/admin/tests/questions`, {
+                    method: 'POST', headers: HEADERS(),
+                    body: JSON.stringify({ testId: currentTestId, questionText, sortOrder: maxOrder + 1 })
+                });
+                const d1 = await r1.json();
+                if (d1.code === 200) {
+                    for (const opt of options) {
+                        opt.questionId = d1.data.id;
+                        await fetch(`${BASE}/api/admin/tests/options`, { method: 'POST', headers: HEADERS(), body: JSON.stringify(opt) });
+                    }
+                }
+            }
+            document.getElementById('questionModal').classList.add('hidden');
+            loadQuestions();
+        }
+
+        async function deleteQuestion(id) {
+            if (!confirm('确定删除该题目及其选项？')) return;
+            await fetch(`${BASE}/api/admin/tests/questions/${id}`, { method: 'DELETE', headers: HEADERS() });
+            loadQuestions();
+        }
+
+        document.getElementById('addOptionBtn').addEventListener('click', () => {
+            const rows = document.querySelectorAll('#optionsEditor .opt-row');
+            const i = rows.length + 1;
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 items-center opt-row';
+            div.innerHTML = `<span class="text-sm text-gray-500 w-8">${i}.</span>
+                <input class="opt-text flex-1 border border-gray-300 rounded px-2 py-1 text-sm" value="" placeholder="选项文本" />
+                <input class="opt-score w-16 border border-gray-300 rounded px-2 py-1 text-sm" value="0" type="number" />
+                <span class="text-xs text-gray-400">分</span>`;
+            document.getElementById('optionsEditor').appendChild(div);
+        });
+
+        async function loadHistory() {
+            const res = await fetch(`${BASE}/api/admin/tests/history`, { headers: HEADERS() });
+            const data = await res.json();
+            const records = data.data || [];
+            document.getElementById('historyTableBody').innerHTML = records.map(r => `
+                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                    <td class="py-3 px-4">${r.id}</td>
+                    <td class="py-3 px-4">${r.userId}</td>
+                    <td class="py-3 px-4">${r.testName}</td>
+                    <td class="py-3 px-4">${r.totalScore}</td>
+                    <td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs text-white ${r.result === '正常' ? 'bg-green-500' : r.result === '轻度' ? 'bg-yellow-500' : r.result === '中度' ? 'bg-orange-500' : 'bg-red-500'}">${r.result}</span></td>
+                    <td class="py-3 px-4 text-sm text-gray-500">${r.createTime || ''}</td>
+                </tr>
+            `).join('') || '<tr><td colspan="6" class="text-center py-8 text-gray-500">暂无测评记录</td></tr>';
+        }
+    </script>
+</body>
+</html>

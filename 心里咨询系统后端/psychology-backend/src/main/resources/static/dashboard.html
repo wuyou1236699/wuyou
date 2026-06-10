@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理咨询系统 - 控制台</title>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/admin.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            transition: all 0.3s;
+        }
+        .sidebar.collapsed {
+            width: 64px;
+        }
+        .sidebar.collapsed .menu-text {
+            display: none;
+        }
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+        .sidebar.collapsed .submenu {
+            display: none;
+        }
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            width: 360px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            z-index: 50;
+            display: none;
+        }
+        .notification-dropdown.show {
+            display: block;
+        }
+        .notification-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: 16px;
+            width: 12px;
+            height: 12px;
+            background: white;
+            transform: rotate(45deg);
+            box-shadow: -2px -2px 4px rgba(0,0,0,0.04);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+    <aside class="sidebar bg-gray-800 text-white w-64 h-screen fixed left-0 top-0 overflow-y-auto">
+        <div class="p-4 border-b border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="text-3xl">🧠</div>
+                <span class="logo-text font-bold text-xl">心理咨询系统</span>
+            </div>
+        </div>
+        
+        <nav class="p-4">
+            <div class="space-y-2">
+                <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2 bg-purple-600 rounded-lg">
+                    <i class="fa fa-tachometer"></i>
+                    <span class="menu-text">控制台</span>
+                </a>
+                
+                <div class="menu-group">
+                    <button class="menu-toggle flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-700 rounded-lg">
+                        <i class="fa fa-users"></i>
+                        <span class="menu-text">用户管理</span>
+                        <i class="fa fa-chevron-down ml-auto"></i>
+                    </button>
+                    <div class="submenu ml-4 mt-2 space-y-1">
+                        <a href="users.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm">
+                            <span class="menu-text">用户列表</span>
+                        </a>
+                        <a href="counselors.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm">
+                            <span class="menu-text">咨询师管理</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <a href="appointments.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-calendar"></i>
+                    <span class="menu-text">预约管理</span>
+                </a>
+                
+                <a href="records.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-file-text"></i>
+                    <span class="menu-text">咨询记录</span>
+                </a>
+                
+                <a href="schedule.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-clock-o"></i>
+                    <span class="menu-text">排班管理</span>
+                </a>
+                
+
+                
+                <a href="statistics.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-bar-chart"></i>
+                    <span class="menu-text">统计分析</span>
+                </a>
+                
+                <a href="tests.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-check-square"></i><span>测评管理</span></a>
+                <a href="science.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-book"></i><span>科普管理</span></a>
+                <a href="announcement.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-bullhorn"></i>
+                    <span class="menu-text">公告管理</span>
+                </a>
+            </div>
+        </nav>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
+            <button id="logoutBtn" class="flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-700 rounded-lg">
+                <i class="fa fa-sign-out"></i>
+                <span class="menu-text">退出登录</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-64 p-6">
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">控制台</h1>
+                <p class="text-gray-500">欢迎回来，管理员</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <button id="notificationBtn" class="relative p-2 hover:bg-gray-200 rounded-lg">
+                        <i class="fa fa-bell text-xl"></i>
+                        <span id="notificationBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full items-center justify-center" style="display:none"></span>
+                    </button>
+                    <div id="notificationDropdown" class="notification-dropdown">
+                        <div class="p-3 border-b border-gray-100 flex justify-between items-center">
+                            <span class="font-semibold text-gray-800 text-sm">通知</span>
+                            <button id="dropdownMarkAllRead" class="text-purple-600 text-xs hover:underline">全部已读</button>
+                        </div>
+                        <div id="dropdownNotificationList" class="p-2">
+                            <div class="text-center py-6 text-gray-400 text-sm">加载中...</div>
+                        </div>
+                        <div class="p-2 border-t border-gray-100">
+                            <a href="#notification-section" class="block text-center text-purple-600 text-sm hover:underline">查看全部通知</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
+                        <i class="fa fa-user"></i>
+                    </div>
+                    <span class="text-gray-700">管理员</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-4 gap-6 mb-6">
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">总用户数</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-2" id="totalUsers">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fa fa-users text-blue-600"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">咨询师数</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-2" id="totalCounselors">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <i class="fa fa-user-md text-green-600"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">今日预约</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-2" id="todayAppointments">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                        <i class="fa fa-calendar text-purple-600"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">满意度</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-2" id="satisfaction">98%</p>
+                    </div>
+                    <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                        <i class="fa fa-star text-orange-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="pushedAnnouncements" class="mb-6" style="display:none;"></div>
+
+        <div class="grid grid-cols-3 gap-6">
+            <div id="notification-section" class="col-span-2 bg-white rounded-xl p-6 shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-gray-800">实时通知</h2>
+                    <button id="markAllRead" class="text-purple-600 text-sm hover:underline">全部已读</button>
+                </div>
+                <div id="notificationList" class="space-y-3 max-h-80 overflow-y-auto">
+                    <div class="text-center py-8 text-gray-400">加载中...</div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">快捷操作</h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="goToPage('counselors.html')" class="p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition text-center cursor-pointer">
+                        <i class="fa fa-plus text-blue-600 text-2xl"></i>
+                        <p class="text-sm text-gray-700 mt-2">添加咨询师</p>
+                    </button>
+                    <button onclick="goToPage('schedule.html')" class="p-4 bg-green-50 hover:bg-green-100 rounded-lg transition text-center cursor-pointer">
+                        <i class="fa fa-calendar-plus-o text-green-600 text-2xl"></i>
+                        <p class="text-sm text-gray-700 mt-2">创建排班</p>
+                    </button>
+                    <button onclick="goToPage('announcement.html')" class="p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition text-center cursor-pointer">
+                        <i class="fa fa-bullhorn text-purple-600 text-2xl"></i>
+                        <p class="text-sm text-gray-700 mt-2">发布公告</p>
+                    </button>
+                    <button onclick="goToPage('statistics.html')" class="p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition text-center cursor-pointer">
+                        <i class="fa fa-file-text-o text-orange-600 text-2xl"></i>
+                        <p class="text-sm text-gray-700 mt-2">生成报表</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        if (!localStorage.getItem('admin_token')) { window.location.href = 'index.html'; }
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStatistics();
+            loadNotifications();
+            loadPushedAnnouncements();
+            setupLogout();
+            setupMenuToggle();
+            setupMarkAllRead();
+            setupNotificationBell();
+        });
+
+        function loadStatistics() {
+            fetch('http://localhost:8080/api/admin/statistics', {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200) {
+                    document.getElementById('totalUsers').textContent = (data.data.totalUsers || 0).toLocaleString();
+                    document.getElementById('totalCounselors').textContent = data.data.totalCounselors || 0;
+                    document.getElementById('todayAppointments').textContent = data.data.todayAppointments || 0;
+                    const sat = data.data.satisfaction;
+                    const avg = data.data.avgRating;
+                    document.getElementById('satisfaction').textContent = (sat != null ? sat : (avg != null ? avg + '分' : '0分'));
+                }
+            })
+            .catch(err => console.error('加载统计数据失败:', err));
+        }
+
+        function loadPushedAnnouncements() {
+            fetch('http://localhost:8080/api/admin/announcements/pushed', {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code !== 200 || !data.data || data.data.length === 0) return;
+                var container = document.getElementById('pushedAnnouncements');
+                container.style.display = 'block';
+                container.innerHTML = '<div class="bg-white rounded-xl p-6 shadow-sm border-l-4 border-purple-500">' +
+                    '<h2 class="text-lg font-semibold text-gray-800 mb-3"><i class="fa fa-bullhorn text-purple-500 mr-2"></i>推送公告</h2>' +
+                    data.data.map(function(a) {
+                        return '<div class="py-2 border-b border-gray-100 last:border-0">' +
+                            '<p class="font-medium text-gray-700">📌 ' + a.title + '</p>' +
+                            '<p class="text-sm text-gray-500">' + (a.content || '').substring(0, 100) + '</p>' +
+                        '</div>';
+                    }).join('') +
+                '</div>';
+            })
+            .catch(function() {});
+        }
+
+        function getLastReadTime() {
+            return localStorage.getItem('notifLastReadTime') || '';
+        }
+
+        function renderNotificationItem(event, isRead) {
+            const icons = {
+                'appointment': { icon: 'fa-calendar', color: 'bg-blue-500' },
+                'review': { icon: 'fa-star', color: 'bg-green-500' },
+                'appointment_cancelled': { icon: 'fa-times', color: 'bg-red-500' },
+                'appointment_completed': { icon: 'fa-check', color: 'bg-teal-500' }
+            };
+            const type = icons[event.type] || { icon: 'fa-bell', color: 'bg-purple-500' };
+            const bgClass = isRead ? 'bg-white border border-gray-100' : 'bg-purple-50 border-l-2 border-purple-400';
+            const dot = !isRead ? '<span class="w-2 h-2 bg-purple-500 rounded-full absolute top-1 right-1"></span>' : '';
+            return `
+                <div class="flex items-start gap-3 p-3 ${bgClass} rounded-lg cursor-pointer hover:bg-gray-100 transition relative" onclick="viewNotification('${event.id}')">
+                    <div class="w-8 h-8 ${type.color} rounded-full flex items-center justify-center text-white flex-shrink-0 relative">
+                        <i class="fa ${type.icon}"></i>
+                        ${dot}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-start">
+                            <span class="font-medium ${isRead ? 'text-gray-500' : 'text-gray-800'} text-sm truncate">${event.title || '通知'}</span>
+                            <span class="text-xs text-gray-400 flex-shrink-0 ml-2">${formatEventTime(event.time)}</span>
+                        </div>
+                        <p class="text-sm ${isRead ? 'text-gray-400' : 'text-gray-600'} mt-1 truncate">${event.content || ''}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadNotifications() {
+            fetch('http://localhost:8080/api/admin/events?limit=10', {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const list = document.getElementById('notificationList');
+                const dropdownList = document.getElementById('dropdownNotificationList');
+                const badge = document.getElementById('notificationBadge');
+                if (data.code === 200 && data.data && data.data.length > 0) {
+                    const lastReadTime = getLastReadTime();
+                    const unreadCount = data.data.filter(function(e) { return !lastReadTime || e.time > lastReadTime; }).length;
+                    if (unreadCount > 0) {
+                        badge.textContent = unreadCount;
+                        badge.style.display = 'flex';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                    const html = data.data.map(function(e) {
+                        var isRead = lastReadTime && e.time <= lastReadTime;
+                        return renderNotificationItem(e, isRead);
+                    }).join('');
+                    list.innerHTML = html;
+                    dropdownList.innerHTML = html;
+                } else {
+                    badge.style.display = 'none';
+                    list.innerHTML = '<div class="text-center py-8 text-gray-400">暂无通知</div>';
+                    dropdownList.innerHTML = '<div class="text-center py-4 text-gray-400 text-sm">暂无通知</div>';
+                }
+            })
+            .catch(err => console.error('加载通知失败:', err));
+        }
+
+        function getEventLabel(type) {
+            const labels = {
+                'appointment_created': '新预约',
+                'appointment_cancelled': '预约取消',
+                'appointment_completed': '咨询完成',
+                'review_submitted': '新评价',
+                'user_registered': '新用户注册'
+            };
+            return labels[type] || type;
+        }
+
+        function formatTime(timestamp) {
+            if (!timestamp) return '刚刚';
+            const now = Date.now();
+            const diff = now - timestamp;
+            if (diff < 60000) return '刚刚';
+            if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`;
+            if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`;
+            const d = new Date(timestamp);
+            return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}`;
+        }
+
+        function formatEventTime(timeStr) {
+            if (!timeStr) return '';
+            var d = new Date(timeStr);
+            if (isNaN(d.getTime())) return timeStr;
+            var now = new Date();
+            var diff = now - d;
+            if (diff < 60000) return '刚刚';
+            if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+            return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
+        }
+
+        function goToPage(page) {
+            window.location.href = page;
+        }
+
+        function viewNotification(id) {
+            fetch('http://localhost:8080/api/admin/events/' + id, {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200) {
+                    const event = data.data;
+                    alert(`通知详情:\n类型: ${event.type}\n描述: ${event.description}\n时间: ${event.createTime}`);
+                } else {
+                    alert('查看详情失败');
+                }
+            })
+            .catch(err => {
+                console.error('查看通知失败:', err);
+                alert('查看详情失败');
+            });
+        }
+
+        function markAllAsRead() {
+            localStorage.setItem('notifLastReadTime', new Date().toISOString());
+            loadNotifications();
+        }
+
+        function setupLogout() {
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('确定要退出登录吗？')) {
+                    localStorage.removeItem('admin_token');
+                    localStorage.removeItem('admin_user');
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+
+        function setupNotificationBell() {
+            const btn = document.getElementById('notificationBtn');
+            const dropdown = document.getElementById('notificationDropdown');
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.classList.toggle('show');
+                if (dropdown.classList.contains('show')) {
+                    document.getElementById('notificationBadge').style.display = 'none';
+                    localStorage.setItem('notifLastReadTime', new Date().toISOString());
+                    loadNotifications();
+                }
+            });
+            document.addEventListener('click', function(e) {
+                if (!dropdown.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+                    dropdown.classList.remove('show');
+                }
+            });
+            // 查看全部通知关闭下拉
+            dropdown.querySelector('a[href="#notification-section"]').addEventListener('click', function() {
+                dropdown.classList.remove('show');
+            });
+        }
+
+        function setupMarkAllRead() {
+            document.getElementById('markAllRead').addEventListener('click', function() {
+                markAllAsRead();
+            });
+            document.getElementById('dropdownMarkAllRead').addEventListener('click', function() {
+                markAllAsRead();
+            });
+        }
+
+        function setupMenuToggle() {
+            document.querySelectorAll('.menu-toggle').forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    const submenu = this.parentElement.querySelector('.submenu');
+                    const icon = this.querySelector('.fa-chevron-down');
+                    if (submenu.style.display === 'none' || !submenu.style.display) {
+                        submenu.style.display = 'block';
+                        icon.style.transform = 'rotate(180deg)';
+                    } else {
+                        submenu.style.display = 'none';
+                        icon.style.transform = 'rotate(0)';
+                    }
+                });
+            });
+        }
+
+        setInterval(loadNotifications, 5000);
+    </script>
+</body>
+</html>

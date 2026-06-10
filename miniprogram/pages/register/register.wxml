@@ -1,0 +1,35 @@
+<view class="container">
+  <view class="header">
+    <text class="title">用户注册</text>
+    <text class="subtitle">加入我们，开始您的心理健康之旅</text>
+  </view>
+
+  <view class="register-form">
+    <view class="form-item">
+      <text class="label">用户名</text>
+      <input class="input" placeholder="请输入用户名" value="{{username}}" bindinput="onUsernameInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="label">昵称</text>
+      <input class="input" placeholder="请输入昵称（选填）" value="{{nickname}}" bindinput="onNicknameInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="label">密码</text>
+      <input class="input" password placeholder="请输入密码" value="{{password}}" bindinput="onPasswordInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="label">确认密码</text>
+      <input class="input" password placeholder="请再次输入密码" value="{{confirmPassword}}" bindinput="onConfirmPasswordInput" />
+    </view>
+
+    <button class="btn-register" bindtap="handleRegister">注册</button>
+    
+    <view class="btn-login" bindtap="goToLogin">
+      <text class="login-text">已有账号？</text>
+      <text class="login-link">立即登录</text>
+    </view>
+  </view>
+</view>

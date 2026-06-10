@@ -1,0 +1,80 @@
+.container {
+  padding: 20rpx;
+  background-color: #FFF5F2;
+  min-height: 100vh;
+}
+.card {
+  background-color: #fff;
+  border-radius: 24rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.05);
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+.counselor-name {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+.status {
+  font-size: 28rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 30rpx;
+  background-color: #eee;
+}
+.status-0 { background-color: #FFA500; color: white; }
+.status-1 { background-color: #FF7E67; color: white; }
+.status-2 { background-color: #4CAF50; color: white; }
+.status-3 { background-color: #B8A0A0; color: white; }
+.time, .type, .problem {
+  font-size: 28rpx;
+  color: #8C7373;
+  margin-bottom: 12rpx;
+}
+.cancel-btn {
+  background-color: #f44336;
+  color: white;
+  border-radius: 48rpx;
+  font-size: 28rpx;
+  padding: 16rpx;
+  margin-top: 20rpx;
+}
+.review-btn {
+  background-color: #FF7E67;
+  color: white;
+  border-radius: 48rpx;
+  font-size: 28rpx;
+  padding: 16rpx;
+  margin-top: 20rpx;
+}
+.view-review-btn {
+  background-color: #9C27B0;
+  color: white;
+  border-radius: 48rpx;
+  font-size: 28rpx;
+  padding: 16rpx;
+  margin-top: 20rpx;
+}
+.loading, .loading-more {
+  text-align: center;
+  padding: 40rpx;
+  color: #B8A0A0;
+}
+.reviewed-tag {
+  display: block;
+  text-align: center;
+  color: #B8A0A0;
+  font-size: 28rpx;
+  margin-top: 20rpx;
+}
+.chat-btn {
+  background-color: #FF7E67;
+  color: white;
+  border-radius: 48rpx;
+  font-size: 28rpx;
+  padding: 16rpx;
+  margin-top: 20rpx;
+}

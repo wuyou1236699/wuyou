@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的预约 - 心理咨询</title>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #FDF8F5;
+            --primary: #FF7E67;
+            --primary-dark: #E8694F;
+            --primary-light: #FFF0ED;
+            --primary-50: #FFF5F3;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Roboto, sans-serif;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Button styles */
+        .btn-primary {
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(255, 126, 103, 0.35);
+        }
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-outline:hover {
+            background-color: var(--primary-50);
+        }
+        .btn-outline:active {
+            transform: scale(0.97);
+        }
+
+        .btn-white {
+            background: #fff;
+            color: #666;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-white:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background-color: var(--primary-50);
+        }
+
+        .btn-danger {
+            background: #fff;
+            color: #EF4444;
+            border: 1px solid #FECACA;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-danger:hover {
+            background-color: #FEF2F2;
+            border-color: #EF4444;
+        }
+        .btn-danger:active {
+            transform: scale(0.97);
+        }
+
+        .btn-danger-solid {
+            background-color: #EF4444;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-danger-solid:hover {
+            background-color: #DC2626;
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        /* Status badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .badge-yellow {
+            background-color: #FEF3C7;
+            color: #D97706;
+        }
+        .badge-green {
+            background-color: #D1FAE5;
+            color: #059669;
+        }
+        .badge-gray {
+            background-color: #F3F4F6;
+            color: #6B7280;
+        }
+        .badge-red {
+            background-color: #FEE2E2;
+            color: #DC2626;
+        }
+
+        /* Line clamp fallback (Tailwind v2 compat) */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Card hover */
+        .appointment-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .appointment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 126, 103, 0.1);
+        }
+
+        /* Avatar placeholder */
+        .avatar-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* Loading spinner */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Modal backdrop */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.4);
+            transition: opacity 0.2s ease;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="sticky top-0 z-20 bg-white shadow-sm">
+        <div class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+            <a href="home.html" class="btn-ghost text-gray-500 hover:text-gray-700 no-underline flex items-center text-sm">
+                <i class="fas fa-arrow-left mr-1.5"></i>
+                <span>返回</span>
+            </a>
+            <h1 class="text-lg font-bold text-gray-800">我的预约</h1>
+            <button id="reloadBtn" class="btn-ghost text-gray-400 hover:text-gray-600 p-1" title="刷新">
+                <i class="fas fa-redo text-sm"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="flex-1 max-w-2xl mx-auto w-full px-4 py-6">
+
+        <!-- Loading state -->
+        <div id="loadingState" class="flex flex-col items-center justify-center py-20">
+            <div class="w-8 h-8 border-2 border-[#FF7E67] border-t-transparent rounded-full animate-spin mb-3"></div>
+            <p class="text-sm text-gray-400">正在加载预约记录...</p>
+        </div>
+
+        <!-- Error state -->
+        <div id="errorState" class="text-center py-16" style="display:none;">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: #FEE2E2;">
+                <i class="fas fa-exclamation-triangle text-red-400 text-xl"></i>
+            </div>
+            <p class="text-gray-600 font-medium mb-1">加载失败</p>
+            <p class="text-gray-400 text-sm mb-4" id="errorMsg">网络异常，请稍后重试</p>
+            <button id="retryBtn" class="btn-outline px-6 py-2 rounded-full text-sm">
+                <i class="fas fa-redo mr-1"></i>重新加载
+            </button>
+        </div>
+
+        <!-- Empty state -->
+        <div id="emptyState" class="text-center py-16" style="display:none;">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: #f3f4f6;">
+                <i class="fas fa-calendar-check text-gray-300 text-3xl"></i>
+            </div>
+            <p class="text-gray-500 font-medium">暂无预约记录</p>
+            <p class="text-gray-400 text-sm mt-1 mb-6">快去预约一位咨询师吧</p>
+            <a href="home.html" class="btn-primary no-underline inline-block px-6 py-2.5 rounded-full text-sm font-medium shadow-sm">
+                <i class="fas fa-calendar-plus mr-1.5"></i>预约咨询
+            </a>
+        </div>
+
+        <!-- Appointment list -->
+        <div id="appointmentList" class="space-y-4" style="display:none;">
+            <!-- Dynamically rendered -->
+        </div>
+
+    </main>
+
+    <!-- ==================== CANCEL CONFIRMATION MODAL ==================== -->
+    <div id="cancelModal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden">
+        <div class="bg-white rounded-2xl shadow-xl px-6 py-5 mx-4 max-w-sm w-full">
+            <div class="text-center mb-4">
+                <div class="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style="background: #FEF2F2;">
+                    <i class="fas fa-exclamation-triangle text-red-400 text-lg"></i>
+                </div>
+                <p class="text-gray-800 font-semibold text-base">确认取消预约？</p>
+                <p class="text-gray-500 text-sm mt-1">取消后不可恢复，确定要取消此预约吗？</p>
+            </div>
+            <div class="flex gap-3">
+                <button id="cancelModalClose" class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors bg-white cursor-pointer">
+                    再想想
+                </button>
+                <button id="cancelModalConfirm" class="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition-colors cursor-pointer">
+                    确认取消
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SCRIPTS ==================== -->
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        // ==================== LOGIN GUARD ====================
+        if (!checkLogin()) return;
+
+        var pendingCancelId = null;
+
+        // ==================== DOM REFS ====================
+        var loadingState = document.getElementById('loadingState');
+        var errorState = document.getElementById('errorState');
+        var errorMsg = document.getElementById('errorMsg');
+        var emptyState = document.getElementById('emptyState');
+        var appointmentList = document.getElementById('appointmentList');
+        var cancelModal = document.getElementById('cancelModal');
+        var cancelModalClose = document.getElementById('cancelModalClose');
+        var cancelModalConfirm = document.getElementById('cancelModalConfirm');
+        var reloadBtn = document.getElementById('reloadBtn');
+        var retryBtn = document.getElementById('retryBtn');
+
+        // ==================== INITIAL LOAD ====================
+        loadAppointments();
+
+        // ==================== EVENT BINDINGS ====================
+        reloadBtn.addEventListener('click', function () {
+            showToast('正在刷新...', 'info');
+            loadAppointments();
+        });
+
+        retryBtn.addEventListener('click', function () {
+            loadAppointments();
+        });
+
+        cancelModalClose.addEventListener('click', closeCancelModal);
+
+        cancelModalConfirm.addEventListener('click', confirmCancel);
+
+        // Click backdrop to close modal
+        cancelModal.addEventListener('click', function (e) {
+            if (e.target === cancelModal) {
+                closeCancelModal();
+            }
+        });
+
+        // Keyboard escape to close modal
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !cancelModal.classList.contains('hidden')) {
+                closeCancelModal();
+            }
+        });
+
+        // ==================== LOAD APPOINTMENTS ====================
+        function loadAppointments() {
+            showLoading();
+
+            api.get('/api/appointment/my?page=1&size=50')
+                .then(function (res) {
+                    var records = parseRecords(res);
+
+                    hideAll();
+
+                    if (!records || records.length === 0) {
+                        showEmpty();
+                        return;
+                    }
+
+                    showList();
+                    renderAppointments(records);
+                })
+                .catch(function (err) {
+                    hideAll();
+                    console.error('Failed to load appointments:', err);
+                    errorMsg.textContent = err.message || '网络异常，请稍后重试';
+                    showError();
+                });
+        }
+
+        function parseRecords(res) {
+            if (Array.isArray(res)) return res;
+            if (res && res.data) {
+                if (Array.isArray(res.data)) return res.data;
+                if (res.data.records) return res.data.records;
+                if (res.data.list) return res.data.list;
+            }
+            if (res && res.records) return res.records;
+            return [];
+        }
+
+        // ==================== RENDER ====================
+        function renderAppointments(records) {
+            appointmentList.innerHTML = '';
+
+            records.forEach(function (item) {
+                var card = buildCard(item);
+                appointmentList.appendChild(card);
+            });
+        }
+
+        function buildCard(item) {
+            var id = item.id;
+            var counselorName = item.counselorName || (item.counselor && item.counselor.name) || (item.counselor && item.counselor.counselorName) || (item.counselor && item.counselor.realName) || '咨询师';
+            var counselorId = item.counselorId || (item.counselor && (item.counselor.id || item.counselor.counselorId)) || null;
+            var dateStr = item.appointmentTime || item.appointmentDate || item.time || item.dateTime || item.createTime || '';
+            var status = normalizeStatus(item.status);
+            var serviceType = item.serviceType || item.type || item.consultType || item.consultationType || item.mode || '';
+            var description = item.description || item.problemDescription || item.problem || item.content || item.remark || '';
+            var hasReview = item.hasReview === true || item.hasReview === 1 || item.hasReview === '1' ||
+                            item.reviewed === true || item.reviewed === 1 || item.reviewed === '1' ||
+                            item.isReviewed === true || item.isReviewed === 1 || item.isReviewed === '1' ||
+                            !!item.reviewId || !!item.review || !!item.reviewContent;
+
+            // Status info
+            var statusInfo = getStatusInfo(status);
+
+            // Service type info
+            var serviceInfo = getServiceInfo(serviceType);
+
+            // Avatar color and initial
+            var avatarColor = getAvatarColor(counselorName);
+            var initial = (counselorName || '?').charAt(0);
+
+            // Truncate description
+            var displayDesc = description || '';
+            if (displayDesc.length > 80) {
+                displayDesc = displayDesc.substring(0, 80) + '...';
+            }
+
+            // Format date
+            var formattedDate = formatDateTime(dateStr);
+
+            // Build card element
+            var card = document.createElement('div');
+            card.className = 'appointment-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5';
+            card.setAttribute('data-id', id);
+
+            // --- Top row: avatar + name + badge ---
+            var topHTML =
+                '<div class="flex items-center justify-between mb-3">' +
+                    '<div class="flex items-center space-x-3 min-w-0">' +
+                        '<div class="avatar-placeholder w-10 h-10 text-white font-bold text-sm flex-shrink-0" style="background-color:' + avatarColor + ';">' +
+                            escapeHTML(initial) +
+                        '</div>' +
+                        '<h3 class="font-semibold text-gray-800 truncate">' + escapeHTML(counselorName) + '</h3>' +
+                    '</div>' +
+                    '<span class="badge ' + statusInfo.className + ' flex-shrink-0 ml-2">' + statusInfo.label + '</span>' +
+                '</div>';
+
+            // --- Info rows ---
+            var infoHTML =
+                '<div class="space-y-2 mb-3">' +
+                    '<div class="flex items-center text-sm text-gray-500">' +
+                        '<i class="fas fa-calendar w-4 mr-2 text-gray-300 flex-shrink-0"></i>' +
+                        '<span>' + escapeHTML(formattedDate) + '</span>' +
+                    '</div>' +
+                    '<div class="flex items-center text-sm text-gray-500">' +
+                        '<i class="fas ' + serviceInfo.icon + ' w-4 mr-2 text-gray-300 flex-shrink-0"></i>' +
+                        '<span>' + escapeHTML(serviceInfo.label) + '</span>' +
+                    '</div>' +
+                    (displayDesc ? (
+                        '<div class="flex items-start text-sm text-gray-500">' +
+                            '<i class="fas fa-comment w-4 mr-2 text-gray-300 mt-0.5 flex-shrink-0"></i>' +
+                            '<span class="line-clamp-2">' + escapeHTML(displayDesc) + '</span>' +
+                        '</div>'
+                    ) : '') +
+                '</div>';
+
+            // --- Action buttons ---
+            var actionsHTML = buildActionsHTML(id, status, hasReview, counselorId, counselorName, serviceType);
+
+            card.innerHTML = topHTML + infoHTML + actionsHTML;
+
+            // --- Bind action events ---
+            bindCardEvents(card, id, status, hasReview, counselorId, counselorName);
+
+            return card;
+        }
+
+        function buildActionsHTML(id, status, hasReview, counselorId, counselorName, serviceType) {
+            var buttons = [];
+
+            // Status 0 (pending) or 1 (confirmed): "取消预约"
+            if (status === 0 || status === 1) {
+                buttons.push(
+                    '<button class="btn-danger flex-1 py-2 rounded-lg text-xs font-medium" data-action="cancel" data-id="' + id + '">' +
+                        '<i class="fas fa-times-circle mr-1"></i>取消预约' +
+                    '</button>'
+                );
+            }
+
+            // Status 1 (confirmed): "去沟通"（门诊预约不显示）
+            if (status === 1 && serviceType != 3) {
+                var chatUrl = 'chat.html?counselorId=' + (counselorId || '') + '&name=' + encodeURIComponent(counselorName) + '&appointmentId=' + id;
+                buttons.push(
+                    '<a href="' + chatUrl + '" class="btn-primary flex-1 py-2 rounded-lg text-xs font-medium no-underline text-center shadow-sm" style="display:inline-block;">' +
+                        '<i class="fas fa-comment-dots mr-1"></i>去沟通' +
+                    '</a>'
+                );
+            }
+
+            // Status 2 (completed): review actions
+            if (status === 2) {
+                if (!hasReview) {
+                    var reviewUrl = 'reviews.html?appointmentId=' + id + '&counselorId=' + (counselorId || '');
+                    buttons.push(
+                        '<a href="' + reviewUrl + '" class="btn-primary flex-1 py-2 rounded-lg text-xs font-medium no-underline text-center shadow-sm" style="display:inline-block;">' +
+                            '<i class="fas fa-star mr-1"></i>去评价' +
+                        '</a>'
+                    );
+                } else {
+                    buttons.push(
+                        '<span class="flex-1 py-2 rounded-lg text-xs font-medium text-center text-gray-400 bg-gray-50 cursor-default" style="display:inline-block;">' +
+                            '<i class="fas fa-check-circle mr-1"></i>查看评价' +
+                        '</span>'
+                    );
+                }
+            }
+
+            // Status 3 (cancelled): no buttons, show empty actions row for layout consistency
+            if (buttons.length === 0) {
+                return '<div class="flex items-center space-x-2 pt-2 border-t border-gray-50"></div>';
+            }
+
+            return '<div class="flex items-center space-x-2 pt-2 border-t border-gray-50">' + buttons.join('') + '</div>';
+        }
+
+        function bindCardEvents(card, id, status, hasReview, counselorId, counselorName) {
+            var cancelBtn = card.querySelector('[data-action="cancel"]');
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    openCancelModal(id);
+                });
+            }
+        }
+
+        // ==================== CANCEL MODAL ====================
+        function openCancelModal(id) {
+            pendingCancelId = id;
+            cancelModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCancelModal() {
+            pendingCancelId = null;
+            cancelModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function confirmCancel() {
+            if (!pendingCancelId) return;
+
+            var id = pendingCancelId;
+            closeCancelModal();
+
+            // Show loading toast
+            showToast('正在取消预约...', 'info');
+
+            api.put('/api/appointment/cancel/' + id)
+                .then(function (res) {
+                    if (res.code === 200) {
+                        showToast('预约已取消', 'success');
+                        // Reload the list
+                        loadAppointments();
+                    } else {
+                        showToast(res.msg || res.message || '取消失败，请重试', 'error');
+                    }
+                })
+                .catch(function (err) {
+                    console.error('Cancel error:', err);
+                    showToast('网络异常，取消失败', 'error');
+                });
+        }
+
+        // ==================== STATE HELPERS ====================
+        function showLoading() {
+            loadingState.style.display = 'flex';
+            errorState.style.display = 'none';
+            emptyState.style.display = 'none';
+            appointmentList.style.display = 'none';
+        }
+
+        function showError() {
+            loadingState.style.display = 'none';
+            errorState.style.display = 'block';
+            emptyState.style.display = 'none';
+            appointmentList.style.display = 'none';
+        }
+
+        function showEmpty() {
+            loadingState.style.display = 'none';
+            errorState.style.display = 'none';
+            emptyState.style.display = 'block';
+            appointmentList.style.display = 'none';
+        }
+
+        function showList() {
+            loadingState.style.display = 'none';
+            errorState.style.display = 'none';
+            emptyState.style.display = 'none';
+            appointmentList.style.display = 'block';
+        }
+
+        function hideAll() {
+            loadingState.style.display = 'none';
+            errorState.style.display = 'none';
+            emptyState.style.display = 'none';
+            appointmentList.style.display = 'none';
+        }
+
+        // ==================== DATA HELPERS ====================
+        function normalizeStatus(status) {
+            if (typeof status === 'number') return status;
+            if (typeof status === 'string') {
+                var n = parseInt(status, 10);
+                if (!isNaN(n)) return n;
+                var lower = status.toLowerCase();
+                if (lower === 'pending') return 0;
+                if (lower === 'confirmed') return 1;
+                if (lower === 'completed' || lower === 'finished') return 2;
+                if (lower === 'cancelled' || lower === 'canceled') return 3;
+            }
+            return -1; // unknown
+        }
+
+        function getStatusInfo(status) {
+            switch (status) {
+                case 0:
+                    return { label: '待确认', className: 'badge-yellow' };
+                case 1:
+                    return { label: '已确认', className: 'badge-green' };
+                case 2:
+                    return { label: '已完成', className: 'badge-gray' };
+                case 3:
+                    return { label: '已取消', className: 'badge-red' };
+                default:
+                    return { label: '未知', className: 'badge-gray' };
+            }
+        }
+
+        function getServiceInfo(type) {
+            if (typeof type === 'number') {
+                var types = {
+                    1: { label: '电话咨询', icon: 'fa-phone' },
+                    2: { label: '网络咨询', icon: 'fa-globe' },
+                    3: { label: '门诊咨询', icon: 'fa-hospital-user' }
+                };
+                return types[type] || { label: '咨询服务', icon: 'fa-calendar-check' };
+            }
+
+            var str = (type || '').toLowerCase();
+            if (str === 'phone' || str.includes('电话') || str === 'call') {
+                return { label: '电话咨询', icon: 'fa-phone' };
+            }
+            if (str === 'online' || str === 'video' || str.includes('网络') || str.includes('视频') || str === 'web') {
+                return { label: '网络咨询', icon: 'fa-globe' };
+            }
+            if (str === 'clinic' || str === 'offline' || str === 'face_to_face' || str.includes('门诊') || str.includes('面对面') || str === '面询') {
+                return { label: '门诊咨询', icon: 'fa-hospital-user' };
+            }
+
+            // If it's a Chinese string that we couldn't match, return as-is
+            if (/[一-鿿]/.test(type)) {
+                return { label: type, icon: 'fa-calendar-check' };
+            }
+
+            return { label: type || '咨询服务', icon: 'fa-calendar-check' };
+        }
+
+        // ==================== UTILITY ====================
+        function escapeHTML(str) {
+            if (!str) return '';
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+        function getAvatarColor(name) {
+            var colors = [
+                '#FF7E67', '#FF9A76', '#F9A826', '#6C5CE7',
+                '#00B894', '#0984E3', '#E17055', '#D63031',
+                '#FDCB6E', '#00CEC9', '#A29BFE', '#55EFC4'
+            ];
+            var hash = 0;
+            for (var i = 0; i < (name || '').length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return colors[Math.abs(hash) % colors.length];
+        }
+
+    })();
+    </script>
+
+</body>
+</html>

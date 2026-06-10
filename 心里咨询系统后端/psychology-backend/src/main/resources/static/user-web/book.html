@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预约咨询</title>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #FDF8F5;
+            --primary: #FF7E67;
+            --primary-dark: #E8694F;
+            --primary-light: #FFF0ED;
+            --primary-50: #FFF5F3;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Roboto, sans-serif;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(255, 126, 103, 0.35);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-white {
+            background: #fff;
+            color: var(--primary);
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-white:hover {
+            border-color: var(--primary);
+            background-color: var(--primary-50);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-outline:hover {
+            background-color: var(--primary-50);
+        }
+
+        /* Tab bar buttons */
+        .tab-btn {
+            transition: all 0.2s ease;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 20px;
+            white-space: nowrap;
+        }
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+            box-shadow: 0 2px 10px rgba(255, 126, 103, 0.3);
+        }
+        .tab-btn:not(.active) {
+            background-color: #fff;
+            color: #666;
+            border: 1px solid #e5e7eb;
+        }
+        .tab-btn:not(.active):hover {
+            background-color: var(--primary-50);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Counselor card */
+        .counselor-card {
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .counselor-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(255, 126, 103, 0.12);
+        }
+
+        /* Expertise tags */
+        .expertise-tag {
+            display: inline-block;
+            background-color: var(--primary-50);
+            color: var(--primary);
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        /* Avatar placeholder */
+        .avatar-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* Online dot */
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .online-dot.online {
+            background-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+        }
+        .online-dot.offline {
+            background-color: #d1d5db;
+        }
+
+        /* Problem type buttons */
+        .problem-type-btn {
+            transition: all 0.2s ease;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .problem-type-btn.selected {
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+            box-shadow: 0 2px 10px rgba(255, 126, 103, 0.3);
+        }
+        .problem-type-btn:not(.selected) {
+            background-color: #fff;
+            color: #555;
+            border: 1px solid #e5e7eb;
+        }
+        .problem-type-btn:not(.selected):hover {
+            border-color: var(--primary);
+            background-color: var(--primary-50);
+            color: var(--primary);
+        }
+
+        /* Date & period buttons */
+        .date-btn, .period-btn {
+            transition: all 0.2s ease;
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .date-btn.selected, .period-btn.selected {
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+            box-shadow: 0 2px 8px rgba(255, 126, 103, 0.25);
+        }
+        .date-btn:not(.selected), .period-btn:not(.selected) {
+            background-color: #fff;
+            color: #555;
+            border: 1px solid #e5e7eb;
+        }
+        .date-btn:not(.selected):hover, .period-btn:not(.selected):hover {
+            border-color: var(--primary);
+            background-color: var(--primary-50);
+            color: var(--primary);
+        }
+
+        /* Time slot badges */
+        .time-slot-badge {
+            display: inline-block;
+            background-color: var(--primary-50);
+            color: var(--primary);
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+            margin: 2px 4px 2px 0;
+        }
+
+        /* Back button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #fff;
+            color: #555;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        .back-btn:hover {
+            background-color: var(--primary-50);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 h-14 flex items-center space-x-4">
+            <a href="home.html" class="back-btn" title="返回首页">
+                <i class="fa fa-arrow-left text-sm"></i>
+            </a>
+            <h1 class="text-lg font-bold text-gray-800 flex-1">预约咨询</h1>
+        </div>
+    </header>
+
+    <!-- ==================== TAB BAR ==================== -->
+    <div class="max-w-4xl mx-auto px-4 mt-5">
+        <div class="flex items-center space-x-3 overflow-x-auto pb-1">
+            <button class="tab-btn active" data-tab="1">
+                <i class="fa fa-tags mr-1.5"></i>按问题类型
+            </button>
+            <button class="tab-btn" data-tab="2">
+                <i class="fa fa-user-doctor mr-1.5"></i>按咨询师
+            </button>
+            <button class="tab-btn" data-tab="3">
+                <i class="fa fa-clock mr-1.5"></i>按时间
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== TAB 1: BY PROBLEM TYPE ==================== -->
+    <section id="tabContent1" class="max-w-4xl mx-auto px-4 mt-5 pb-16">
+        <p class="text-sm text-gray-500 mb-4">选择你当前面临的问题类型，系统将为你匹配合适的咨询师</p>
+
+        <!-- Problem type buttons grid -->
+        <div id="problemTypeGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+            <!-- Rendered by JS -->
+        </div>
+
+        <!-- Selected type indicator -->
+        <div id="selectedTypeIndicator" class="mb-4 hidden">
+            <span class="text-sm text-gray-500">当前筛选：</span>
+            <span id="selectedTypeLabel" class="text-sm font-semibold px-3 py-1 rounded-full" style="background-color: var(--primary-50); color: var(--primary);"></span>
+            <button id="clearTypeFilter" class="text-xs text-gray-400 hover:text-gray-600 ml-2 bg-transparent border-0 cursor-pointer underline">清除筛选</button>
+        </div>
+
+        <!-- Results -->
+        <div id="tab1Results" class="space-y-4"></div>
+    </section>
+
+    <!-- ==================== TAB 2: BY COUNSELOR ==================== -->
+    <section id="tabContent2" class="max-w-4xl mx-auto px-4 mt-5 pb-16 hidden">
+        <p class="text-sm text-gray-500 mb-4">搜索咨询师姓名或擅长领域，快速找到合适的咨询师</p>
+
+        <!-- Search input -->
+        <div class="relative mb-5">
+            <i class="fa fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+            <input
+                type="text"
+                id="counselorSearchInput"
+                class="w-full pl-11 pr-10 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-current transition-colors"
+                style="--tw-ring-color: var(--primary);"
+                placeholder="输入咨询师姓名或擅长领域..."
+                autocomplete="off"
+            >
+            <button id="clearSearchBtn" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 bg-transparent border-0 cursor-pointer p-1 hidden">
+                <i class="fa fa-times-circle"></i>
+            </button>
+        </div>
+
+        <!-- Search results count -->
+        <p id="tab2ResultCount" class="text-sm text-gray-500 mb-3 hidden"></p>
+
+        <!-- Results -->
+        <div id="tab2Results" class="space-y-4"></div>
+    </section>
+
+    <!-- ==================== TAB 3: BY TIME ==================== -->
+    <section id="tabContent3" class="max-w-4xl mx-auto px-4 mt-5 pb-16 hidden">
+        <p class="text-sm text-gray-500 mb-4">选择日期和时间段，查看可预约的咨询师</p>
+
+        <!-- Date selector -->
+        <div class="mb-4">
+            <p class="text-xs text-gray-400 font-medium mb-2 uppercase tracking-wide">选择日期</p>
+            <div id="dateSelector" class="flex items-center space-x-2 overflow-x-auto pb-2">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+
+        <!-- Time period selector -->
+        <div class="mb-6">
+            <p class="text-xs text-gray-400 font-medium mb-2 uppercase tracking-wide">选择时段</p>
+            <div id="periodSelector" class="flex items-center space-x-3">
+                <button class="period-btn selected" data-period="morning">
+                    <i class="fa fa-sun mr-1"></i>上午 9:00-12:00
+                </button>
+                <button class="period-btn" data-period="afternoon">
+                    <i class="fa fa-cloud-sun mr-1"></i>下午 13:00-17:00
+                </button>
+                <button class="period-btn" data-period="evening">
+                    <i class="fa fa-moon mr-1"></i>晚上 18:00-21:00
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading indicator -->
+        <div id="tab3Loading" class="text-center py-10 hidden">
+            <i class="fa fa-spinner fa-spin text-2xl" style="color: var(--primary);"></i>
+            <p class="text-sm text-gray-400 mt-2">正在查询可预约时段...</p>
+        </div>
+
+        <!-- Results -->
+        <div id="tab3Results" class="space-y-4"></div>
+    </section>
+
+    <!-- ==================== SHARED LOADING / EMPTY ==================== -->
+    <!-- Initial loading state (before counselors are fetched) -->
+    <div id="initialLoading" class="max-w-4xl mx-auto px-4 text-center py-16">
+        <i class="fa fa-spinner fa-spin text-3xl" style="color: var(--primary);"></i>
+        <p class="text-sm text-gray-400 mt-3">正在加载咨询师列表...</p>
+    </div>
+
+    <!-- Global empty state (no counselors at all) -->
+    <div id="globalEmpty" class="max-w-4xl mx-auto px-4 text-center py-16 hidden">
+        <div class="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: #f3f4f6;">
+            <i class="fa fa-user-group text-gray-300 text-3xl"></i>
+        </div>
+        <p class="text-gray-500 font-medium">暂无咨询师</p>
+        <p class="text-gray-400 text-sm mt-1">请稍后再来查看</p>
+    </div>
+
+    <!-- ==================== SCRIPTS ==================== -->
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        // ==================== 登录守卫 ====================
+        if (!checkLogin()) return;
+
+        // ==================== 状态 ====================
+        var allCounselors = [];
+        var isLoaded = false;
+        var activeTab = 1;
+
+        // ==================== Tab 3 状态 ====================
+        var selectedDate = formatDateStr(today());
+        var selectedPeriod = 'morning'; // 'morning' | 'afternoon' | 'evening'
+
+        // ==================== 日期工具 ====================
+        function today() {
+            var d = new Date();
+            return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        }
+
+        function formatDateStr(d) {
+            var y = d.getFullYear();
+            var m = (d.getMonth() + 1).toString().padStart(2, '0');
+            var day = d.getDate().toString().padStart(2, '0');
+            return y + '-' + m + '-' + day;
+        }
+
+        function formatDateDisplay(d) {
+            var m = d.getMonth() + 1;
+            var day = d.getDate();
+            var weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            var wd = weekdays[d.getDay()];
+            return { month: m, day: day, weekday: wd, isToday: formatDateStr(d) === formatDateStr(today()) };
+        }
+
+        function getNextWeekDates() {
+            var dates = [];
+            var t = today();
+            for (var i = 0; i < 8; i++) {
+                var d = new Date(t);
+                d.setDate(d.getDate() + i);
+                dates.push(d);
+            }
+            return dates;
+        }
+
+        // ==================== 问题类型映射 ====================
+        var problemTypes = [
+            { label: '抑郁', icon: 'fa-cloud-rain', keywords: ['抑郁', '情绪', '低落', '消沉'] },
+            { label: '焦虑', icon: 'fa-bolt', keywords: ['焦虑', '紧张', '不安', '恐惧'] },
+            { label: '婚恋', icon: 'fa-heart', keywords: ['婚恋', '情感', '婚姻', '恋爱', '家庭', '感情'] },
+            { label: '情绪压力', icon: 'fa-brain', keywords: ['情绪', '压力', '减压', '紧张', '疲惫'] },
+            { label: '青少年', icon: 'fa-child', keywords: ['青少年', '儿童', '学生', '教育', '青春期', '亲子'] },
+            { label: '职场', icon: 'fa-briefcase', keywords: ['职场', '职业', '工作', '就业', '生涯', '规划'] },
+            { label: '人际关系', icon: 'fa-users', keywords: ['人际', '关系', '社交', '沟通', '交往'] },
+            { label: '睡眠障碍', icon: 'fa-moon', keywords: ['睡眠', '失眠', '休息', '入睡'] }
+        ];
+
+        // ==================== 加载咨询师列表 ====================
+        function loadCounselors() {
+            var loadingEl = document.getElementById('initialLoading');
+            var emptyEl = document.getElementById('globalEmpty');
+
+            loadingEl.style.display = 'block';
+            emptyEl.classList.add('hidden');
+
+            api.get('/api/counselor/list?page=1&size=100')
+                .then(function (res) {
+                    loadingEl.style.display = 'none';
+
+                    var records = [];
+                    if (Array.isArray(res)) {
+                        records = res;
+                    } else if (res && res.data) {
+                        if (Array.isArray(res.data)) {
+                            records = res.data;
+                        } else if (res.data.records) {
+                            records = res.data.records;
+                        }
+                    }
+
+                    if (!records || records.length === 0) {
+                        emptyEl.classList.remove('hidden');
+                        hideAllTabContents();
+                        isLoaded = true;
+                        return;
+                    }
+
+                    allCounselors = records;
+                    isLoaded = true;
+
+                    // Render the active tab content
+                    renderTab(activeTab);
+                })
+                .catch(function (err) {
+                    loadingEl.style.display = 'none';
+                    emptyEl.classList.remove('hidden');
+                    console.error('Failed to load counselors:', err);
+                    showToast('加载咨询师列表失败，请重试', 'error');
+                });
+        }
+
+        // ==================== Tab 切换 ====================
+        function switchTab(tabIndex) {
+            activeTab = tabIndex;
+
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(function (btn) {
+                var t = parseInt(btn.getAttribute('data-tab'));
+                if (t === tabIndex) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Show/hide tab contents
+            document.querySelectorAll('[id^="tabContent"]').forEach(function (el) {
+                el.classList.add('hidden');
+            });
+            var contentEl = document.getElementById('tabContent' + tabIndex);
+            if (contentEl) contentEl.classList.remove('hidden');
+
+            // Render tab content
+            if (isLoaded && allCounselors.length > 0) {
+                renderTab(tabIndex);
+            }
+        }
+
+        function renderTab(tabIndex) {
+            if (tabIndex === 1) renderTab1();
+            else if (tabIndex === 2) renderTab2();
+            else if (tabIndex === 3) renderTab3();
+        }
+
+        // ==================== TAB 1: 按问题类型匹配 ====================
+        var selectedProblemType = null;
+
+        function renderTab1() {
+            renderProblemTypeButtons();
+            applyProblemTypeFilter();
+        }
+
+        function renderProblemTypeButtons() {
+            var grid = document.getElementById('problemTypeGrid');
+            grid.innerHTML = '';
+
+            problemTypes.forEach(function (pt, idx) {
+                var btn = document.createElement('button');
+                btn.className = 'problem-type-btn' + (selectedProblemType === idx ? ' selected' : '');
+                btn.innerHTML = '<i class="fa ' + pt.icon + ' mr-1.5"></i>' + pt.label;
+                btn.addEventListener('click', function () {
+                    if (selectedProblemType === idx) {
+                        selectedProblemType = null;
+                    } else {
+                        selectedProblemType = idx;
+                    }
+                    renderProblemTypeButtons();
+                    applyProblemTypeFilter();
+                });
+                grid.appendChild(btn);
+            });
+
+            // Update indicator
+            var indicator = document.getElementById('selectedTypeIndicator');
+            var label = document.getElementById('selectedTypeLabel');
+            if (selectedProblemType !== null) {
+                indicator.classList.remove('hidden');
+                label.textContent = problemTypes[selectedProblemType].label;
+            } else {
+                indicator.classList.add('hidden');
+            }
+        }
+
+        function applyProblemTypeFilter() {
+            var resultsEl = document.getElementById('tab1Results');
+
+            if (selectedProblemType === null) {
+                resultsEl.innerHTML = '<div class="text-center py-12">' +
+                    '<i class="fa fa-hand-pointer text-gray-300 text-4xl"></i>' +
+                    '<p class="text-gray-400 text-sm mt-3">请选择一个问题类型来匹配咨询师</p>' +
+                    '</div>';
+                return;
+            }
+
+            var keywords = problemTypes[selectedProblemType].keywords;
+            var matched = filterCounselorsByExpertise(allCounselors, keywords);
+
+            // Sort by rating descending
+            matched.sort(function (a, b) {
+                var ra = a.avgRating || 0;
+                var rb = b.avgRating || 0;
+                return rb - ra;
+            });
+
+            if (matched.length === 0) {
+                resultsEl.innerHTML = '<div class="text-center py-12">' +
+                    '<i class="fa fa-search text-gray-300 text-4xl"></i>' +
+                    '<p class="text-gray-400 text-sm mt-3">没有找到匹配"<span class="font-medium text-gray-500">' + escapeHTML(problemTypes[selectedProblemType].label) + '</span>"的咨询师</p>' +
+                    '<p class="text-gray-300 text-xs mt-1">请尝试其他问题类型</p>' +
+                    '</div>';
+                return;
+            }
+
+            resultsEl.innerHTML = '';
+            matched.slice(0, 3).forEach(function (c) {
+                resultsEl.appendChild(createCounselorCard(c));
+            });
+        }
+
+        function filterCounselorsByExpertise(counselors, keywords) {
+            return counselors.filter(function (c) {
+                var expertise = (c.expertise || '').toLowerCase();
+                return keywords.some(function (kw) {
+                    return expertise.indexOf(kw.toLowerCase()) !== -1;
+                });
+            });
+        }
+
+        // ==================== TAB 2: 按咨询师预约 ====================
+        function renderTab2() {
+            var input = document.getElementById('counselorSearchInput');
+            applySearchFilter(input.value || '');
+        }
+
+        function applySearchFilter(query) {
+            var q = (query || '').trim().toLowerCase();
+            var resultsEl = document.getElementById('tab2Results');
+            var countEl = document.getElementById('tab2ResultCount');
+            var clearBtn = document.getElementById('clearSearchBtn');
+
+            // Show/hide clear button
+            if (q) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+
+            if (!q) {
+                countEl.classList.add('hidden');
+                resultsEl.innerHTML = '<div class="text-center py-12">' +
+                    '<i class="fa fa-search text-gray-300 text-4xl"></i>' +
+                    '<p class="text-gray-400 text-sm mt-3">输入咨询师姓名或擅长领域进行搜索</p>' +
+                    '</div>';
+                return;
+            }
+
+            var matched = allCounselors.filter(function (c) {
+                var name = (c.name || '').toLowerCase();
+                var expertise = (c.expertise || '').toLowerCase();
+                return name.indexOf(q) !== -1 || expertise.indexOf(q) !== -1;
+            });
+
+            countEl.classList.remove('hidden');
+            countEl.textContent = '找到 ' + matched.length + ' 位咨询师';
+
+            resultsEl.innerHTML = '';
+            if (matched.length === 0) {
+                resultsEl.innerHTML = '<div class="text-center py-12">' +
+                    '<i class="fa fa-face-frown text-gray-300 text-4xl"></i>' +
+                    '<p class="text-gray-400 text-sm mt-3">没有找到匹配"<span class="font-medium text-gray-500">' + escapeHTML(query) + '</span>"的咨询师</p>' +
+                    '<p class="text-gray-300 text-xs mt-1">请尝试其他关键词</p></div>';
+                return;
+            }
+
+            matched.forEach(function (c) {
+                resultsEl.appendChild(createCounselorCard(c));
+            });
+        }
+
+        // ==================== TAB 3: 按时间预约 ====================
+        function renderTab3() {
+            renderDateSelector();
+            renderPeriodSelector();
+            searchByTime();
+        }
+
+        function renderDateSelector() {
+            var container = document.getElementById('dateSelector');
+            container.innerHTML = '';
+
+            var dates = getNextWeekDates();
+            dates.forEach(function (d) {
+                var dateStr = formatDateStr(d);
+                var display = formatDateDisplay(d);
+                var btn = document.createElement('button');
+                btn.className = 'date-btn' + (dateStr === selectedDate ? ' selected' : '');
+
+                var label = display.isToday ? '今天' : (display.month + '/' + display.day);
+                var weekLabel = display.weekday;
+
+                btn.innerHTML = '<div class="text-xs text-center">' +
+                    '<div class="font-semibold">' + label + '</div>' +
+                    '<div class="text-[10px] opacity-70">' + weekLabel + '</div>' +
+                    '</div>';
+
+                btn.addEventListener('click', function () {
+                    selectedDate = dateStr;
+                    renderDateSelector();
+                    searchByTime();
+                });
+
+                container.appendChild(btn);
+            });
+        }
+
+        function renderPeriodSelector() {
+            document.querySelectorAll('.period-btn').forEach(function (btn) {
+                var period = btn.getAttribute('data-period');
+                if (period === selectedPeriod) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+        }
+
+        function getPeriodRange() {
+            if (selectedPeriod === 'morning')   return { start: 9,  end: 12 };
+            if (selectedPeriod === 'afternoon') return { start: 13, end: 17 };
+            if (selectedPeriod === 'evening')   return { start: 18, end: 21 };
+            return { start: 9, end: 21 };
+        }
+
+        function searchByTime() {
+            var loadingEl = document.getElementById('tab3Loading');
+            var resultsEl = document.getElementById('tab3Results');
+
+            resultsEl.innerHTML = '';
+            loadingEl.classList.remove('hidden');
+
+            var range = getPeriodRange();
+
+            // For each counselor, fetch their schedule for the selected date
+            var promises = allCounselors.map(function (counselor) {
+                return api.get('/api/counselor/schedule?counselorId=' + counselor.id + '&startDate=' + selectedDate + '&endDate=' + selectedDate)
+                    .then(function (res) {
+                        // Parse schedule response
+                        var schedules = [];
+                        if (Array.isArray(res)) {
+                            schedules = res;
+                        } else if (res && res.data && Array.isArray(res.data)) {
+                            schedules = res.data;
+                        }
+
+                        // Filter schedules that overlap with the selected time period
+                        var matchingSlots = schedules.filter(function (s) {
+                            var startTime = s.startTime || '';
+                            var endTime = s.endTime || '';
+                            if (!startTime) return false;
+
+                            // Parse start hour
+                            var startHour = parseInt(startTime.split(':')[0], 10);
+                            var endHour = endTime ? parseInt(endTime.split(':')[0], 10) : startHour + 1;
+
+                            // Check overlap: schedule [startHour, endHour) vs period [range.start, range.end]
+                            return startHour < range.end && endHour > range.start;
+                        });
+
+                        if (matchingSlots.length > 0) {
+                            return { counselor: counselor, slots: matchingSlots };
+                        }
+                        return null;
+                    })
+                    .catch(function () {
+                        return null;
+                    });
+            });
+
+            Promise.all(promises).then(function (results) {
+                loadingEl.classList.add('hidden');
+
+                var matched = results.filter(function (r) {
+                    return r !== null;
+                });
+
+                resultsEl.innerHTML = '';
+
+                if (matched.length === 0) {
+                    var periodLabel = selectedPeriod === 'morning' ? '上午' : (selectedPeriod === 'afternoon' ? '下午' : '晚上');
+                    resultsEl.innerHTML = '<div class="text-center py-12">' +
+                        '<i class="fa fa-calendar-xmark text-gray-300 text-4xl"></i>' +
+                        '<p class="text-gray-400 text-sm mt-3">该时段暂无可用咨询师</p>' +
+                        '<p class="text-gray-300 text-xs mt-1">' + selectedDate + ' ' + periodLabel + '，请尝试其他日期或时段</p>' +
+                        '</div>';
+                    return;
+                }
+
+                matched.forEach(function (item) {
+                    var card = createCounselorCard(item.counselor);
+
+                    // Add time slots under the card
+                    var slotsContainer = document.createElement('div');
+                    slotsContainer.className = 'mt-3 pt-3 border-t border-gray-100';
+
+                    var slotsLabel = document.createElement('p');
+                    slotsLabel.className = 'text-xs text-gray-400 mb-2';
+                    slotsLabel.innerHTML = '<i class="fa fa-clock mr-1"></i>可预约时段：';
+                    slotsContainer.appendChild(slotsLabel);
+
+                    var slotsWrapper = document.createElement('div');
+                    slotsWrapper.className = 'flex flex-wrap gap-1.5';
+
+                    item.slots.forEach(function (slot) {
+                        var slotBadge = document.createElement('span');
+                        slotBadge.className = 'time-slot-badge';
+                        var startTime = slot.startTime || '';
+                        var endTime = slot.endTime || '';
+                        if (startTime) startTime = startTime.substring(0, 5);
+                        if (endTime) endTime = endTime.substring(0, 5);
+                        slotBadge.textContent = startTime + (endTime ? ' - ' + endTime : '');
+                        slotsWrapper.appendChild(slotBadge);
+                    });
+
+                    slotsContainer.appendChild(slotsWrapper);
+
+                    // Insert slots before the button row (which is the last child)
+                    var btnRow = card.querySelector('.card-btn-row');
+                    if (btnRow) {
+                        card.insertBefore(slotsContainer, btnRow);
+                    } else {
+                        card.appendChild(slotsContainer);
+                    }
+
+                    resultsEl.appendChild(card);
+                });
+            }).catch(function (err) {
+                loadingEl.classList.add('hidden');
+                resultsEl.innerHTML = '<div class="text-center py-12">' +
+                    '<i class="fa fa-triangle-exclamation text-gray-300 text-4xl"></i>' +
+                    '<p class="text-gray-400 text-sm mt-3">查询失败，请重试</p></div>';
+                console.error('Failed to search by time:', err);
+            });
+        }
+
+        // ==================== 咨询师卡片 ====================
+        function createCounselorCard(counselor) {
+            var id = counselor.id;
+            var name = counselor.name || '咨询师';
+            var avatar = counselor.avatar || '';
+            var rating = typeof counselor.avgRating === 'number' ? counselor.avgRating : parseFloat(counselor.avgRating || counselor.rating) || 0;
+            var expertise = counselor.expertise || '';
+            var appointmentCount = counselor.appointmentCount || 0;
+            var isOnline = counselor.isOnline === true;
+
+            // Parse expertise
+            var expertiseList = [];
+            if (typeof expertise === 'string') {
+                expertiseList = expertise.split(/[,，、\s]+/).filter(Boolean);
+            } else if (Array.isArray(expertise)) {
+                expertiseList = expertise;
+            }
+
+            var expertiseHTML = '';
+            var showTags = expertiseList.slice(0, 4);
+            showTags.forEach(function (tag) {
+                expertiseHTML += '<span class="expertise-tag">' + escapeHTML(tag) + '</span>';
+            });
+
+            // Avatar
+            var avatarHTML;
+            if (avatar && avatar.trim()) {
+                avatarHTML = '<div class="avatar-placeholder w-14 h-14 text-white text-lg flex-shrink-0" style="background-image:url(' + escapeHTML(avatar) + ');background-size:cover;background-position:center;"></div>';
+            } else {
+                avatarHTML = '<div class="avatar-placeholder w-14 h-14 text-white text-lg flex-shrink-0" style="background-color:' + getAvatarColor(name) + ';">' + escapeHTML(name.charAt(0)) + '</div>';
+            }
+
+            // Online status
+            var onlineHTML = isOnline
+                ? '<span class="online-dot online"></span><span class="text-xs text-green-600 ml-1">在线</span>'
+                : '<span class="online-dot offline"></span><span class="text-xs text-gray-400 ml-1">离线</span>';
+
+            var card = document.createElement('div');
+            card.className = 'counselor-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5';
+
+            card.innerHTML =
+                '<div class="flex items-start space-x-4 mb-4">' +
+                    avatarHTML +
+                    '<div class="flex-1 min-w-0">' +
+                        '<div class="flex items-center space-x-2 mb-1">' +
+                            '<h3 class="text-base font-semibold text-gray-800 truncate">' + escapeHTML(name) + '</h3>' +
+                            '<div class="flex items-center flex-shrink-0">' + onlineHTML + '</div>' +
+                        '</div>' +
+                        '<div class="flex items-center text-sm">' + starRating(rating) + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="flex flex-wrap gap-1.5 mb-3 min-h-[1.5rem]">' +
+                    (expertiseHTML || '<span class="text-xs text-gray-400">暂无标签</span>') +
+                '</div>' +
+                '<div class="flex items-center text-xs text-gray-400 mb-4">' +
+                    '<i class="fa fa-user-check mr-1.5"></i>已服务 <span class="font-medium text-gray-600">' + appointmentCount + '</span> 次' +
+                '</div>' +
+                '<div class="card-btn-row flex items-center space-x-2">' +
+                    '<button class="btn-outline flex-1 py-2 rounded-lg text-xs font-medium" data-action="detail" data-id="' + id + '">' +
+                        '<i class="fa fa-info-circle mr-1"></i>查看详情' +
+                    '</button>' +
+                    '<button class="btn-primary flex-1 py-2 rounded-lg text-xs font-medium shadow-sm" data-action="book" data-id="' + id + '">' +
+                        '<i class="fa fa-calendar-check mr-1"></i>预约' +
+                    '</button>' +
+                '</div>';
+
+            // Attach events
+            card.querySelector('[data-action="detail"]').addEventListener('click', function () {
+                window.location.href = 'counselor-detail.html?id=' + id;
+            });
+            card.querySelector('[data-action="book"]').addEventListener('click', function () {
+                window.location.href = 'counselor-detail.html?id=' + id;
+            });
+
+            return card;
+        }
+
+        // ==================== 工具函数 ====================
+        function escapeHTML(str) {
+            if (!str) return '';
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+        function getAvatarColor(name) {
+            var colors = [
+                '#FF7E67', '#FF9A76', '#F9A826', '#6C5CE7',
+                '#00B894', '#0984E3', '#E17055', '#D63031',
+                '#FDCB6E', '#00CEC9', '#A29BFE', '#55EFC4'
+            ];
+            var hash = 0;
+            for (var i = 0; i < (name || '').length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return colors[Math.abs(hash) % colors.length];
+        }
+
+        function hideAllTabContents() {
+            document.querySelectorAll('[id^="tabContent"]').forEach(function (el) {
+                el.classList.add('hidden');
+            });
+        }
+
+        // ==================== 事件绑定 ====================
+        // Tab buttons
+        document.querySelectorAll('.tab-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var tabIndex = parseInt(this.getAttribute('data-tab'));
+                switchTab(tabIndex);
+            });
+        });
+
+        // Clear problem type filter
+        document.getElementById('clearTypeFilter').addEventListener('click', function () {
+            selectedProblemType = null;
+            renderProblemTypeButtons();
+            applyProblemTypeFilter();
+        });
+
+        // Search input (Tab 2)
+        var searchInput = document.getElementById('counselorSearchInput');
+        var searchTimer = null;
+        searchInput.addEventListener('input', function () {
+            if (searchTimer) clearTimeout(searchTimer);
+            var self = this;
+            searchTimer = setTimeout(function () {
+                applySearchFilter(self.value);
+            }, 300);
+        });
+
+        // Clear search button
+        document.getElementById('clearSearchBtn').addEventListener('click', function () {
+            searchInput.value = '';
+            applySearchFilter('');
+            searchInput.focus();
+        });
+
+        // Period selector buttons
+        document.querySelectorAll('.period-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                selectedPeriod = this.getAttribute('data-period');
+                renderPeriodSelector();
+                if (activeTab === 3) {
+                    searchByTime();
+                }
+            });
+        });
+
+        // ==================== 初始化 ====================
+        loadCounselors();
+    })();
+    </script>
+</body>
+</html>

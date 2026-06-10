@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理咨询系统 - 公告管理</title>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/admin.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+    <aside class="sidebar bg-gray-800 text-white w-64 h-screen fixed left-0 top-0 overflow-y-auto">
+        <div class="p-4 border-b border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="text-3xl">🧠</div>
+                <span class="font-bold text-xl">心理咨询系统</span>
+            </div>
+        </div>
+        
+        <nav class="p-4">
+            <div class="space-y-2">
+                <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-tachometer"></i>
+                    <span>控制台</span>
+                </a>
+                
+                <div class="menu-group">
+                    <button class="menu-toggle flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-700 rounded-lg">
+                        <i class="fa fa-users"></i>
+                        <span>用户管理</span>
+                        <i class="fa fa-chevron-down ml-auto"></i>
+                    </button>
+                    <div class="submenu ml-4 mt-2 space-y-1">
+                        <a href="users.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm">
+                            用户列表
+                        </a>
+                        <a href="counselors.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm">
+                            咨询师管理
+                        </a>
+                    </div>
+                </div>
+                
+                <a href="appointments.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-calendar"></i>
+                    <span>预约管理</span>
+                </a>
+                
+                <a href="records.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-file-text"></i>
+                    <span>咨询记录</span>
+                </a>
+                
+                <a href="schedule.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-clock-o"></i>
+                    <span>排班管理</span>
+                </a>
+                
+
+                
+                <a href="statistics.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-bar-chart"></i>
+                    <span>统计分析</span>
+                </a>
+                
+                <a href="tests.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-check-square"></i><span>测评管理</span></a>
+                <a href="science.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-book"></i><span>科普管理</span></a>
+                <a href="announcement.html" class="flex items-center gap-3 px-3 py-2 bg-purple-600 rounded-lg">
+                    <i class="fa fa-bullhorn"></i>
+                    <span>公告管理</span>
+                </a>
+            </div>
+        </nav>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
+            <button id="logoutBtn" class="flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-700 rounded-lg">
+                <i class="fa fa-sign-out"></i>
+                <span>退出登录</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-64 p-6">
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">公告管理</h1>
+                <p class="text-gray-500">管理系统公告信息</p>
+            </div>
+            <button id="addAnnouncementBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-2">
+                <i class="fa fa-plus"></i>
+                发布公告
+            </button>
+        </header>
+
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex gap-4 mb-6">
+                <div class="flex-1 relative">
+                    <input type="text" id="searchInput" placeholder="搜索公告标题..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <option value="">全部状态</option>
+                    <option value="published">已发布</option>
+                    <option value="draft">草稿</option>
+                </select>
+                <button id="searchBtn" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                    搜索
+                </button>
+            </div>
+
+            <div id="announcementList" class="space-y-4">
+                <div class="text-center py-8 text-gray-400">加载中...</div>
+            </div>
+
+            <div class="flex justify-between items-center mt-6">
+                <p id="paginationInfo" class="text-gray-500"></p>
+                <div id="paginationBtns" class="flex gap-2"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="announcementModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl w-full max-w-lg p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modalTitle" class="text-xl font-bold text-gray-800">发布公告</h2>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="announcementForm">
+                <input type="hidden" id="announcementId">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">标题</label>
+                    <input type="text" id="announcementTitle" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">内容</label>
+                    <textarea id="announcementContent" rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">状态</label>
+                    <select id="announcementStatus" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="draft">草稿</option>
+                        <option value="published">发布</option>
+                    </select>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" id="cancelBtn" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        if (!localStorage.getItem('admin_token')) { window.location.href = 'index.html'; }
+        const BASE_URL = 'http://localhost:8080';
+        const TOKEN = localStorage.getItem('admin_token');
+        let currentPage = 1;
+        let totalPages = 1;
+        const pageSize = 10;
+
+        function formatDateTime(date) {
+            if (!date) return '-';
+            const d = new Date(date);
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        }
+
+        function loadAnnouncements(page) {
+            if (page) currentPage = page;
+            const listEl = document.getElementById('announcementList');
+            listEl.innerHTML = '<div class="text-center py-8 text-gray-400">加载中...</div>';
+
+            fetch(`${BASE_URL}/api/admin/announcements?page=${currentPage}&size=${pageSize}&_t=${Date.now()}`, {
+                headers: { Authorization: 'Bearer ' + TOKEN },
+                cache: 'no-store'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200) {
+                    const records = data.data.records || [];
+                    totalPages = data.data.totalPages || 1;
+                    const total = data.data.total || 0;
+
+                    // 删除后当前页可能已超出范围，自动回退到最后一页
+                    if (records.length === 0 && currentPage > 1 && total > 0) {
+                        currentPage = totalPages;
+                        loadAnnouncements(currentPage);
+                        return;
+                    }
+
+                    if (records.length === 0) {
+                        listEl.innerHTML = '<div class="text-center py-8 text-gray-400">暂无公告</div>';
+                    } else {
+                        listEl.innerHTML = records.map(a => {
+                            const status = a.status === 'published'
+                                ? { label: '已发布', cls: 'bg-green-100 text-green-600' }
+                                : { label: '草稿', cls: 'bg-gray-100 text-gray-600' };
+                            const pushed = a.pushed === 1;
+                            return `<div class="border border-gray-200 rounded-lg p-4 ${pushed ? 'ring-2 ring-purple-300' : ''}">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">${pushed ? '📌 ' : ''}${a.title}</h3>
+                                        <p class="text-sm text-gray-500">${formatDateTime(a.createTime)}</p>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        ${pushed ? '<span class="px-2 py-1 bg-purple-100 text-purple-600 text-xs rounded-full">已推送</span>' : ''}
+                                        <span class="px-2 py-1 ${status.cls} text-xs rounded-full">${status.label}</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600 text-sm whitespace-pre-wrap">${a.content}</p>
+                                <div class="flex gap-3 mt-4">
+                                    <button class="edit-btn text-orange-600 hover:text-orange-800 text-sm" data-id="${a.id}">编辑</button>
+                                    <button class="push-btn text-sm ${pushed ? 'text-gray-500 hover:text-gray-700' : 'text-purple-600 hover:text-purple-800 font-semibold'}" data-id="${a.id}" data-pushed="${pushed}">${pushed ? '取消推送' : '推送到首页'}</button>
+                                    <button class="delete-btn text-red-600 hover:text-red-800 text-sm" data-id="${a.id}">删除</button>
+                                </div>
+                            </div>`;
+                        }).join('');
+                    }
+                    renderPagination();
+                }
+            })
+            .catch(err => {
+                console.error('加载公告失败:', err);
+                listEl.innerHTML = '<div class="text-center py-8 text-red-400">加载失败</div>';
+            });
+        }
+
+        function renderPagination() {
+            document.getElementById('paginationInfo').textContent =
+                totalPages > 0 ? `第 ${currentPage} 页，共 ${totalPages} 页` : '';
+            const btnsEl = document.getElementById('paginationBtns');
+            let html = `<button class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 ${currentPage<=1?'opacity-50':''}" ${currentPage<=1?'disabled':''} onclick="loadAnnouncements(${currentPage-1})">上一页</button>`;
+            for (let i = 1; i <= totalPages; i++) {
+                html += `<button class="px-3 py-1 border rounded ${i===currentPage?'bg-purple-600 text-white':'border-gray-300 hover:bg-gray-100'}" onclick="loadAnnouncements(${i})">${i}</button>`;
+            }
+            html += `<button class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 ${currentPage>=totalPages?'opacity-50':''}" ${currentPage>=totalPages?'disabled':''} onclick="loadAnnouncements(${currentPage+1})">下一页</button>`;
+            btnsEl.innerHTML = html;
+        }
+
+        // 事件委托：编辑/删除按钮通过父容器委托处理
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('edit-btn')) {
+                const id = e.target.dataset.id;
+                fetch(`${BASE_URL}/api/admin/announcements/${id}`, {
+                    headers: { Authorization: 'Bearer ' + TOKEN }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        const a = data.data;
+                        document.getElementById('modalTitle').textContent = '编辑公告';
+                        document.getElementById('announcementId').value = a.id;
+                        document.getElementById('announcementTitle').value = a.title;
+                        document.getElementById('announcementContent').value = a.content;
+                        document.getElementById('announcementStatus').value = a.status;
+                        document.getElementById('announcementModal').style.display = 'flex';
+                    }
+                });
+            }
+            if (e.target.classList.contains('delete-btn')) {
+                const id = e.target.dataset.id;
+                if (confirm('确定要删除这个公告吗？')) {
+                    fetch(`${BASE_URL}/api/admin/announcements/${id}`, {
+                        method: 'DELETE',
+                        headers: { Authorization: 'Bearer ' + TOKEN }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.code === 200) {
+                            loadAnnouncements();
+                        } else {
+                            alert(data.msg || '删除失败');
+                        }
+                    });
+                }
+            }
+            if (e.target.classList.contains('push-btn')) {
+                const id = e.target.dataset.id;
+                const pushed = e.target.dataset.pushed === 'true';
+                const url = pushed
+                    ? `${BASE_URL}/api/admin/announcements/${id}/unpush`
+                    : `${BASE_URL}/api/admin/announcements/${id}/push`;
+                fetch(url, {
+                    method: 'PUT',
+                    headers: { Authorization: 'Bearer ' + TOKEN }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        loadAnnouncements();
+                    } else {
+                        alert(data.msg || '操作失败');
+                    }
+                });
+            }
+        });
+
+        // 模态框
+        document.getElementById('addAnnouncementBtn').addEventListener('click', function() {
+            document.getElementById('modalTitle').textContent = '发布公告';
+            document.getElementById('announcementId').value = '';
+            document.getElementById('announcementForm').reset();
+            document.getElementById('announcementModal').style.display = 'flex';
+        });
+        document.getElementById('closeModal').addEventListener('click', () => document.getElementById('announcementModal').style.display = 'none');
+        document.getElementById('cancelBtn').addEventListener('click', () => document.getElementById('announcementModal').style.display = 'none');
+        document.getElementById('announcementForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('announcementId').value;
+            const data = {
+                title: document.getElementById('announcementTitle').value,
+                content: document.getElementById('announcementContent').value,
+                status: document.getElementById('announcementStatus').value
+            };
+            const url = id ? `${BASE_URL}/api/admin/announcements/${id}` : `${BASE_URL}/api/admin/announcements`;
+            const method = id ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200) {
+                    document.getElementById('announcementModal').style.display = 'none';
+                    loadAnnouncements();
+                } else {
+                    alert(data.msg || '操作失败');
+                }
+            })
+            .catch(err => { console.error(err); alert('操作失败'); });
+        });
+
+        // 退出登录
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            if (confirm('确定要退出登录吗？')) {
+                localStorage.removeItem('admin_token');
+                localStorage.removeItem('admin_user');
+                window.location.href = 'index.html';
+            }
+        });
+
+        // 搜索
+        document.getElementById('searchBtn').addEventListener('click', function() {
+            loadAnnouncements(1);
+        });
+
+        loadAnnouncements();
+    </script>
+</body>
+</html>

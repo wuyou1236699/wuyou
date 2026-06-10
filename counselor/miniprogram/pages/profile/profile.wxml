@@ -1,0 +1,76 @@
+<view class="container" wx:if="{{!loading}}">
+  <view class="profile-header">
+    <view class="profile-avatar">
+      <image src="{{userInfo.avatar}}" class="avatar" mode="aspectFill"></image>
+      <view class="edit-btn" bindtap="editProfile">
+        <text>编辑</text>
+      </view>
+    </view>
+    <view class="profile-info">
+      <text class="profile-name">{{userInfo.name}}</text>
+      <text class="profile-title">{{userInfo.title}}</text>
+      <view class="profile-meta">
+        <text class="meta-item">{{userInfo.expertise}}</text>
+        <text class="meta-dot">·</text>
+        <text class="meta-item">{{userInfo.experience}}</text>
+      </view>
+    </view>
+    <view class="profile-rating">
+      <text class="rating-star">⭐</text>
+      <text class="rating-value">{{userInfo.rating}}</text>
+    </view>
+  </view>
+
+  <view class="stats-card">
+    <view class="stats-grid">
+      <view class="stat-item" wx:for="{{stats}}" wx:key="label">
+        <text class="stat-icon">{{item.icon}}</text>
+        <text class="stat-value">{{item.value}}</text>
+        <text class="stat-label">{{item.label}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="menu-card">
+    <view 
+      class="menu-item" 
+      wx:for="{{menuItems}}" 
+      wx:key="label"
+      bindtap="goToPage"
+      data-path="{{item.path}}"
+    >
+      <text class="menu-icon">{{item.icon}}</text>
+      <text class="menu-label">{{item.label}}</text>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="contact-card">
+    <view class="contact-item">
+      <text class="contact-icon">📞</text>
+      <text class="contact-label">联系电话</text>
+      <input wx:if="{{editing}}" class="contact-input" value="{{editPhone}}" bindinput="onPhoneInput" placeholder="请输入联系电话"/>
+      <text wx:else class="contact-value">{{maskedPhone || '未设置'}}</text>
+    </view>
+    <view class="contact-item">
+      <text class="contact-icon">📧</text>
+      <text class="contact-label">邮箱</text>
+      <input wx:if="{{editing}}" class="contact-input" value="{{editEmail}}" bindinput="onEmailInput" placeholder="请输入邮箱"/>
+      <text wx:else class="contact-value">{{userInfo.email || '未设置'}}</text>
+    </view>
+    <view class="contact-actions">
+      <button wx:if="{{!editing}}" class="edit-contact-btn" bindtap="startEditContact">编辑联系方式</button>
+      <button wx:if="{{editing}}" class="save-contact-btn" bindtap="saveContact">保存</button>
+      <button wx:if="{{editing}}" class="cancel-contact-btn" bindtap="cancelEditContact">取消</button>
+    </view>
+  </view>
+
+  <view class="logout-btn" bindtap="logout">
+    <text>退出登录</text>
+  </view>
+</view>
+
+<view class="loading-state" wx:if="{{loading}}">
+  <view class="loading-spinner"></view>
+  <text class="loading-text">加载中...</text>
+</view>

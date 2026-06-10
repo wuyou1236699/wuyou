@@ -1,0 +1,199 @@
+page {
+  background-color: #F8F7FC;
+  min-height: 100vh;
+}
+
+.container {
+  padding: 20rpx;
+}
+
+.filter-bar {
+  background: #fff;
+  padding: 20rpx;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.picker-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F5F2FC;
+  padding: 20rpx;
+  border-radius: 16rpx;
+}
+
+.picker-btn text {
+  font-size: 28rpx;
+  color: #2D2438;
+}
+
+.picker-arrow {
+  margin-left: 8rpx;
+  font-size: 24rpx;
+  color: #A099B0;
+}
+
+.record-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.record-item {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.record-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.record-avatar .avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7C6FF7 0%, #6558D3 100%);
+  margin-right: 16rpx;
+}
+
+.record-info {
+  flex: 1;
+}
+
+.record-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #2D2438;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.record-meta {
+  display: flex;
+  align-items: center;
+}
+
+.meta-item {
+  font-size: 24rpx;
+  color: #6B6380;
+}
+
+.meta-dot {
+  margin: 0 12rpx;
+  color: #d1d5db;
+}
+
+.record-status {
+  padding: 8rpx 16rpx;
+  border-radius: 12rpx;
+}
+
+.record-status.completed {
+  background: #d1fae5;
+}
+
+.record-status.completed text {
+  color: #3AB88A;
+  font-size: 22rpx;
+}
+
+.record-status.draft {
+  background: #FFF7E6;
+}
+
+.record-status.draft text {
+  color: #F59E0B;
+  font-size: 22rpx;
+}
+
+.record-content {
+  padding: 0 0 20rpx;
+  border-bottom: 1rpx solid #F5F2FC;
+  margin-bottom: 20rpx;
+}
+
+.record-row {
+  display: flex;
+  margin-bottom: 12rpx;
+}
+
+.row-label {
+  font-size: 26rpx;
+  color: #A099B0;
+  width: 160rpx;
+  flex-shrink: 0;
+}
+
+.row-value {
+  font-size: 26rpx;
+  color: #2D2438;
+  flex: 1;
+}
+
+.record-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.record-fee {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #7C6FF7;
+}
+
+.record-arrow {
+  font-size: 36rpx;
+  color: #d1d5db;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 0;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 24rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #A099B0;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.loading-spinner {
+  width: 64rpx;
+  height: 64rpx;
+  border: 6rpx solid #F5F2FC;
+  border-top: 6rpx solid #7C6FF7;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 24rpx;
+  font-size: 28rpx;
+  color: #A099B0;
+}

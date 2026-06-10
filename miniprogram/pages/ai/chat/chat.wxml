@@ -1,0 +1,31 @@
+<view class="chat-container">
+  <view class="header">
+    <text class="title">AI对话</text>
+    <button class="clear-btn" bindtap="clearHistory">清除历史</button>
+  </view>
+  <scroll-view class="message-list" scroll-y scroll-into-view="{{scrollToView}}" scroll-with-animation>
+    <block wx:for="{{messages}}" wx:key="index">
+      <view class="message {{item.role}}">
+        <view class="content">{{item.content}}</view>
+        <view class="time">{{item.time}}</view>
+      </view>
+    </block>
+    <!-- 正在输入提示 -->
+    <view class="message ai" wx:if="{{showTyping}}">
+      <view class="content typing">正在输入...</view>
+    </view>
+    <view id="bottom"></view>
+  </scroll-view>
+
+  <view class="input-bar">
+    <input 
+      bindinput="onInput" 
+      value="{{inputValue}}" 
+      placeholder="输入消息..." 
+      confirm-type="send" 
+      bindconfirm="sendMessage"
+      disabled="{{sending}}"
+    />
+    <button bindtap="sendMessage" disabled="{{sending}}">发送</button>
+  </view>
+</view>

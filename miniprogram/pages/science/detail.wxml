@@ -1,0 +1,30 @@
+<view class="container">
+  <view class="article-header" wx:if="!loading">
+    <image class="article-cover" src="{{article.coverImage}}" mode="aspectFill" />
+    <view class="article-info">
+      <text class="article-title">{{article.title}}</text>
+      <view class="article-meta">
+        <text class="meta-item">{{article.category}}</text>
+        <text class="meta-item">👁️ {{article.readCount}}</text>
+        <text class="meta-item">{{article.createTime}}</text>
+      </view>
+    </view>
+  </view>
+
+  <scroll-view class="article-content" scroll-y wx:if="!loading">
+    <view class="content-inner">
+      <rich-text nodes="{{article.content}}"></rich-text>
+    </view>
+  </scroll-view>
+
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="footer">
+    <view class="footer-btn" bindtap="onShareAppMessage">
+      <text class="footer-icon">📤</text>
+      <text class="footer-text">分享</text>
+    </view>
+  </view>
+</view>

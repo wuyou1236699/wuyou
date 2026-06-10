@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理咨询系统 - 预约管理</title>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/admin.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+    <aside class="sidebar bg-gray-800 text-white w-64 h-screen fixed left-0 top-0 overflow-y-auto">
+        <div class="p-4 border-b border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="text-3xl">🧠</div>
+                <span class="font-bold text-xl">心理咨询系统</span>
+            </div>
+        </div>
+        
+        <nav class="p-4">
+            <div class="space-y-2">
+                <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-tachometer"></i>
+                    <span>控制台</span>
+                </a>
+                
+                <div class="menu-group">
+                    <button class="menu-toggle flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-700 rounded-lg">
+                        <i class="fa fa-users"></i>
+                        <span>用户管理</span>
+                        <i class="fa fa-chevron-down ml-auto"></i>
+                    </button>
+                    <div class="submenu ml-4 mt-2 space-y-1">
+                        <a href="users.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm">
+                            用户列表
+                        </a>
+                        <a href="counselors.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm">
+                            咨询师管理
+                        </a>
+                    </div>
+                </div>
+                
+                <a href="appointments.html" class="flex items-center gap-3 px-3 py-2 bg-purple-600 rounded-lg">
+                    <i class="fa fa-calendar"></i>
+                    <span>预约管理</span>
+                </a>
+                
+                <a href="records.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-file-text"></i>
+                    <span>咨询记录</span>
+                </a>
+                
+                <a href="schedule.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-clock-o"></i>
+                    <span>排班管理</span>
+                </a>
+                
+
+                
+                <a href="statistics.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-bar-chart"></i>
+                    <span>统计分析</span>
+                </a>
+                
+                <a href="tests.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-check-square"></i><span>测评管理</span></a>
+                <a href="science.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-book"></i><span>科普管理</span></a>
+                <a href="announcement.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-bullhorn"></i>
+                    <span>公告管理</span>
+                </a>
+            </div>
+        </nav>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
+            <button id="logoutBtn" class="flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-700 rounded-lg">
+                <i class="fa fa-sign-out"></i>
+                <span>退出登录</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-64 p-6">
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">预约管理</h1>
+                <p class="text-gray-500">管理平台预约信息</p>
+            </div>
+            <div class="flex gap-3">
+            </div>
+        </header>
+
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">待确认</p>
+                        <p class="text-2xl font-bold text-gray-800 mt-1" id="pendingCount">0</p>
+                    </div>
+                    <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                        <i class="fa fa-clock-o text-yellow-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">已完成</p>
+                        <p class="text-2xl font-bold text-gray-800 mt-1" id="completedCount">0</p>
+                    </div>
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <i class="fa fa-check text-green-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">已取消</p>
+                        <p class="text-2xl font-bold text-gray-800 mt-1" id="cancelledCount">0</p>
+                    </div>
+                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                        <i class="fa fa-times text-red-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex gap-4 mb-6">
+                <div class="flex-1 relative">
+                    <input type="text" id="searchInput" placeholder="搜索用户姓名、咨询师姓名..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <option value="">全部状态</option>
+                    <option value="pending">待确认</option>
+                    <option value="confirmed">已确认</option>
+                    <option value="completed">已完成</option>
+                    <option value="cancelled">已取消</option>
+                </select>
+                <input type="date" id="dateFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                <button id="searchBtn" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                    搜索
+                </button>
+            </div>
+
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-gray-200">
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">预约ID</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">用户</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">咨询师</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">日期</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">时间</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">状态</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="appointmentTableBody">
+                    <tr><td colspan="7" class="text-center py-8 text-gray-500">加载中...</td></tr>
+                </tbody>
+            </table>
+
+            <div class="flex justify-between items-center mt-6">
+                <p id="paginationInfo" class="text-gray-500">加载中...</p>
+                <div class="flex gap-2">
+                    <button id="prevPageBtn" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100" disabled>上一页</button>
+                    <span id="pageNumbers"></span>
+                    <button id="nextPageBtn" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100">下一页</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="appointmentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl w-full max-w-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modalTitle" class="text-xl font-bold text-gray-800">预约详情</h2>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="appointmentDetail" class="space-y-4">
+                <div class="flex justify-between py-2 border-b border-gray-100">
+                    <span class="text-gray-500">预约ID</span>
+                    <span class="text-gray-800">A001</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-gray-100">
+                    <span class="text-gray-500">用户</span>
+                    <span class="text-gray-800">张三</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-gray-100">
+                    <span class="text-gray-500">咨询师</span>
+                    <span class="text-gray-800">李医生</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-gray-100">
+                    <span class="text-gray-500">日期</span>
+                    <span class="text-gray-800">2024-01-20</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-gray-100">
+                    <span class="text-gray-500">时间</span>
+                    <span class="text-gray-800">10:00-11:00</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-gray-100">
+                    <span class="text-gray-500">状态</span>
+                    <span class="px-2 py-1 bg-yellow-100 text-yellow-600 text-xs rounded-full">待确认</span>
+                </div>
+                <div class="flex justify-between py-2">
+                    <span class="text-gray-500">问题类型</span>
+                    <span class="text-gray-800">情绪压力</span>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button id="cancelBtn" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">关闭</button>
+                <button id="confirmBtn" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">确认预约</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if (!localStorage.getItem('admin_token')) { window.location.href = 'index.html'; }
+        let currentPage = 1;
+        let totalPages = 1;
+        let totalRecords = 0;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAppointments(currentPage);
+            loadStats();
+            setupLogout();
+            setupModal();
+            setupPagination();
+            setupSearch();
+        });
+
+        function loadAppointments(page) {
+            let url = `http://localhost:8080/api/admin/appointments?page=${page}&size=10`;
+            const statusFilter = document.getElementById('statusFilter').value;
+            if (statusFilter) {
+                const statusMap = { 'pending': 0, 'confirmed': 1, 'completed': 2, 'cancelled': 3 };
+                if (statusMap[statusFilter] !== undefined) url += '&status=' + statusMap[statusFilter];
+            }
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (keyword) url += '&keyword=' + encodeURIComponent(keyword);
+
+            fetch(url, {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200 && data.data) {
+                    const tbody = document.getElementById('appointmentTableBody');
+                    const records = data.data.records || [];
+                    if (records.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-500">暂无预约数据</td></tr>';
+                    } else {
+                        tbody.innerHTML = records.map(appointment => {
+                            const statusMap = {
+                                'pending': { label: '待确认', class: 'bg-yellow-100 text-yellow-600' },
+                                'confirmed': { label: '已确认', class: 'bg-blue-100 text-blue-600' },
+                                'completed': { label: '已完成', class: 'bg-green-100 text-green-600' },
+                                'cancelled': { label: '已取消', class: 'bg-red-100 text-red-600' }
+                            };
+                            const status = statusMap[appointment.status] || statusMap['pending'];
+                            return `
+                                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                    <td class="py-3 px-4 text-gray-800">${appointment.id}</td>
+                                    <td class="py-3 px-4 text-gray-800">${appointment.userName || '-'}</td>
+                                    <td class="py-3 px-4 text-gray-800">${appointment.counselorName || '-'}</td>
+                                    <td class="py-3 px-4 text-gray-800">${appointment.date || '-'}</td>
+                                    <td class="py-3 px-4 text-gray-800">${appointment.time || '-'}</td>
+                                    <td class="py-3 px-4"><span class="px-2 py-1 ${status.class} text-xs rounded-full">${status.label}</span></td>
+                                    <td class="py-3 px-4">
+                                        <button class="text-blue-600 hover:text-blue-800 mr-3" onclick="viewAppointment('${appointment.id}')">
+                                            <i class="fa fa-eye"></i>
+                                        </button>
+                                        ${appointment.status === 'pending' ? `
+                                            <button class="text-green-600 hover:text-green-800 mr-3" onclick="confirmAppointment('${appointment.id}')">
+                                                <i class="fa fa-check"></i>
+                                            </button>
+                                        ` : ''}
+                                        ${appointment.status !== 'cancelled' ? `
+                                            <button class="text-red-600 hover:text-red-800" onclick="cancelAppointment('${appointment.id}')">
+                                                <i class="fa fa-times"></i>
+                                            </button>
+                                        ` : ''}
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+                    totalPages = data.data.pages || Math.ceil((data.data.total || 0) / 10);
+                    totalRecords = data.data.total || 0;
+                    currentPage = page;
+                    updatePagination();
+                }
+            })
+            .catch(err => console.error('加载预约失败:', err));
+        }
+
+        function setupPagination() {
+            document.getElementById('prevPageBtn').addEventListener('click', function() {
+                if (currentPage > 1) loadAppointments(currentPage - 1);
+            });
+            document.getElementById('nextPageBtn').addEventListener('click', function() {
+                if (currentPage < totalPages) loadAppointments(currentPage + 1);
+            });
+        }
+
+        function updatePagination() {
+            document.getElementById('paginationInfo').textContent =
+                `显示 ${(currentPage - 1) * 10 + 1}-${Math.min(currentPage * 10, totalRecords)} 条，共 ${totalRecords} 条`;
+            document.getElementById('prevPageBtn').disabled = currentPage <= 1;
+            document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+
+            const pagesDiv = document.getElementById('pageNumbers');
+            pagesDiv.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = `px-3 py-1 border rounded ${i === currentPage ? 'bg-purple-600 text-white' : 'border-gray-300 hover:bg-gray-100'}`;
+                btn.textContent = i;
+                btn.addEventListener('click', () => loadAppointments(i));
+                pagesDiv.appendChild(btn);
+            }
+        }
+
+        function setupSearch() {
+            document.getElementById('searchBtn').addEventListener('click', function() {
+                currentPage = 1;
+                loadAppointments(currentPage);
+            });
+        }
+
+        function loadStats() {
+            fetch('http://localhost:8080/api/admin/statistics', {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200) {
+                    document.getElementById('pendingCount').textContent = data.data.pendingAppointments || 0;
+                    document.getElementById('completedCount').textContent = data.data.completedAppointments || 0;
+                    document.getElementById('cancelledCount').textContent = data.data.cancelledAppointments || 0;
+                }
+            })
+            .catch(err => console.error('加载统计数据失败:', err));
+        }
+
+        function setupLogout() {
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('确定要退出登录吗？')) {
+                    localStorage.removeItem('admin_token');
+                    localStorage.removeItem('admin_user');
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+
+        function setupModal() {
+            document.getElementById('closeModal').addEventListener('click', function() {
+                document.getElementById('appointmentModal').style.display = 'none';
+            });
+            document.getElementById('cancelBtn').addEventListener('click', function() {
+                document.getElementById('appointmentModal').style.display = 'none';
+            });
+            document.getElementById('confirmBtn').addEventListener('click', function() {
+                const id = document.getElementById('appointmentDetail').dataset.id;
+                confirmAppointment(id);
+            });
+        }
+
+        function viewAppointment(id) {
+            fetch('http://localhost:8080/api/admin/appointments/' + id, {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200) {
+                    const appointment = data.data;
+                    const statusMap = {
+                        'pending': { label: '待确认', class: 'bg-yellow-100 text-yellow-600' },
+                        'confirmed': { label: '已确认', class: 'bg-blue-100 text-blue-600' },
+                        'completed': { label: '已完成', class: 'bg-green-100 text-green-600' },
+                        'cancelled': { label: '已取消', class: 'bg-red-100 text-red-600' }
+                    };
+                    const status = statusMap[appointment.status] || statusMap['pending'];
+                    const serviceNames = {1:'电话咨询', 2:'网络咨询', 3:'门诊咨询'};
+                    document.getElementById('appointmentDetail').innerHTML = `
+                        <div class="flex justify-between py-2 border-b border-gray-100">
+                            <span class="text-gray-500">预约ID</span><span class="text-gray-800">${appointment.id}</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-100">
+                            <span class="text-gray-500">用户</span><span class="text-gray-800">${appointment.userName || '-'}</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-100">
+                            <span class="text-gray-500">咨询师</span><span class="text-gray-800">${appointment.counselorName || '-'}</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-100">
+                            <span class="text-gray-500">服务类型</span><span class="text-gray-800">${serviceNames[appointment.serviceType] || '-'}</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-100">
+                            <span class="text-gray-500">日期</span><span class="text-gray-800">${appointment.date || '-'}</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-100">
+                            <span class="text-gray-500">时间</span><span class="text-gray-800">${appointment.time || '-'}</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-100">
+                            <span class="text-gray-500">状态</span>
+                            <span class="px-2 py-1 ${status.class} text-xs rounded-full">${status.label}</span>
+                        </div>
+                        <div class="py-2">
+                            <span class="text-gray-500 block mb-2">问题描述</span>
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <p class="text-gray-700 text-sm">${appointment.problem || '未填写'}</p>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('appointmentDetail').dataset.id = appointment.id;
+                    document.getElementById('appointmentModal').style.display = 'flex';
+                }
+            })
+            .catch(err => console.error('查看预约失败:', err));
+        }
+
+        function confirmAppointment(id) {
+            fetch('http://localhost:8080/api/admin/appointments/' + id + '/confirm', {
+                method: 'PUT',
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200) {
+                    alert('确认成功');
+                    document.getElementById('appointmentModal').style.display = 'none';
+                    loadAppointments(currentPage);
+                    loadStats();
+                } else {
+                    alert(data.msg || '确认失败');
+                }
+            })
+            .catch(err => { console.error('确认失败:', err); alert('确认失败'); });
+        }
+
+        function cancelAppointment(id) {
+            if (confirm('确定要取消这个预约吗？')) {
+                fetch('http://localhost:8080/api/admin/appointments/' + id + '/cancel', {
+                    method: 'PUT',
+                    headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        alert('取消成功');
+                        document.getElementById('appointmentModal').style.display = 'none';
+                        loadAppointments(currentPage);
+                        loadStats();
+                    } else {
+                        alert(data.msg || '取消失败');
+                    }
+                })
+                .catch(err => { console.error('取消失败:', err); alert('取消失败'); });
+            }
+        }
+    </script>
+</body>
+</html>

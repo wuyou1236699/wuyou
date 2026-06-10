@@ -1,0 +1,46 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/index/index",
+    "pages/appointments/appointments",
+    "pages/appointment-detail/appointment-detail",
+    "pages/chat/chat-list",
+    "pages/chat/chat-detail",
+    "pages/records/records",
+    "pages/schedule/schedule",
+    "pages/profile/profile",
+    "pages/reviews/reviews",
+    "pages/records/record-detail"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#7C6FF7",
+    "navigationBarTitleText": "心理咨询师端",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F8F7FC"
+  },
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#7C6FF7",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/appointments/appointments",
+        "text": "预约"
+      },
+      {
+        "pagePath": "pages/records/records",
+        "text": "记录"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}
