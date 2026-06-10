@@ -1,0 +1,94 @@
+<view class="container" wx:if="{{!loading}}">
+  <view class="record-header">
+    <view class="record-avatar">
+      <view class="avatar"></view>
+    </view>
+    <view class="record-info">
+      <text class="record-name">{{record.userName}}</text>
+      <view class="record-meta">
+        <view class="service-tag">{{record.serviceTypeText || record.serviceType}}</view>
+        <text class="meta-text">{{record.date}} {{record.time}}</text>
+      </view>
+    </view>
+    <view class="record-status {{record.status}}">
+      <text>{{record.status === 1 || record.status === 'completed' ? '已完成' : '草稿'}}</text>
+    </view>
+  </view>
+
+  <view class="form-section">
+    <view class="section-title">咨询问题</view>
+    <view class="section-content">
+      <text>{{record.problem}}</text>
+    </view>
+  </view>
+
+  <view class="form-section">
+    <view class="section-title">诊断结果</view>
+    <view class="section-content">
+      <textarea 
+        wx:if="{{isEditing}}"
+        class="edit-textarea"
+        value="{{record.diagnosis}}"
+        bindinput="onDiagnosisInput"
+        placeholder="请输入诊断结果"
+      />
+      <text wx:else>{{record.diagnosis || '暂无诊断'}}</text>
+    </view>
+  </view>
+
+  <view class="form-section">
+    <view class="section-title">建议方案</view>
+    <view class="section-content">
+      <textarea 
+        wx:if="{{isEditing}}"
+        class="edit-textarea"
+        value="{{record.suggestions}}"
+        bindinput="onSuggestionsInput"
+        placeholder="请输入建议方案"
+      />
+      <text wx:else>{{record.suggestions || '暂无建议'}}</text>
+    </view>
+  </view>
+
+  <view class="form-section">
+    <view class="section-title">咨询信息</view>
+    <view class="info-grid">
+      <view class="info-item">
+        <text class="info-label">评价状态</text>
+        <text class="info-value" style="color: {{record.hasReview ? '#52c41a' : '#faad14'}}">{{record.hasReview ? '已评价' : '未评价'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">费用</text>
+        <text class="info-value">¥{{record.fee || 0}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="form-section">
+    <view class="section-title">时间信息</view>
+    <view class="info-grid">
+      <view class="info-item">
+        <text class="info-label">创建时间</text>
+        <text class="info-value">{{record.createdAt}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">更新时间</text>
+        <text class="info-value">{{record.updatedAt}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="action-bar">
+    <view class="action-btn secondary" bindtap="toggleEdit">
+      <text>{{isEditing ? '取消' : '编辑'}}</text>
+    </view>
+    <view class="action-btn primary" wx:if="{{isEditing}}" bindtap="saveRecord">
+      <text>保存</text>
+    </view>
+  </view>
+</view>
+
+<view class="loading-state" wx:if="{{loading}}">
+  <view class="loading-spinner"></view>
+  <text class="loading-text">加载中...</text>
+</view>

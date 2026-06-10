@@ -1,0 +1,30 @@
+# 依赖
+node_modules/
+miniprogram_npm/
+
+# Maven 编译产物
+target/
+*.jar
+*.class
+
+# IDE
+.idea/
+*.iml
+
+# 工具配置
+.claude/
+.playwright-mcp/
+.codex/
+
+# 临时文件
+*.bat
+*.log
+*.png
+tmp_*
+
+# 旧后端目录（非当前使用）
+心里咨询系统后端/psychology_backend/
+心里咨询系统后端/import_cases.py
+
+# 旧管理端（已被 admin-web 替代）
+admin/

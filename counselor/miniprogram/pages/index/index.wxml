@@ -1,0 +1,121 @@
+<view class="container" wx:if="{{!loading}}">
+  <view class="status-card {{isOnline ? 'online' : 'offline'}}">
+    <view class="status-bg"></view>
+    <view class="status-content">
+      <view class="status-left">
+        <view class="status-indicator">
+          <view class="pulse-ring {{isOnline ? 'active' : ''}}"></view>
+          <view class="status-dot-large {{isOnline ? 'online' : 'offline'}}"></view>
+        </view>
+        <view class="status-info">
+          <text class="status-title">{{isOnline ? '在线服务中' : '离线休息中'}}</text>
+          <text class="status-desc">{{isOnline ? '您可以接收新的咨询请求' : '开启后可以接收咨询'}}</text>
+        </view>
+      </view>
+      <view class="status-toggle-wrapper">
+        <view class="toggle-switch {{isOnline ? 'active' : ''}}" bindtap="toggleOnlineStatus">
+          <view class="toggle-knob"></view>
+        </view>
+        <text class="toggle-text">{{isOnline ? '点击离线' : '点击上线'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="greeting-section">
+    <text class="greeting-text">您好，{{userInfo.name || '医生'}}</text>
+    <text class="greeting-subtitle">{{isOnline ? '您当前在线，可以开始咨询了' : '当前离线，可切换为在线状态'}}</text>
+  </view>
+
+  <view class="announcement-bar" wx:if="{{announcements.length > 0}}" bindtap="goToAnnouncement" data-id="{{announcements[0].id}}">
+    <text class="announcement-icon">📢</text>
+    <text class="announcement-text">{{announcements[0].title}}</text>
+  </view>
+
+  <view class="stats-grid">
+    <view class="stat-card" bindtap="goToAppointments">
+      <view class="stat-icon-wrapper blue">
+        <text class="stat-icon">�</text>
+      </view>
+      <view class="stat-info">
+        <text class="stat-value">{{stats.todayAppointments || 0}}</text>
+        <text class="stat-label">今日预约</text>
+      </view>
+    </view>
+    <view class="stat-card">
+      <view class="stat-icon-wrapper orange">
+        <text class="stat-icon">⭐</text>
+      </view>
+      <view class="stat-info">
+        <text class="stat-value">{{stats.rating || 0}}</text>
+        <text class="stat-label">评分</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="quick-actions">
+    <view class="section-title">快捷操作</view>
+    <view class="action-grid">
+      <view class="action-item" bindtap="goToChatList">
+        <view class="action-icon-wrapper green">
+          <text class="action-icon">💬</text>
+        </view>
+        <text class="action-text">消息列表</text>
+      </view>
+      <view class="action-item" bindtap="goToRecords">
+        <view class="action-icon-wrapper purple">
+          <text class="action-icon">📝</text>
+        </view>
+        <text class="action-text">咨询记录</text>
+      </view>
+      <view class="action-item" bindtap="goToSchedule">
+        <view class="action-icon-wrapper orange">
+          <text class="action-icon">📋</text>
+        </view>
+        <text class="action-text">我的排班</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="upcoming-section">
+    <view class="section-header">
+      <text class="section-title">即将到来的预约</text>
+      <text class="more-link" bindtap="goToAppointments">查看全部 ></text>
+    </view>
+    <view class="upcoming-list" wx:if="{{upcomingAppointments.length > 0}}">
+      <view
+        class="upcoming-item"
+        wx:for="{{upcomingAppointments}}"
+        wx:key="id"
+        bindtap="goToAppointmentDetail"
+        data-id="{{item.id}}"
+      >
+        <view class="upcoming-avatar">
+          <image class="avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+          <view class="service-tag {{item.serviceType === 2 ? 'blue' : (item.serviceType === 1 ? 'green' : 'orange')}}">
+            {{item.serviceTypeText}}
+          </view>
+        </view>
+        <view class="upcoming-info">
+          <text class="upcoming-name">{{item.userName}}</text>
+          <text class="upcoming-service">{{item.problem || item.serviceTypeText}}</text>
+        </view>
+        <view class="upcoming-time">
+          <text class="time-text">{{item.timeText}}</text>
+          <text class="date-text">{{item.dateText}}</text>
+        </view>
+        <view class="upcoming-action">
+          <text class="action-btn">详情</text>
+        </view>
+      </view>
+    </view>
+    <view class="empty-state" wx:else>
+      <text class="empty-icon">📅</text>
+      <text class="empty-text">暂无预约</text>
+    </view>
+  </view>
+</view>
+
+<view class="loading-state" wx:if="{{loading}}">
+  <view class="loading-spinner"></view>
+  <text class="loading-text">加载中...</text>
+</view>

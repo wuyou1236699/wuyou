@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理咨询系统 - 排班管理</title>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/admin.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+    <aside class="sidebar bg-gray-800 text-white w-64 h-screen fixed left-0 top-0 overflow-y-auto">
+        <div class="p-4 border-b border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="text-3xl">🧠</div>
+                <span class="font-bold text-xl">心理咨询系统</span>
+            </div>
+        </div>
+        
+        <nav class="p-4">
+            <div class="space-y-2">
+                <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-tachometer"></i>
+                    <span>控制台</span>
+                </a>
+                
+                <div class="menu-group">
+                    <button class="menu-toggle flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-700 rounded-lg">
+                        <i class="fa fa-users"></i>
+                        <span>用户管理</span>
+                        <i class="fa fa-chevron-down ml-auto"></i>
+                    </button>
+                    <div class="submenu ml-4 mt-2 space-y-1">
+                        <a href="users.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm">
+                            用户列表
+                        </a>
+                        <a href="counselors.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm">
+                            咨询师管理
+                        </a>
+                    </div>
+                </div>
+                
+                <a href="appointments.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-calendar"></i>
+                    <span>预约管理</span>
+                </a>
+                
+                <a href="records.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-file-text"></i>
+                    <span>咨询记录</span>
+                </a>
+                
+                <a href="schedule.html" class="flex items-center gap-3 px-3 py-2 bg-purple-600 rounded-lg">
+                    <i class="fa fa-clock-o"></i>
+                    <span>排班管理</span>
+                </a>
+                
+
+                
+                <a href="statistics.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-bar-chart"></i>
+                    <span>统计分析</span>
+                </a>
+                
+                <a href="tests.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-check-square"></i><span>测评管理</span></a>
+                <a href="science.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-book"></i><span>科普管理</span></a>
+                <a href="announcement.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-bullhorn"></i>
+                    <span>公告管理</span>
+                </a>
+            </div>
+        </nav>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
+            <button id="logoutBtn" class="flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-700 rounded-lg">
+                <i class="fa fa-sign-out"></i>
+                <span>退出登录</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-64 p-6">
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">排班管理</h1>
+                <p class="text-gray-500">管理咨询师排班信息</p>
+            </div>
+            <div class="flex gap-2">
+                <button id="addScheduleBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-2">
+                    <i class="fa fa-plus"></i>
+                    添加日期排班
+                </button>
+                <button id="addPeriodicBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-2">
+                    <i class="fa fa-calendar-plus-o"></i>
+                    周期性排班
+                </button>
+            </div>
+        </header>
+
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex gap-4 mb-6">
+                <select id="counselorSelect" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <option value="">选择咨询师</option>
+                </select>
+                <input type="date" id="dateFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                <button id="searchBtn" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                    查询
+                </button>
+            </div>
+
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-gray-200">
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">咨询师</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">日期</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">时间段</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">状态</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleTableBody">
+                    <tr><td colspan="5" class="text-center py-8 text-gray-500">加载中...</td></tr>
+                </tbody>
+            </table>
+
+            <div class="flex justify-between items-center mt-6">
+                <p id="paginationInfo" class="text-gray-500">显示 1-1 条，共 48 条</p>
+                <div id="pagination" class="flex gap-2">
+                    <button id="prevPage" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100" disabled>上一页</button>
+                    <span id="pageNumbers"></span>
+                    <button id="nextPage" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100">下一页</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="scheduleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl w-full max-w-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modalTitle" class="text-xl font-bold text-gray-800">添加排班</h2>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="scheduleForm">
+                <input type="hidden" id="scheduleId">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">咨询师</label>
+                    <select id="scheduleCounselor" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required>
+                        <option value="">请选择咨询师</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">日期</label>
+                    <input type="date" id="scheduleDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">开始时间</label>
+                    <input type="time" id="scheduleStart" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">结束时间</label>
+                    <input type="time" id="scheduleEnd" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">状态</label>
+                    <select id="scheduleStatus" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="available">可预约</option>
+                        <option value="unavailable">不可预约</option>
+                    </select>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" id="cancelBtn" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 周期性排班弹窗 -->
+    <div id="periodicModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl w-full max-w-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">周期性排班</h2>
+                <button id="closePeriodicModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="periodicForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">咨询师</label>
+                    <select id="periodicCounselor" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+                        <option value="">请选择咨询师</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">每周上班日</label>
+                    <div class="flex flex-wrap gap-2" id="weekdayCheckboxes">
+                        <label class="px-3 py-1.5 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-sm"><input type="checkbox" value="1" class="mr-1">周一</label>
+                        <label class="px-3 py-1.5 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-sm"><input type="checkbox" value="2" class="mr-1">周二</label>
+                        <label class="px-3 py-1.5 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-sm"><input type="checkbox" value="3" class="mr-1">周三</label>
+                        <label class="px-3 py-1.5 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-sm"><input type="checkbox" value="4" class="mr-1">周四</label>
+                        <label class="px-3 py-1.5 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-sm"><input type="checkbox" value="5" class="mr-1">周五</label>
+                        <label class="px-3 py-1.5 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-sm"><input type="checkbox" value="6" class="mr-1">周六</label>
+                        <label class="px-3 py-1.5 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-sm"><input type="checkbox" value="7" class="mr-1">周日</label>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">开始时间</label>
+                    <input type="time" id="periodicStart" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">结束时间</label>
+                    <input type="time" id="periodicEnd" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">起始日期</label>
+                    <input type="date" id="periodicStartDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">持续周数</label>
+                    <select id="periodicWeeks" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        <option value="1">1周</option>
+                        <option value="2">2周</option>
+                        <option value="4" selected>4周</option>
+                        <option value="8">8周</option>
+                        <option value="12">12周</option>
+                    </select>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" id="cancelPeriodicBtn" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">生成排班</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        if (!localStorage.getItem('admin_token')) { window.location.href = 'index.html'; }
+        let currentPage = 1;
+        let totalPages = 1;
+        let totalRecords = 0;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCounselors();
+            loadSchedules(currentPage);
+            setupLogout();
+            setupModal();
+            setupPeriodicModal();
+            setupPagination();
+            setupSearch();
+        });
+
+        function loadCounselors() {
+            fetch('http://localhost:8080/api/admin/counselors?page=1&size=50', {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200 && data.data.records) {
+                    const select = document.getElementById('counselorSelect');
+                    const scheduleSelect = document.getElementById('scheduleCounselor');
+                    const periodicSelect = document.getElementById('periodicCounselor');
+                    data.data.records.forEach(counselor => {
+                        const option = document.createElement('option');
+                        option.value = counselor.id;
+                        option.textContent = counselor.name;
+                        select.appendChild(option.cloneNode(true));
+                        scheduleSelect.appendChild(option.cloneNode(true));
+                        periodicSelect.appendChild(option);
+                    });
+                }
+            })
+            .catch(err => console.error('加载咨询师失败:', err));
+        }
+
+        function loadSchedules(page) {
+            const counselorId = document.getElementById('counselorSelect').value;
+            const date = document.getElementById('dateFilter').value;
+            
+            let url = `http://localhost:8080/api/admin/schedules?page=${page}&size=10`;
+            if (counselorId) {
+                url += `&counselorId=${counselorId}`;
+            }
+            if (date) {
+                url += `&date=${date}`;
+            }
+
+            fetch(url, {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200 && data.data) {
+                    const tbody = document.getElementById('scheduleTableBody');
+                    const records = data.data.records || [];
+                    
+                    if (records.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-500">暂无排班数据</td></tr>';
+                    } else {
+                        tbody.innerHTML = records.map(schedule => {
+                            const statusMap = {
+                                'available': { label: '可预约', class: 'bg-green-100 text-green-600' },
+                                'unavailable': { label: '不可预约', class: 'bg-gray-100 text-gray-600' }
+                            };
+                            const status = statusMap[schedule.status] || statusMap['available'];
+                            return `
+                                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                    <td class="py-3 px-4 text-gray-800">${schedule.counselorName || '未知'}</td>
+                                    <td class="py-3 px-4 text-gray-800">${schedule.date}</td>
+                                    <td class="py-3 px-4 text-gray-800">${schedule.startTime}-${schedule.endTime}</td>
+                                    <td class="py-3 px-4"><span class="px-2 py-1 ${status.class} text-xs rounded-full">${status.label}</span></td>
+                                    <td class="py-3 px-4">
+                                        <button class="text-orange-600 hover:text-orange-800 mr-3" onclick="editSchedule('${schedule.id}')">
+                                            <i class="fa fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-800" onclick="deleteSchedule('${schedule.id}')">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+
+                    totalPages = data.data.pages || 1;
+                    totalRecords = data.data.total || 0;
+                    currentPage = page;
+                    updatePagination();
+                }
+            })
+            .catch(err => console.error('加载排班失败:', err));
+        }
+
+        function setupPagination() {
+            document.getElementById('prevPage').addEventListener('click', function() {
+                if (currentPage > 1) {
+                    loadSchedules(currentPage - 1);
+                }
+            });
+
+            document.getElementById('nextPage').addEventListener('click', function() {
+                if (currentPage < totalPages) {
+                    loadSchedules(currentPage + 1);
+                }
+            });
+        }
+
+        function updatePagination() {
+            const paginationInfo = document.getElementById('paginationInfo');
+            const pageNumbers = document.getElementById('pageNumbers');
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+
+            const startRecord = (currentPage - 1) * 10 + 1;
+            const endRecord = Math.min(currentPage * 10, totalRecords);
+            paginationInfo.textContent = `显示 ${startRecord}-${endRecord} 条，共 ${totalRecords} 条`;
+
+            pageNumbers.innerHTML = '';
+            const maxVisible = 5;
+            let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let end = Math.min(totalPages, start + maxVisible - 1);
+            if (end - start < maxVisible - 1) start = Math.max(1, end - maxVisible + 1);
+
+            if (start > 1) {
+                pageNumbers.appendChild(createPageBtn(1));
+                if (start > 2) pageNumbers.appendChild(createPageEllipsis());
+            }
+            for (let i = start; i <= end; i++) {
+                pageNumbers.appendChild(createPageBtn(i));
+            }
+            if (end < totalPages) {
+                if (end < totalPages - 1) pageNumbers.appendChild(createPageEllipsis());
+                pageNumbers.appendChild(createPageBtn(totalPages));
+            }
+
+            function createPageBtn(page) {
+                const btn = document.createElement('button');
+                btn.className = `px-3 py-1 border rounded ${page === currentPage ? 'bg-purple-600 text-white' : 'border-gray-300 hover:bg-gray-100'}`;
+                btn.textContent = page;
+                btn.addEventListener('click', () => loadSchedules(page));
+                return btn;
+            }
+            function createPageEllipsis() {
+                const span = document.createElement('span');
+                span.className = 'px-3 py-1 text-gray-400';
+                span.textContent = '...';
+                return span;
+            }
+
+            prevBtn.disabled = currentPage <= 1;
+            nextBtn.disabled = currentPage >= totalPages;
+        }
+
+        function setupPeriodicModal() {
+            document.getElementById('addPeriodicBtn').addEventListener('click', function() {
+                document.getElementById('periodicStartDate').value = new Date().toISOString().slice(0, 10);
+                document.getElementById('periodicStart').value = '';
+                document.getElementById('periodicEnd').value = '';
+                document.getElementById('periodicWeeks').value = '4';
+                var cbs = document.querySelectorAll('#weekdayCheckboxes input[type="checkbox"]');
+                cbs.forEach(function(cb) { cb.checked = false; });
+                document.getElementById('periodicModal').style.display = 'flex';
+            });
+
+            document.getElementById('closePeriodicModal').addEventListener('click', function() {
+                document.getElementById('periodicModal').style.display = 'none';
+            });
+
+            document.getElementById('cancelPeriodicBtn').addEventListener('click', function() {
+                document.getElementById('periodicModal').style.display = 'none';
+            });
+
+            document.getElementById('periodicForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                var counselorId = document.getElementById('periodicCounselor').value;
+                var startTime = document.getElementById('periodicStart').value;
+                var endTime = document.getElementById('periodicEnd').value;
+                var startDateStr = document.getElementById('periodicStartDate').value;
+                var weeks = parseInt(document.getElementById('periodicWeeks').value);
+
+                if (!counselorId || !startTime || !endTime || !startDateStr) {
+                    alert('请填写完整信息');
+                    return;
+                }
+
+                var cbs = document.querySelectorAll('#weekdayCheckboxes input[type="checkbox"]:checked');
+                if (cbs.length === 0) {
+                    alert('请至少选择一个上班日');
+                    return;
+                }
+
+                var selectedDays = Array.from(cbs).map(function(cb) { return parseInt(cb.value); });
+
+                // Generate schedule entries for matching days within the date range
+                var startDate = new Date(startDateStr + 'T00:00:00');
+                var endDate = new Date(startDate);
+                endDate.setDate(endDate.getDate() + weeks * 7);
+
+                var schedules = [];
+                var current = new Date(startDate);
+                while (current < endDate) {
+                    var dayOfWeek = current.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+                    var mappedDay = dayOfWeek === 0 ? 7 : dayOfWeek; // Map to 1=Mon ... 7=Sun
+                    if (selectedDays.indexOf(mappedDay) !== -1) {
+                        var dateStr = current.getFullYear() + '-' +
+                            String(current.getMonth() + 1).padStart(2, '0') + '-' +
+                            String(current.getDate()).padStart(2, '0');
+                        schedules.push({
+                            counselorId: parseInt(counselorId),
+                            date: dateStr,
+                            startTime: startTime,
+                            endTime: endTime,
+                            isAvailable: 1
+                        });
+                    }
+                    current.setDate(current.getDate() + 1);
+                }
+
+                if (schedules.length === 0) {
+                    alert('所选日期范围内没有匹配的上班日');
+                    return;
+                }
+
+                fetch('http://localhost:8080/api/admin/schedules', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token')
+                    },
+                    body: JSON.stringify(schedules)
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data.code === 200) {
+                        alert('成功生成 ' + schedules.length + ' 条排班记录');
+                        document.getElementById('periodicModal').style.display = 'none';
+                        loadSchedules(1);
+                    } else {
+                        alert(data.msg || '生成失败');
+                    }
+                })
+                .catch(function(err) {
+                    console.error('生成排班失败:', err);
+                    alert('生成失败');
+                });
+            });
+        }
+
+        function setupSearch() {
+            document.getElementById('searchBtn').addEventListener('click', function() {
+                currentPage = 1;
+                loadSchedules(currentPage);
+            });
+        }
+
+        function setupLogout() {
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('确定要退出登录吗？')) {
+                    localStorage.removeItem('admin_token');
+                    localStorage.removeItem('admin_user');
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+
+        function setupModal() {
+            document.getElementById('addScheduleBtn').addEventListener('click', function() {
+                document.getElementById('modalTitle').textContent = '添加排班';
+                document.getElementById('scheduleId').value = '';
+                document.getElementById('scheduleDate').value = '';
+                document.getElementById('scheduleStart').value = '';
+                document.getElementById('scheduleEnd').value = '';
+                document.getElementById('scheduleStatus').value = 'available';
+                document.getElementById('scheduleModal').style.display = 'flex';
+            });
+
+            document.getElementById('closeModal').addEventListener('click', function() {
+                document.getElementById('scheduleModal').style.display = 'none';
+            });
+
+            document.getElementById('cancelBtn').addEventListener('click', function() {
+                document.getElementById('scheduleModal').style.display = 'none';
+            });
+
+            document.getElementById('scheduleForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const statusValue = document.getElementById('scheduleStatus').value;
+                const data = {
+                    counselorId: document.getElementById('scheduleCounselor').value,
+                    date: document.getElementById('scheduleDate').value,
+                    startTime: document.getElementById('scheduleStart').value,
+                    endTime: document.getElementById('scheduleEnd').value,
+                    isAvailable: statusValue === 'available' ? 1 : 0
+                };
+
+                const scheduleId = document.getElementById('scheduleId').value;
+                const url = scheduleId ? `http://localhost:8080/api/admin/schedules/${scheduleId}` : 'http://localhost:8080/api/admin/schedules';
+                const method = scheduleId ? 'PUT' : 'POST';
+
+                fetch(url, {
+                    method,
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token')
+                    },
+                    body: scheduleId ? JSON.stringify(data) : JSON.stringify([data])
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        alert(scheduleId ? '修改成功' : '添加成功');
+                        document.getElementById('scheduleModal').style.display = 'none';
+                        loadSchedules();
+                    } else {
+                        alert(data.msg || '操作失败');
+                    }
+                })
+                .catch(err => {
+                    console.error('操作失败:', err);
+                    alert('操作失败');
+                });
+            });
+        }
+
+        function editSchedule(id) {
+            fetch('http://localhost:8080/api/admin/schedules/' + id, {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200) {
+                    const schedule = data.data;
+                    document.getElementById('modalTitle').textContent = '编辑排班';
+                    document.getElementById('scheduleId').value = schedule.id;
+                    document.getElementById('scheduleCounselor').value = schedule.counselorId;
+                    document.getElementById('scheduleDate').value = schedule.date;
+                    document.getElementById('scheduleStart').value = schedule.startTime;
+                    document.getElementById('scheduleEnd').value = schedule.endTime;
+                    const avail = (schedule.isAvailable === 1 || schedule.status === 'available');
+                    document.getElementById('scheduleStatus').value = avail ? 'available' : 'unavailable';
+                    document.getElementById('scheduleModal').style.display = 'flex';
+                }
+            })
+            .catch(err => console.error('获取排班失败:', err));
+        }
+
+        function deleteSchedule(id) {
+            if (confirm('确定要删除这个排班吗？')) {
+                fetch('http://localhost:8080/api/admin/schedules/' + id, {
+                    method: 'DELETE',
+                    headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        alert('删除成功');
+                        loadSchedules();
+                    } else {
+                        alert(data.msg || '删除失败');
+                    }
+                })
+                .catch(err => {
+                    console.error('删除失败:', err);
+                    alert('删除失败');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

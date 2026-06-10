@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理咨询系统 - 咨询记录</title>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/admin.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+    <aside class="sidebar bg-gray-800 text-white w-64 h-screen fixed left-0 top-0 overflow-y-auto">
+        <div class="p-4 border-b border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="text-3xl">🧠</div>
+                <span class="font-bold text-xl">心理咨询系统</span>
+            </div>
+        </div>
+        
+        <nav class="p-4">
+            <div class="space-y-2">
+                <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-tachometer"></i>
+                    <span>控制台</span>
+                </a>
+                
+                <div class="menu-group">
+                    <button class="menu-toggle flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-700 rounded-lg">
+                        <i class="fa fa-users"></i>
+                        <span>用户管理</span>
+                        <i class="fa fa-chevron-down ml-auto"></i>
+                    </button>
+                    <div class="submenu ml-4 mt-2 space-y-1">
+                        <a href="users.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm">
+                            用户列表
+                        </a>
+                        <a href="counselors.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm">
+                            咨询师管理
+                        </a>
+                    </div>
+                </div>
+                
+                <a href="appointments.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-calendar"></i>
+                    <span>预约管理</span>
+                </a>
+                
+                <a href="records.html" class="flex items-center gap-3 px-3 py-2 bg-purple-600 rounded-lg">
+                    <i class="fa fa-file-text"></i>
+                    <span>咨询记录</span>
+                </a>
+                
+                <a href="schedule.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-clock-o"></i>
+                    <span>排班管理</span>
+                </a>
+                
+
+                
+                <a href="statistics.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-bar-chart"></i>
+                    <span>统计分析</span>
+                </a>
+                
+                <a href="tests.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-check-square"></i><span>测评管理</span></a>
+                <a href="science.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-book"></i><span>科普管理</span></a>
+                <a href="announcement.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-bullhorn"></i>
+                    <span>公告管理</span>
+                </a>
+            </div>
+        </nav>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
+            <button id="logoutBtn" class="flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-700 rounded-lg">
+                <i class="fa fa-sign-out"></i>
+                <span>退出登录</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-64 p-6">
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">咨询记录</h1>
+                <p class="text-gray-500">查看和管理咨询记录</p>
+            </div>
+        </header>
+
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex gap-4 mb-6">
+                <div class="flex-1 relative">
+                    <input type="text" id="searchInput" placeholder="搜索用户、咨询师姓名..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <input type="date" id="startDate" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                <span class="self-center text-gray-400">至</span>
+                <input type="date" id="endDate" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                <button id="searchBtn" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                    搜索
+                </button>
+            </div>
+
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-gray-200">
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">记录ID</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">用户</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">咨询师</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">咨询日期</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">评分</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="recordTableBody">
+                    <tr><td colspan="6" class="text-center py-8 text-gray-500">加载中...</td></tr>
+                </tbody>
+            </table>
+
+            <div class="flex justify-between items-center mt-6">
+                <p id="pageInfo" class="text-gray-500">加载中...</p>
+                <div class="flex gap-2">
+                    <button id="prevBtn" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100">上一页</button>
+                    <div id="pageNumbers" class="flex gap-2"></div>
+                    <button id="nextBtn" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100">下一页</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="recordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl w-full max-w-lg p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modalTitle" class="text-xl font-bold text-gray-800">咨询记录详情</h2>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="recordDetail" class="space-y-4">
+                <div class="text-center py-8 text-gray-400">加载中...</div>
+            </div>
+            <button id="cancelBtn" class="w-full mt-6 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        if (!localStorage.getItem('admin_token')) { window.location.href = 'index.html'; }
+        let currentPage = 1;
+        let pageSize = 10;
+        let totalRecords = 0;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRecords();
+            setupLogout();
+            setupModal();
+            setupPagination();
+            setupSearch();
+        });
+
+        function setupSearch() {
+            document.getElementById('searchBtn').addEventListener('click', function() {
+                currentPage = 1;
+                loadRecords();
+            });
+        }
+
+        function loadRecords() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            let url = `http://localhost:8080/api/admin/records?page=${currentPage}&size=${pageSize}`;
+            if (keyword) url += '&keyword=' + encodeURIComponent(keyword);
+            fetch(url, {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log('API返回的数据:', data);
+                if (data.code === 200 && data.data) {
+                    const tbody = document.getElementById('recordTableBody');
+                    const records = data.data.records || [];
+                    tbody.innerHTML = records.map(record => `
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-3 px-4 text-gray-800">${record.id}</td>
+                            <td class="py-3 px-4 text-gray-800">${record.userName}</td>
+                            <td class="py-3 px-4 text-gray-800">${record.counselorName}</td>
+                            <td class="py-3 px-4 text-gray-800">${record.date}</td>
+                            <td class="py-3 px-4 flex items-center gap-1"><i class="fa fa-star text-yellow-500"></i> ${record.rating || 0}</td>
+                            <td class="py-3 px-4">
+                                <button class="text-blue-600 hover:text-blue-800 mr-3" onclick="viewRecord('${record.id}')">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                                <button class="text-red-600 hover:text-red-800" onclick="deleteRecord('${record.id}')">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                    
+                    totalRecords = data.data.total || 0;
+                    const start = totalRecords > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+                    const end = Math.min(currentPage * pageSize, totalRecords);
+                    document.getElementById('pageInfo').textContent = 
+                        `显示 ${start}-${end} 条，共 ${totalRecords} 条`;
+                    
+                    updatePagination();
+                    console.log('总记录数:', totalRecords);
+                }
+            })
+            .catch(err => console.error('加载记录失败:', err));
+        }
+
+        function setupPagination() {
+            document.getElementById('prevBtn').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadRecords();
+                }
+            });
+            document.getElementById('nextBtn').addEventListener('click', () => {
+                const maxPage = Math.ceil(totalRecords / pageSize);
+                if (currentPage < maxPage) {
+                    currentPage++;
+                    loadRecords();
+                }
+            });
+        }
+
+        function updatePagination() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const maxPage = Math.ceil(totalRecords / pageSize);
+            
+            prevBtn.disabled = currentPage <= 1;
+            nextBtn.disabled = currentPage >= maxPage;
+            
+            const pageNumbersDiv = document.getElementById('pageNumbers');
+            pageNumbersDiv.innerHTML = '';
+            for (let i = 1; i <= maxPage; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.className = i === currentPage 
+                    ? 'px-3 py-1 bg-purple-600 text-white rounded'
+                    : 'px-3 py-1 border border-gray-300 rounded hover:bg-gray-100';
+                btn.addEventListener('click', () => {
+                    currentPage = i;
+                    loadRecords();
+                });
+                pageNumbersDiv.appendChild(btn);
+            }
+        }
+
+        function setupLogout() {
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('确定要退出登录吗？')) {
+                    localStorage.removeItem('admin_token');
+                    localStorage.removeItem('admin_user');
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+
+        function setupModal() {
+            document.getElementById('closeModal').addEventListener('click', function() {
+                document.getElementById('recordModal').style.display = 'none';
+            });
+
+            document.getElementById('cancelBtn').addEventListener('click', function() {
+                document.getElementById('recordModal').style.display = 'none';
+            });
+        }
+
+        function viewRecord(id) {
+            fetch('http://localhost:8080/api/admin/records/' + id, {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200) {
+                    const record = data.data;
+                    document.getElementById('recordDetail').innerHTML = `
+                        <div class="flex justify-between py-2 border-b border-gray-100">
+                            <span class="text-gray-500">记录ID</span>
+                            <span class="text-gray-800">${record.id}</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-100">
+                            <span class="text-gray-500">用户</span>
+                            <span class="text-gray-800">${record.userName}</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-100">
+                            <span class="text-gray-500">咨询师</span>
+                            <span class="text-gray-800">${record.counselorName}</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-100">
+                            <span class="text-gray-500">咨询日期</span>
+                            <span class="text-gray-800">${record.date} ${record.time || ''}</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-100">
+                            <span class="text-gray-500">评价状态</span>
+                            <span class="text-gray-800" style="color: ${record.hasReview ? '#52c41a' : '#faad14'}">${record.hasReview ? '已评价' : '未评价'}</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-100">
+                            <span class="text-gray-500">评分</span>
+                            <span class="flex items-center gap-1"><i class="fa fa-star text-yellow-500"></i> ${record.rating || 0}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500 block mb-2">咨询内容</span>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <p class="text-gray-700 text-sm">${record.content || '-'}</p>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-gray-500 block mb-2">咨询师建议</span>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <p class="text-gray-700 text-sm">${record.suggestion || '-'}</p>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('recordModal').style.display = 'flex';
+                }
+            })
+            .catch(err => console.error('查看记录失败:', err));
+        }
+
+        function deleteRecord(id) {
+            if (confirm('确定要删除这个记录吗？')) {
+                fetch('http://localhost:8080/api/admin/records/' + id, {
+                    method: 'DELETE',
+                    headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        alert('删除成功');
+                        loadRecords();
+                    } else {
+                        alert(data.msg || '删除失败');
+                    }
+                })
+                .catch(err => {
+                    console.error('删除失败:', err);
+                    alert('删除失败');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

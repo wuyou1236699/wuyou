@@ -1,0 +1,65 @@
+<view class="container">
+  <view class="filter-tabs">
+    <view class="tab-item {{activeTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">全部</view>
+    <view class="tab-item {{activeTab === 'completed' ? 'active' : ''}}" bindtap="switchTab" data-tab="completed">已完成</view>
+    <view class="tab-item {{activeTab === 'draft' ? 'active' : ''}}" bindtap="switchTab" data-tab="draft">草稿</view>
+  </view>
+
+  <block wx:if="{{loading && records.length === 0}}">
+    <view class="loading-container">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </block>
+  <block wx:else>
+    <view class="record-list">
+      <view class="record-card" wx:for="{{records}}" wx:key="id">
+        <view class="card-header">
+          <view class="counselor-info">
+            <image class="counselor-avatar" src="{{item.counselorAvatar || '/images/default-avatar.png'}}"></image>
+            <view class="counselor-details">
+              <text class="counselor-name">{{item.counselorName || '未知咨询师'}}</text>
+              <text class="record-date">{{item.createTimeText}}</text>
+            </view>
+          </view>
+          <view class="status-badge {{item.status === 'completed' ? 'completed' : 'draft'}}">
+            {{item.status === 'completed' ? '已完成' : '草稿'}}
+          </view>
+        </view>
+
+        <view class="card-body">
+          <view class="info-item">
+            <text class="info-label">患者：</text>
+            <text class="info-value">{{item.userName || '匿名用户'}}</text>
+          </view>
+          <view class="info-item">
+            <text class="info-label">咨询问题：</text>
+            <text class="info-value">{{item.problem || '未填写'}}</text>
+          </view>
+          <view class="info-item">
+            <text class="info-label">诊断结果：</text>
+            <text class="info-value">{{item.diagnosis || '未填写'}}</text>
+          </view>
+          <view class="info-item">
+            <text class="info-label">评价状态：</text>
+            <text class="info-value" style="color: {{item.hasReview ? '#52c41a' : '#faad14'}}">{{item.hasReview ? '已评价' : '未评价'}}</text>
+          </view>
+          <view class="info-item">
+            <text class="info-label">咨询费用：</text>
+            <text class="info-value">{{item.displayFee || '未填写'}}</text>
+          </view>
+        </view>
+
+        <view class="card-footer">
+          <text class="suggestions-label">建议方案：</text>
+          <text class="suggestions-content">{{item.suggestions || '暂无建议'}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{!loading && records.length === 0}}" class="empty-state">
+      <text class="empty-icon">📭</text>
+      <text class="empty-text">暂无咨询记录</text>
+    </view>
+  </block>
+</view>

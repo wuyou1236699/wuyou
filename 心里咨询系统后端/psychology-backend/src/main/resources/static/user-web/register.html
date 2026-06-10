@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理咨询系统 - 注册</title>
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <style>
+        body {
+            background-color: #FDF8F5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .card-shadow {
+            box-shadow: 0 8px 32px rgba(255, 126, 103, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        .input-focus:focus {
+            border-color: #FF7E67;
+            box-shadow: 0 0 0 3px rgba(255, 126, 103, 0.15);
+            outline: none;
+        }
+        .btn-primary {
+            background-color: #FF7E67;
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            background-color: #FF6B52;
+            box-shadow: 0 4px 14px rgba(255, 126, 103, 0.35);
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-sm">
+        <div class="bg-white rounded-2xl card-shadow p-8">
+            <!-- Logo & Title -->
+            <div class="text-center mb-8">
+                <div class="text-5xl mb-3">🧠</div>
+                <h1 class="text-2xl font-bold text-gray-800">创建账号</h1>
+                <p class="text-sm text-gray-400 mt-1">开启你的心灵之旅</p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorBox" class="hidden mb-5 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3" role="alert"></div>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="space-y-5">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-600 mb-1.5">用户名 <span class="text-red-400">*</span></label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        required
+                        autocomplete="username"
+                        placeholder="请输入用户名"
+                        class="input-focus w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-700 placeholder-gray-400 transition-colors"
+                    >
+                </div>
+
+                <div>
+                    <label for="nickname" class="block text-sm font-medium text-gray-600 mb-1.5">昵称 <span class="text-gray-300 text-xs">（选填）</span></label>
+                    <input
+                        type="text"
+                        id="nickname"
+                        name="nickname"
+                        autocomplete="nickname"
+                        placeholder="给自己取个好听的名字吧"
+                        class="input-focus w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-700 placeholder-gray-400 transition-colors"
+                    >
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-600 mb-1.5">密码 <span class="text-red-400">*</span></label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                        autocomplete="new-password"
+                        placeholder="至少6位字符"
+                        class="input-focus w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-700 placeholder-gray-400 transition-colors"
+                    >
+                </div>
+
+                <div>
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-600 mb-1.5">确认密码 <span class="text-red-400">*</span></label>
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        required
+                        autocomplete="new-password"
+                        placeholder="请再次输入密码"
+                        class="input-focus w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-700 placeholder-gray-400 transition-colors"
+                    >
+                </div>
+
+                <button
+                    type="submit"
+                    id="submitBtn"
+                    class="btn-primary w-full py-3 text-white font-semibold rounded-xl text-base transition-colors"
+                >
+                    注 册
+                </button>
+            </form>
+
+            <!-- Login Link -->
+            <p class="text-center text-sm text-gray-400 mt-6">
+                已有账号？
+                <a href="index.html" class="font-medium hover:underline" style="color: #FF7E67;">返回登录</a>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <p class="text-center text-xs text-gray-300 mt-6">用心倾听，与你同行</p>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        (function () {
+            var form = document.getElementById('registerForm');
+            var errorBox = document.getElementById('errorBox');
+            var submitBtn = document.getElementById('submitBtn');
+
+            function showError(msg) {
+                errorBox.textContent = msg;
+                errorBox.classList.remove('hidden');
+            }
+
+            function hideError() {
+                errorBox.classList.add('hidden');
+            }
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                hideError();
+
+                var username = document.getElementById('username').value.trim();
+                var nickname = document.getElementById('nickname').value.trim();
+                var password = document.getElementById('password').value;
+                var confirmPassword = document.getElementById('confirmPassword').value;
+
+                // Client-side validation
+                if (!username) {
+                    showError('请输入用户名');
+                    return;
+                }
+
+                if (!password) {
+                    showError('请输入密码');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    showError('密码长度至少为6位字符');
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    showError('两次输入的密码不一致，请检查');
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = '注册中…';
+
+                var payload = { username: username, password: password };
+                if (nickname) {
+                    payload.nickname = nickname;
+                }
+
+                api.post('/api/user/register', payload)
+                    .then(function (data) {
+                        if (data.code === 200) {
+                            localStorage.setItem('user_token', data.data.token || data.data);
+                            localStorage.setItem('user_info', JSON.stringify(data.data.user || data.data));
+                            window.location.href = 'home.html';
+                        } else {
+                            showError(data.msg || data.message || '注册失败，请稍后重试');
+                        }
+                    })
+                    .catch(function (err) {
+                        showError('网络异常，请稍后重试');
+                        console.error(err);
+                    })
+                    .finally(function () {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '注 册';
+                    });
+            });
+        })();
+    </script>
+</body>
+</html>

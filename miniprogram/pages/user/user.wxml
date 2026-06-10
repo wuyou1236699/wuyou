@@ -1,0 +1,43 @@
+<view class="container">
+  <!-- 用户信息区域 -->
+  <view class="user-info-section">
+    <view class="avatar-wrap" bindtap="onAvatarTap">
+      <image class="avatar" src="{{userInfo ? userInfo.avatar : '/images/default-avatar.png'}}" mode="aspectFill"></image>
+      <view class="avatar-edit-tip">
+        <text>点击更换</text>
+      </view>
+    </view>
+    <view class="user-details">
+      <text class="nickname">{{userInfo ? userInfo.nickname : '未登录'}}</text>
+      <text class="user-id">ID: {{userInfo ? userInfo.id : '000000'}}</text>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu-section">
+    <view class="menu-group">
+      <text class="menu-title">我的服务</text>
+      <view class="menu-item" bindtap="goToMyAppointments">
+        <text class="menu-icon">📅</text>
+        <text class="menu-text">我的预约</text>
+        <text class="menu-arrow">＞</text>
+      </view>
+      <view class="menu-item" bindtap="goToMyConsultations">
+        <text class="menu-icon">💬</text>
+        <text class="menu-text">咨询记录</text>
+        <text class="menu-arrow">＞</text>
+      </view>
+      <view class="menu-item" bindtap="goToMyReports">
+        <text class="menu-icon">📊</text>
+        <text class="menu-text">心理测评</text>
+        <text class="menu-arrow">＞</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 退出登录按钮 -->
+  <button class="logout-btn" bindtap="logout">退出登录</button>
+
+  <!-- 版本信息 -->
+  <text class="version">版本 1.0.0</text>
+</view>

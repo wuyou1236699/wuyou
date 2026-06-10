@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理咨询系统 - 科普管理</title>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/admin.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+    <aside class="sidebar bg-gray-800 text-white w-64 h-screen fixed left-0 top-0 overflow-y-auto">
+        <div class="p-4 border-b border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="text-3xl">🧠</div>
+                <span class="font-bold text-xl">心理咨询系统</span>
+            </div>
+        </div>
+        <nav class="p-4">
+            <div class="space-y-2">
+                <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-tachometer"></i><span>控制台</span></a>
+                <div class="menu-group">
+                    <button class="menu-toggle flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-700 rounded-lg"><i class="fa fa-users"></i><span>用户管理</span><i class="fa fa-chevron-down ml-auto"></i></button>
+                    <div class="submenu ml-4 mt-2 space-y-1">
+                        <a href="users.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm">用户列表</a>
+                        <a href="counselors.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm">咨询师管理</a>
+                    </div>
+                </div>
+                <a href="appointments.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-calendar"></i><span>预约管理</span></a>
+                <a href="records.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-file-text"></i><span>咨询记录</span></a>
+                <a href="schedule.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-clock-o"></i><span>排班管理</span></a>
+                <a href="statistics.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-bar-chart"></i><span>统计分析</span></a>
+                <a href="science.html" class="flex items-center gap-3 px-3 py-2 bg-purple-600 rounded-lg"><i class="fa fa-book"></i><span>科普管理</span></a>
+                <a href="announcement.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-bullhorn"></i><span>公告管理</span></a>
+            </div>
+        </nav>
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
+            <button id="logoutBtn" class="flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-700 rounded-lg"><i class="fa fa-sign-out"></i><span>退出登录</span></button>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-64 p-6">
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">科普管理</h1>
+                <p class="text-gray-500">管理科普文章和分类</p>
+            </div>
+            <button id="addArticleBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-2"><i class="fa fa-plus"></i>发布文章</button>
+        </header>
+
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">文章分类</h2>
+            <div id="categoryList" class="flex flex-wrap gap-2 mb-4"></div>
+            <div class="flex gap-2">
+                <input type="text" id="newCategoryName" placeholder="新分类名称" class="px-3 py-1 border border-gray-300 rounded text-sm">
+                <input type="number" id="newCategorySort" placeholder="排序" value="0" class="w-16 px-3 py-1 border border-gray-300 rounded text-sm">
+                <button id="addCategoryBtn" class="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700">添加分类</button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex gap-4 mb-6">
+                <select id="categoryFilter" class="px-4 py-2 border border-gray-300 rounded-lg">
+                    <option value="">全部分类</option>
+                </select>
+                <button id="searchBtn" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">筛选</button>
+            </div>
+
+            <div id="articleList" class="space-y-4">
+                <div class="text-center py-8 text-gray-400">加载中...</div>
+            </div>
+
+            <div class="flex justify-between items-center mt-6">
+                <p id="paginationInfo" class="text-gray-500"></p>
+                <div id="paginationBtns" class="flex gap-2"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="articleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl w-full max-w-lg p-6 max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modalTitle" class="text-xl font-bold text-gray-800">发布文章</h2>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-600"><i class="fa fa-times text-xl"></i></button>
+            </div>
+            <form id="articleForm">
+                <input type="hidden" id="articleId">
+                <div class="mb-4"><label class="block text-gray-700 text-sm font-medium mb-2">标题</label>
+                    <input type="text" id="articleTitle" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required></div>
+                <div class="mb-4"><label class="block text-gray-700 text-sm font-medium mb-2">分类</label>
+                    <select id="articleCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required></select></div>
+                <div class="mb-4"><label class="block text-gray-700 text-sm font-medium mb-2">摘要</label>
+                    <textarea id="articleSummary" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></textarea></div>
+                <div class="mb-4"><label class="block text-gray-700 text-sm font-medium mb-2">封面图URL</label>
+                    <input type="text" id="articleCover" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></div>
+                <div class="mb-4"><label class="block text-gray-700 text-sm font-medium mb-2">内容</label>
+                    <textarea id="articleContent" rows="8" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required></textarea></div>
+                <div class="flex gap-3">
+                    <button type="button" id="cancelBtn" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        if (!localStorage.getItem('admin_token')) { window.location.href = 'index.html'; }
+        const BASE = 'http://localhost:8080';
+        const TOKEN = localStorage.getItem('admin_token');
+        let currentPage = 1, totalPages = 1;
+
+        function deleteCategory(id) {
+            if (!confirm('确定删除此分类？')) return;
+            fetch(`${BASE}/api/admin/science/categories/${id}`, { method: 'DELETE', headers: { Authorization: 'Bearer ' + TOKEN } })
+            .then(r => r.json()).then(d => { if (d.code === 200) loadCategories(); else alert(d.msg); });
+        }
+
+        document.getElementById('addCategoryBtn').addEventListener('click', () => {
+            const name = document.getElementById('newCategoryName').value.trim();
+            if (!name) return alert('请输入分类名称');
+            const sort = parseInt(document.getElementById('newCategorySort').value) || 0;
+            fetch(`${BASE}/api/admin/science/categories`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
+                body: JSON.stringify({ name, sort })
+            }).then(r => r.json()).then(d => {
+                if (d.code === 200) { document.getElementById('newCategoryName').value = ''; loadCategories(); }
+            });
+        });
+
+        let categoryNames = {};
+        function loadCategories() {
+            fetch(`${BASE}/api/admin/science/categories`, { headers: { Authorization: 'Bearer ' + TOKEN } })
+            .then(r => r.json()).then(d => {
+                if (d.code === 200) {
+                    d.data.forEach(c => { categoryNames[c.id] = c.name; });
+                    const list = document.getElementById('categoryList');
+                    list.innerHTML = d.data.map(c =>
+                        `<span class="px-3 py-1 bg-gray-100 rounded-full text-sm flex items-center gap-2">${c.name} <button class="text-red-400 hover:text-red-600" onclick="deleteCategory(${c.id})">&times;</button></span>`
+                    ).join('') || '<span class="text-gray-400 text-sm">暂无分类</span>';
+                    const filter = document.getElementById('categoryFilter');
+                    filter.innerHTML = '<option value="">全部分类</option>' + d.data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                    const formSel = document.getElementById('articleCategory');
+                    formSel.innerHTML = d.data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                }
+            });
+        }
+
+        function loadArticles(page) {
+            if (page) currentPage = page;
+            const catId = document.getElementById('categoryFilter').value;
+            let url = `${BASE}/api/admin/science/articles?page=${currentPage}&size=10`;
+            if (catId) url += '&categoryId=' + catId;
+
+            const list = document.getElementById('articleList');
+            list.innerHTML = '<div class="text-center py-8 text-gray-400">加载中...</div>';
+
+            fetch(url, { headers: { Authorization: 'Bearer ' + TOKEN } })
+            .then(r => r.json()).then(d => {
+                if (d.code === 200) {
+                    const records = d.data.records || [];
+                    totalPages = d.data.pages || 1;
+                    if (records.length === 0) {
+                        list.innerHTML = '<div class="text-center py-8 text-gray-400">暂无文章</div>';
+                    } else {
+                        list.innerHTML = records.map(a => {
+                            const catName = categoryNames[a.categoryId] || '';
+                            const coverImg = a.cover ? `<img src="${a.cover}" class="w-20 h-20 rounded-lg object-cover flex-shrink-0" onerror="this.style.display='none'">` : '';
+                            return `<div class="flex gap-4 border border-gray-200 rounded-xl p-5 hover:shadow-md transition cursor-pointer">
+                                ${coverImg}
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        ${catName ? `<span class="badge badge-info text-xs">${catName}</span>` : ''}
+                                        <span class="text-xs text-gray-400">${a.createTime ? a.createTime.substring(0,10) : '-'}</span>
+                                    </div>
+                                    <h3 class="font-semibold text-gray-800 text-lg mb-1 truncate">${a.title}</h3>
+                                    <p class="text-gray-500 text-sm line-clamp-2 mb-3">${a.summary || '暂无摘要'}</p>
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex gap-4 text-xs text-gray-400">
+                                            <span>👁 ${a.viewCount||0}</span><span>❤ ${a.likeCount||0}</span>
+                                        </div>
+                                        <div class="flex gap-3">
+                                            <button class="text-orange-600 hover:text-orange-800 text-sm" onclick="event.stopPropagation();editArticle(${a.id})">编辑</button>
+                                            <button class="text-red-600 hover:text-red-800 text-sm" onclick="event.stopPropagation();deleteArticle(${a.id})">删除</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
+                        }).join('');
+                    }
+                    renderPagination();
+                }
+            });
+        }
+
+        function renderPagination() {
+            document.getElementById('paginationInfo').textContent = totalPages > 0 ? `第 ${currentPage} 页，共 ${totalPages} 页` : '';
+            const btns = document.getElementById('paginationBtns');
+            const maxVisible = 5;
+            let s = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let e = Math.min(totalPages, s + maxVisible - 1);
+            if (e - s < maxVisible - 1) s = Math.max(1, e - maxVisible + 1);
+            let h = `<button class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 ${currentPage<=1?'opacity-50':''}" ${currentPage<=1?'disabled':''} onclick="loadArticles(${currentPage-1})">上一页</button>`;
+            if (s > 1) { h += `<button class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100" onclick="loadArticles(1)">1</button>`; if (s > 2) h += '<span class="px-2 text-gray-400">...</span>'; }
+            for (let i = s; i <= e; i++) h += `<button class="px-3 py-1 border rounded ${i===currentPage?'bg-purple-600 text-white':'border-gray-300 hover:bg-gray-100'}" onclick="loadArticles(${i})">${i}</button>`;
+            if (e < totalPages) { if (e < totalPages - 1) h += '<span class="px-2 text-gray-400">...</span>'; h += `<button class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100" onclick="loadArticles(${totalPages})">${totalPages}</button>`; }
+            h += `<button class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 ${currentPage>=totalPages?'opacity-50':''}" ${currentPage>=totalPages?'disabled':''} onclick="loadArticles(${currentPage+1})">下一页</button>`;
+            btns.innerHTML = h;
+        }
+
+        function editArticle(id) {
+            fetch(`${BASE}/api/admin/science/articles/${id}`, { headers: { Authorization: 'Bearer ' + TOKEN } })
+            .then(r => r.json()).then(d => {
+                if (d.code === 200) {
+                    const a = d.data;
+                    document.getElementById('modalTitle').textContent = '编辑文章';
+                    document.getElementById('articleId').value = a.id;
+                    document.getElementById('articleTitle').value = a.title;
+                    document.getElementById('articleCategory').value = a.categoryId || '';
+                    document.getElementById('articleSummary').value = a.summary || '';
+                    document.getElementById('articleCover').value = a.cover || '';
+                    document.getElementById('articleContent').value = a.content || '';
+                    document.getElementById('articleModal').style.display = 'flex';
+                }
+            });
+        }
+
+        function deleteArticle(id) {
+            if (!confirm('确定删除此文章？')) return;
+            fetch(`${BASE}/api/admin/science/articles/${id}`, { method: 'DELETE', headers: { Authorization: 'Bearer ' + TOKEN } })
+            .then(r => r.json()).then(d => { if (d.code === 200) loadArticles(); else alert(d.msg); });
+        }
+
+        document.getElementById('addArticleBtn').addEventListener('click', () => {
+            document.getElementById('modalTitle').textContent = '发布文章';
+            document.getElementById('articleId').value = '';
+            document.getElementById('articleForm').reset();
+            document.getElementById('articleModal').style.display = 'flex';
+        });
+        document.getElementById('closeModal').addEventListener('click', () => document.getElementById('articleModal').style.display = 'none');
+        document.getElementById('cancelBtn').addEventListener('click', () => document.getElementById('articleModal').style.display = 'none');
+        document.getElementById('articleForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('articleId').value;
+            const data = {
+                title: document.getElementById('articleTitle').value,
+                categoryId: document.getElementById('articleCategory').value || null,
+                summary: document.getElementById('articleSummary').value,
+                cover: document.getElementById('articleCover').value,
+                content: document.getElementById('articleContent').value
+            };
+            const url = id ? `${BASE}/api/admin/science/articles/${id}` : `${BASE}/api/admin/science/articles`;
+            fetch(url, {
+                method: id ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
+                body: JSON.stringify(data)
+            }).then(r => r.json()).then(d => {
+                if (d.code === 200) { document.getElementById('articleModal').style.display = 'none'; loadArticles(); }
+                else alert(d.msg || '操作失败');
+            });
+        });
+        document.getElementById('searchBtn').addEventListener('click', () => loadArticles(1));
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (confirm('确定退出？')) { localStorage.removeItem('admin_token'); window.location.href = 'index.html'; }
+        });
+
+        loadCategories();
+        loadArticles();
+    </script>
+</body>
+</html>

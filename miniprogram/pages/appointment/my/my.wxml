@@ -1,0 +1,30 @@
+<view class="container">
+  <block wx:if="{{loading && appointments.length === 0}}">
+    <view class="loading">加载中...</view>
+  </block>
+  <block wx:else>
+    <view class="appointment-list">
+      <view class="card" wx:for="{{appointments}}" wx:key="id">
+        <view class="header">
+          <text class="counselor-name">咨询师：{{item.counselorName || '未知'}}</text>
+          <text class="status status-{{item.status}}">{{statusMap[item.status]}}</text>
+        </view>
+        <view class="time">预约时间：{{item.appointmentTime}}</view>
+        <view class="type">服务类型：{{item.serviceType === 1 ? '电话' : (item.serviceType === 2 ? '网络' : '门诊')}}</view>
+        <view class="problem">问题：{{item.problem}}</view>
+        <!-- 取消按钮 -->
+        <button wx:if="{{item.status === 0 || item.status === 1}}" class="cancel-btn" bindtap="cancelAppointment" data-id="{{item.id}}">取消预约</button>
+        <!-- 评价按钮（已完成且未评价） -->
+        <button wx:if="{{item.status === 2 && !item.reviewed}}" class="review-btn" bindtap="goToReview" data-id="{{item.id}}" data-counselor="{{item.counselorId}}">去评价</button>
+        <!-- 查看评价按钮（已完成且已评价） -->
+        <button wx:if="{{item.status === 2 && item.reviewed}}" class="view-review-btn" bindtap="viewReview" data-counselor="{{item.counselorId}}">查看评价</button>
+        <!-- 去沟通按钮（已确认状态，门诊除外） -->
+        <button wx:if="{{item.status === 1 && item.serviceType !== 3}}" class="chat-btn" bindtap="goToChat" data-id="{{item.counselorId}}" data-name="{{item.counselorName}}" data-appointment="{{item.id}}">去沟通</button>
+      </view>
+    </view>
+    <view wx:if="{{!loading && appointments.length === 0}}" class="empty-state">
+      <text class="empty-text">暂无预约记录</text>
+    </view>
+    <view wx:if="{{loading && appointments.length > 0}}" class="loading-more">加载更多...</view>
+  </block>
+</view>

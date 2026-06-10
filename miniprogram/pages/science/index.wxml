@@ -1,0 +1,61 @@
+<view class="container">
+  <view class="header">
+    <text class="header-title">🧠 心理科普</text>
+    <text class="header-subtitle">了解心理知识，关爱心理健康</text>
+  </view>
+
+  <scroll-view class="category-scroll" scroll-x>
+    <view class="category-list">
+      <view 
+        class="category-item {{activeCategory === '' ? 'active' : ''}}" 
+        bindtap="onCategoryChange" 
+        data-id=""
+      >
+        全部
+      </view>
+      <view 
+        wx:for="{{categories}}" 
+        wx:key="id"
+        class="category-item {{activeCategory === item.id ? 'active' : ''}}" 
+        bindtap="onCategoryChange" 
+        data-id="{{item.id}}"
+      >
+        {{item.name}}
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="article-list">
+    <view 
+      wx:for="{{articles}}" 
+      wx:key="id" 
+      class="article-card" 
+      bindtap="goToDetail"
+      data-article="{{item}}"
+    >
+      <image class="article-cover" src="{{item.coverImage}}" mode="aspectFill" />
+      <view class="article-content">
+        <text class="article-title">{{item.title}}</text>
+        <text class="article-summary">{{item.summary}}</text>
+        <view class="article-footer">
+          <text class="article-category">{{item.category}}</text>
+          <text class="article-read">👁️ {{item.readCount}}</text>
+          <text class="article-time">{{item.createTime}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="no-more" wx:if="{{!loading && !hasMore && articles.length > 0}}">
+    <text>— 已经到底了 —</text>
+  </view>
+
+  <view class="empty-state" wx:if="{{!loading && articles.length === 0}}">
+    <text class="empty-icon">📚</text>
+    <text class="empty-text">暂无科普文章</text>
+  </view>
+</view>

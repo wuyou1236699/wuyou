@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 心理咨询</title>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #FDF8F5;
+            --primary: #FF7E67;
+            --primary-dark: #E8694F;
+            --primary-light: #FFF0ED;
+            --primary-50: #FFF5F3;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Roboto, sans-serif;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Button styles */
+        .btn-ghost {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        /* Avatar placeholder */
+        .avatar-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* Avatar wrapper */
+        .avatar-wrapper {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .avatar-wrapper:hover {
+            transform: scale(1.03);
+        }
+        .avatar-wrapper:hover .avatar-overlay {
+            opacity: 1;
+        }
+        .avatar-overlay {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        /* Menu item */
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            border: 1px solid #f3f4f6;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+        .menu-item:first-of-type {
+            border-radius: 16px 16px 0 0;
+        }
+        .menu-item:last-of-type {
+            border-radius: 0 0 16px 16px;
+        }
+        .menu-item:only-of-type {
+            border-radius: 16px;
+        }
+        .menu-item:hover {
+            background-color: var(--primary-50);
+            border-color: var(--primary-light);
+        }
+        .menu-item:active {
+            background-color: var(--primary-light);
+        }
+
+        .menu-item-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 16px;
+        }
+
+        /* Logout button */
+        .btn-logout {
+            width: 100%;
+            background: #fff;
+            border: 1px solid #FECACA;
+            color: #EF4444;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .btn-logout:hover {
+            background-color: #FEF2F2;
+            border-color: #EF4444;
+        }
+        .btn-logout:active {
+            transform: scale(0.98);
+        }
+
+        /* Modal backdrop */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.4);
+            transition: opacity 0.2s ease;
+        }
+
+        /* Loading spinner */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="sticky top-0 z-20 bg-white shadow-sm">
+        <div class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+            <a href="home.html" class="btn-ghost text-gray-500 hover:text-gray-700 no-underline flex items-center text-sm">
+                <i class="fas fa-arrow-left mr-1.5"></i>
+                <span>返回</span>
+            </a>
+            <h1 class="text-lg font-bold text-gray-800">个人中心</h1>
+            <div class="w-14"></div><!-- spacer for centering -->
+        </div>
+    </header>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="flex-1 max-w-2xl mx-auto w-full px-4 py-6">
+
+        <!-- Loading state -->
+        <div id="loadingState" class="flex flex-col items-center justify-center py-20">
+            <div class="w-8 h-8 border-2 border-[#FF7E67] border-t-transparent rounded-full animate-spin mb-3"></div>
+            <p class="text-sm text-gray-400">加载中...</p>
+        </div>
+
+        <!-- Error state -->
+        <div id="errorState" class="text-center py-16" style="display:none;">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: #FEE2E2;">
+                <i class="fas fa-exclamation-triangle text-red-400 text-xl"></i>
+            </div>
+            <p class="text-gray-600 font-medium mb-1">加载失败</p>
+            <p class="text-gray-400 text-sm mb-4" id="errorMsg">网络异常，请稍后重试</p>
+            <button id="retryBtn" class="btn-ghost text-gray-500 hover:text-gray-700 text-sm font-medium px-6 py-2 rounded-full border border-gray-200">
+                <i class="fas fa-redo mr-1"></i>重新加载
+            </button>
+        </div>
+
+        <!-- Profile content -->
+        <div id="profileContent" style="display:none;">
+
+            <!-- ===== Avatar section ===== -->
+            <div class="flex flex-col items-center mb-6 pt-2">
+                <div class="avatar-wrapper mb-3" id="avatarWrapper" title="点击更换头像">
+                    <div id="avatarDisplay" class="avatar-placeholder w-20 h-20 text-white text-2xl" style="background-color: var(--primary);">
+                        <span id="avatarInitial">用</span>
+                    </div>
+                    <div class="avatar-overlay">
+                        <i class="fas fa-camera text-white text-lg"></i>
+                    </div>
+                </div>
+                <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
+                <p id="displayNickname" class="text-lg font-semibold text-gray-800">用户</p>
+            </div>
+
+            <!-- ===== User info card ===== -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-5">
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">个人信息</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500">用户名</span>
+                        <span id="infoUsername" class="text-sm text-gray-700 font-medium">-</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500">昵称</span>
+                        <span id="infoNickname" class="text-sm text-gray-700 font-medium">-</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500">手机号</span>
+                        <span id="infoPhone" class="text-sm text-gray-700 font-medium">-</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500">注册时间</span>
+                        <span id="infoRegisterDate" class="text-sm text-gray-700 font-medium">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Menu items ===== -->
+            <div class="mb-5 rounded-2xl overflow-hidden shadow-sm">
+                <a href="appointments.html" class="menu-item">
+                    <div class="flex items-center space-x-3">
+                        <div class="menu-item-icon" style="background-color: #FFF0ED;">
+                            <i class="fas fa-calendar-check" style="color: #FF7E67;"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">我的预约</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                </a>
+                <a href="consultation-records.html" class="menu-item">
+                    <div class="flex items-center space-x-3">
+                        <div class="menu-item-icon" style="background-color: #EDF2FF;">
+                            <i class="fas fa-clipboard-list" style="color: #6366F1;"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">咨询记录</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                </a>
+                <a href="tests.html?tab=history" class="menu-item">
+                    <div class="flex items-center space-x-3">
+                        <div class="menu-item-icon" style="background-color: #F0FDF4;">
+                            <i class="fas fa-brain" style="color: #22C55E;"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">心理测评记录</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                </a>
+                <a href="reviews.html" class="menu-item">
+                    <div class="flex items-center space-x-3">
+                        <div class="menu-item-icon" style="background-color: #FFFBEB;">
+                            <i class="fas fa-star" style="color: #F59E0B;"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">我的评价</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                </a>
+            </div>
+
+            <!-- ===== Logout button ===== -->
+            <button id="logoutBtn" class="btn-logout py-3.5 rounded-2xl">
+                <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+            </button>
+
+        </div>
+
+    </main>
+
+    <!-- ==================== LOGOUT CONFIRMATION MODAL ==================== -->
+    <div id="logoutModal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden">
+        <div class="bg-white rounded-2xl shadow-xl px-6 py-5 mx-4 max-w-sm w-full">
+            <div class="text-center mb-4">
+                <div class="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style="background: #FEF2F2;">
+                    <i class="fas fa-sign-out-alt text-red-400 text-lg"></i>
+                </div>
+                <p class="text-gray-800 font-semibold text-base">确认退出？</p>
+                <p class="text-gray-500 text-sm mt-1">退出后需要重新登录</p>
+            </div>
+            <div class="flex gap-3">
+                <button id="logoutCancel" class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors bg-white cursor-pointer">
+                    取消
+                </button>
+                <button id="logoutConfirm" class="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition-colors cursor-pointer">
+                    确认退出
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SCRIPTS ==================== -->
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        // ==================== LOGIN GUARD ====================
+        if (!checkLogin()) return;
+
+        // ==================== DOM REFS ====================
+        var loadingState = document.getElementById('loadingState');
+        var errorState = document.getElementById('errorState');
+        var errorMsg = document.getElementById('errorMsg');
+        var profileContent = document.getElementById('profileContent');
+        var retryBtn = document.getElementById('retryBtn');
+
+        var avatarWrapper = document.getElementById('avatarWrapper');
+        var avatarDisplay = document.getElementById('avatarDisplay');
+        var avatarInitial = document.getElementById('avatarInitial');
+        var avatarFileInput = document.getElementById('avatarFileInput');
+        var displayNickname = document.getElementById('displayNickname');
+
+        var infoUsername = document.getElementById('infoUsername');
+        var infoNickname = document.getElementById('infoNickname');
+        var infoPhone = document.getElementById('infoPhone');
+        var infoRegisterDate = document.getElementById('infoRegisterDate');
+
+        var logoutBtn = document.getElementById('logoutBtn');
+        var logoutModal = document.getElementById('logoutModal');
+        var logoutCancel = document.getElementById('logoutCancel');
+        var logoutConfirm = document.getElementById('logoutConfirm');
+
+        // ==================== INITIAL LOAD ====================
+        showLoading();
+        loadUserInfo();
+
+        // ==================== EVENT BINDINGS ====================
+        retryBtn.addEventListener('click', function () {
+            showLoading();
+            loadUserInfo();
+        });
+
+        // Avatar click → file input
+        avatarWrapper.addEventListener('click', function () {
+            avatarFileInput.click();
+        });
+
+        // File selected → upload
+        avatarFileInput.addEventListener('change', function () {
+            var file = avatarFileInput.files[0];
+            if (!file) return;
+
+            // Validate file type
+            if (!file.type.match(/^image\//)) {
+                showToast('请选择图片文件', 'error');
+                avatarFileInput.value = '';
+                return;
+            }
+
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('图片大小不能超过5MB', 'error');
+                avatarFileInput.value = '';
+                return;
+            }
+
+            uploadAvatar(file);
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', openLogoutModal);
+        logoutCancel.addEventListener('click', closeLogoutModal);
+        logoutConfirm.addEventListener('click', confirmLogout);
+
+        // Click backdrop to close modal
+        logoutModal.addEventListener('click', function (e) {
+            if (e.target === logoutModal) {
+                closeLogoutModal();
+            }
+        });
+
+        // Keyboard escape to close modal
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !logoutModal.classList.contains('hidden')) {
+                closeLogoutModal();
+            }
+        });
+
+        // ==================== LOAD USER INFO ====================
+        function loadUserInfo() {
+            // First, populate from localStorage for instant display
+            populateFromLocalStorage();
+
+            // Then fetch latest from API
+            api.get('/api/user/info')
+                .then(function (res) {
+                    var user = (res && res.data) ? res.data : res;
+
+                    if (user) {
+                        // Update localStorage
+                        localStorage.setItem('user_info', JSON.stringify(user));
+                        renderUserInfo(user);
+                    }
+
+                    hideLoading();
+                    showProfile();
+                })
+                .catch(function (err) {
+                    // If we have localStorage data, still show it
+                    var localUser = getUserInfo();
+                    if (localUser && (localUser.username || localUser.nickname)) {
+                        renderUserInfo(localUser);
+                        hideLoading();
+                        showProfile();
+                        // Show a subtle toast about stale data
+                        showToast('无法刷新最新数据，显示缓存信息', 'info');
+                    } else {
+                        hideLoading();
+                        console.error('Failed to load user info:', err);
+                        errorMsg.textContent = err.message || '网络异常，请稍后重试';
+                        showError();
+                    }
+                });
+        }
+
+        function populateFromLocalStorage() {
+            var user = getUserInfo();
+            if (user) {
+                renderUserInfo(user);
+            }
+        }
+
+        function renderUserInfo(user) {
+            var username = user.username || user.userName || '-';
+            var nickname = user.nickname || user.nickName || username || '-';
+            var phone = user.phone || user.mobile || user.phoneNumber || user.tel || '未绑定';
+            var registerDate = user.createTime || user.registerTime || user.createdAt || user.regDate || '';
+            var avatar = user.avatar || user.avatarUrl || user.headImgUrl || user.profilePicture || '';
+
+            // Update display
+            displayNickname.textContent = nickname;
+            infoUsername.textContent = username;
+            infoNickname.textContent = nickname;
+            infoPhone.textContent = phone;
+            infoRegisterDate.textContent = registerDate ? formatDate(registerDate) : '-';
+
+            // Update avatar
+            updateAvatarDisplay(avatar, nickname);
+        }
+
+        function updateAvatarDisplay(avatarUrl, nickname) {
+            var initial = (nickname || '用').charAt(0).toUpperCase();
+
+            if (avatarUrl && avatarUrl.trim()) {
+                avatarInitial.style.display = 'none';
+                avatarDisplay.style.backgroundImage = 'url(' + avatarUrl + ')';
+                avatarDisplay.style.backgroundSize = 'cover';
+                avatarDisplay.style.backgroundPosition = 'center';
+                avatarDisplay.style.backgroundColor = 'transparent';
+            } else {
+                avatarInitial.style.display = 'block';
+                avatarInitial.textContent = initial;
+                avatarDisplay.style.backgroundImage = '';
+                avatarDisplay.style.backgroundColor = getAvatarColor(nickname);
+            }
+        }
+
+        // ==================== AVATAR UPLOAD ====================
+        function uploadAvatar(file) {
+            showToast('正在上传头像...', 'info');
+
+            var formData = new FormData();
+            formData.append('file', file);
+
+            // Upload file
+            fetch('http://localhost:8080/api/common/upload', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + (localStorage.getItem('user_token') || '')
+                },
+                body: formData
+            })
+            .then(function (res) {
+                if (res.status === 401) {
+                    localStorage.removeItem('user_token');
+                    localStorage.removeItem('user_info');
+                    window.location.href = 'index.html';
+                    throw new Error('未登录');
+                }
+                return res.json();
+            })
+            .then(function (data) {
+                // Parse the upload response to get the URL
+                var avatarUrl = '';
+                if (typeof data === 'string') {
+                    avatarUrl = data;
+                } else if (data && data.data) {
+                    if (typeof data.data === 'string') {
+                        avatarUrl = data.data;
+                    } else if (data.data.url) {
+                        avatarUrl = data.data.url;
+                    } else if (data.data.fileUrl) {
+                        avatarUrl = data.data.fileUrl;
+                    }
+                } else if (data && data.url) {
+                    avatarUrl = data.url;
+                }
+
+                if (!avatarUrl) {
+                    throw new Error('未能获取上传后的图片地址');
+                }
+
+                // Update profile with the new avatar URL
+                return api.put('/api/user/profile', { avatar: avatarUrl })
+                    .then(function (profileRes) {
+                        if (profileRes.code === 200) {
+                            // Update localStorage
+                            var userInfo = getUserInfo() || {};
+                            userInfo.avatar = avatarUrl;
+                            localStorage.setItem('user_info', JSON.stringify(userInfo));
+
+                            // Update display
+                            updateAvatarDisplay(avatarUrl, displayNickname.textContent);
+                            showToast('头像更新成功', 'success');
+                        } else {
+                            throw new Error(profileRes.msg || profileRes.message || '更新头像失败');
+                        }
+                    });
+            })
+            .catch(function (err) {
+                console.error('Avatar upload error:', err);
+                showToast(err.message || '头像上传失败，请重试', 'error');
+            })
+            .finally(function () {
+                // Reset file input so the same file can be selected again
+                avatarFileInput.value = '';
+            });
+        }
+
+        // ==================== LOGOUT ====================
+        function openLogoutModal() {
+            logoutModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLogoutModal() {
+            logoutModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function confirmLogout() {
+            closeLogoutModal();
+            localStorage.removeItem('user_token');
+            localStorage.removeItem('user_info');
+            window.location.href = 'index.html';
+        }
+
+        // ==================== STATE HELPERS ====================
+        function showLoading() {
+            loadingState.style.display = 'flex';
+            errorState.style.display = 'none';
+            profileContent.style.display = 'none';
+        }
+
+        function showError() {
+            loadingState.style.display = 'none';
+            errorState.style.display = 'block';
+            profileContent.style.display = 'none';
+        }
+
+        function showProfile() {
+            loadingState.style.display = 'none';
+            errorState.style.display = 'none';
+            profileContent.style.display = 'block';
+        }
+
+        function hideLoading() {
+            loadingState.style.display = 'none';
+        }
+
+        // ==================== UTILITY ====================
+        function getAvatarColor(name) {
+            var colors = [
+                '#FF7E67', '#FF9A76', '#F9A826', '#6C5CE7',
+                '#00B894', '#0984E3', '#E17055', '#D63031',
+                '#FDCB6E', '#00CEC9', '#A29BFE', '#55EFC4'
+            ];
+            var hash = 0;
+            for (var i = 0; i < (name || '').length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return colors[Math.abs(hash) % colors.length];
+        }
+
+    })();
+    </script>
+
+</body>
+</html>

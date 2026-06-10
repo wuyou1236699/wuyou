@@ -1,0 +1,52 @@
+<view class="container">
+  <view class="header">
+    <text class="header-title">🧠 心理测评</text>
+    <text class="header-subtitle">了解自己，关爱自己</text>
+    <button class="history-btn" bindtap="goToHistory">
+      <text class="history-icon">📋</text>
+      <text class="history-text">测评记录</text>
+    </button>
+  </view>
+
+  <view class="test-list">
+    <view 
+      wx:for="{{tests}}" 
+      wx:key="id" 
+      class="test-card" 
+      bindtap="goToTest"
+      data-test="{{item}}"
+    >
+      <view class="test-icon" style="background: {{item.color}}20;">
+        <text class="icon-text">{{item.icon}}</text>
+      </view>
+      <view class="test-info">
+        <text class="test-title">{{item.title}}</text>
+        <text class="test-desc">{{item.description}}</text>
+        <view class="test-meta">
+          <text class="meta-item">{{item.questionCount}}题</text>
+          <text class="meta-divider">·</text>
+          <text class="meta-item">{{item.duration}}</text>
+          <text class="meta-divider">·</text>
+          <text class="meta-item">{{item.takenCount}}人已测</text>
+        </view>
+      </view>
+      <view class="test-arrow">
+        <text>→</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="empty-state" wx:if="{{!loading && tests.length === 0}}">
+    <text class="empty-icon">📝</text>
+    <text class="empty-text">暂无测评项目</text>
+  </view>
+
+  <view class="footer-tip">
+    <text class="tip-icon">💡</text>
+    <text class="tip-text">测评结果仅供参考，不能替代专业诊断</text>
+  </view>
+</view>

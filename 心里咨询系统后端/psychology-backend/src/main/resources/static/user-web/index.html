@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理咨询系统 - 登录</title>
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <style>
+        body {
+            background-color: #FDF8F5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .card-shadow {
+            box-shadow: 0 8px 32px rgba(255, 126, 103, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        .input-focus:focus {
+            border-color: #FF7E67;
+            box-shadow: 0 0 0 3px rgba(255, 126, 103, 0.15);
+            outline: none;
+        }
+        .btn-primary {
+            background-color: #FF7E67;
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            background-color: #FF6B52;
+            box-shadow: 0 4px 14px rgba(255, 126, 103, 0.35);
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-sm">
+        <div class="bg-white rounded-2xl card-shadow p-8">
+            <!-- Logo & Title -->
+            <div class="text-center mb-8">
+                <div class="text-5xl mb-3">🧠</div>
+                <h1 class="text-2xl font-bold text-gray-800">心理咨询系统</h1>
+                <p class="text-sm text-gray-400 mt-1">专业温暖的心理陪伴</p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorBox" class="hidden mb-5 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3" role="alert"></div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="space-y-5">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-600 mb-1.5">用户名</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        required
+                        autocomplete="username"
+                        placeholder="请输入用户名"
+                        class="input-focus w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-700 placeholder-gray-400 transition-colors"
+                    >
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-600 mb-1.5">密码</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                        autocomplete="current-password"
+                        placeholder="请输入密码"
+                        class="input-focus w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-700 placeholder-gray-400 transition-colors"
+                    >
+                </div>
+
+                <button
+                    type="submit"
+                    id="submitBtn"
+                    class="btn-primary w-full py-3 text-white font-semibold rounded-xl text-base transition-colors"
+                >
+                    登 录
+                </button>
+            </form>
+
+            <!-- Register Link -->
+            <p class="text-center text-sm text-gray-400 mt-6">
+                还没有账号？
+                <a href="register.html" class="font-medium hover:underline" style="color: #FF7E67;">立即注册</a>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <p class="text-center text-xs text-gray-300 mt-6">用心倾听，与你同行</p>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        (function () {
+            // Already logged in — redirect to home
+            if (localStorage.getItem('user_token')) {
+                window.location.href = 'home.html';
+                return;
+            }
+
+            var form = document.getElementById('loginForm');
+            var errorBox = document.getElementById('errorBox');
+            var submitBtn = document.getElementById('submitBtn');
+
+            function showError(msg) {
+                errorBox.textContent = msg;
+                errorBox.classList.remove('hidden');
+            }
+
+            function hideError() {
+                errorBox.classList.add('hidden');
+            }
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                hideError();
+
+                var username = document.getElementById('username').value.trim();
+                var password = document.getElementById('password').value;
+
+                if (!username || !password) {
+                    showError('请填写用户名和密码');
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = '登录中…';
+
+                api.post('/api/user/login', { username: username, password: password })
+                    .then(function (data) {
+                        if (data.code === 200) {
+                            localStorage.setItem('user_token', data.data.token || data.data);
+                            localStorage.setItem('user_info', JSON.stringify(data.data.user || data.data));
+                            window.location.href = 'home.html';
+                        } else {
+                            showError(data.msg || data.message || '用户名或密码错误，请重试');
+                        }
+                    })
+                    .catch(function (err) {
+                        showError('网络异常，请稍后重试');
+                        console.error(err);
+                    })
+                    .finally(function () {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '登 录';
+                    });
+            });
+        })();
+    </script>
+</body>
+</html>

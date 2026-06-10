@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的评价 - 心理咨询</title>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #FDF8F5;
+            --primary: #FF7E67;
+            --primary-dark: #E8694F;
+            --primary-light: #FFF0ED;
+            --primary-50: #FFF5F3;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Roboto, sans-serif;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Button styles */
+        .btn-primary {
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(255, 126, 103, 0.35);
+        }
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        /* Review card */
+        .review-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .review-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 126, 103, 0.1);
+        }
+
+        /* Avatar placeholder */
+        .avatar-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* Star selector */
+        .star-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 28px;
+            color: #d1d5db;
+            transition: color 0.15s ease, transform 0.15s ease;
+            padding: 2px;
+        }
+        .star-btn:hover {
+            transform: scale(1.15);
+        }
+        .star-btn.active {
+            color: #F59E0B;
+        }
+
+        /* Success state */
+        .success-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background-color: #D1FAE5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        /* Textarea */
+        .review-textarea {
+            width: 100%;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            font-family: inherit;
+            line-height: 1.6;
+        }
+        .review-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 126, 103, 0.12);
+        }
+
+        /* Loading spinner */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="sticky top-0 z-20 bg-white shadow-sm">
+        <div class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+            <button id="backBtn" class="btn-ghost text-gray-500 hover:text-gray-700 flex items-center text-sm">
+                <i class="fas fa-arrow-left mr-1.5"></i>
+                <span>返回</span>
+            </button>
+            <h1 id="pageTitle" class="text-lg font-bold text-gray-800">我的评价</h1>
+            <div class="w-14"></div><!-- spacer for centering -->
+        </div>
+    </header>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="flex-1 max-w-2xl mx-auto w-full px-4 py-6">
+
+        <!-- ===== MODE A: SUBMIT REVIEW ===== -->
+        <div id="submitMode" style="display:none;">
+
+            <!-- Loading -->
+            <div id="submitLoading" class="flex flex-col items-center justify-center py-20">
+                <div class="w-8 h-8 border-2 border-[#FF7E67] border-t-transparent rounded-full animate-spin mb-3"></div>
+                <p class="text-sm text-gray-400">加载中...</p>
+            </div>
+
+            <!-- Submit form -->
+            <div id="submitForm" style="display:none;">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-5">
+                    <h2 class="text-base font-semibold text-gray-800 mb-1">评价咨询师</h2>
+                    <p id="submitCounselorName" class="text-sm text-gray-400 mb-6"></p>
+
+                    <!-- Star rating -->
+                    <div class="mb-5">
+                        <p class="text-sm font-medium text-gray-600 mb-3">评分</p>
+                        <div id="starSelector" class="flex items-center space-x-1">
+                            <button class="star-btn" data-star="1"><i class="fas fa-star"></i></button>
+                            <button class="star-btn" data-star="2"><i class="fas fa-star"></i></button>
+                            <button class="star-btn" data-star="3"><i class="fas fa-star"></i></button>
+                            <button class="star-btn" data-star="4"><i class="fas fa-star"></i></button>
+                            <button class="star-btn" data-star="5"><i class="fas fa-star"></i></button>
+                            <span id="ratingText" class="text-sm text-gray-400 ml-2">请点击星星评分</span>
+                        </div>
+                    </div>
+
+                    <!-- Review content -->
+                    <div class="mb-5">
+                        <label class="text-sm font-medium text-gray-600 mb-2 block">评价内容 <span class="text-gray-400 font-normal">（选填）</span></label>
+                        <textarea
+                            id="reviewContent"
+                            class="review-textarea"
+                            rows="4"
+                            maxlength="200"
+                            placeholder="分享你的咨询体验..."
+                        ></textarea>
+                        <div class="flex justify-between mt-1">
+                            <span class="text-xs text-gray-400">真诚的评价能帮助更多人</span>
+                            <span id="charCount" class="text-xs text-gray-400">0/200</span>
+                        </div>
+                    </div>
+
+                    <!-- Error message -->
+                    <div id="submitError" class="hidden mb-4 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3"></div>
+
+                    <!-- Submit button -->
+                    <button id="submitReviewBtn" class="btn-primary w-full py-3 rounded-xl text-base font-semibold shadow-sm">
+                        <i class="fas fa-paper-plane mr-2"></i>提交评价
+                    </button>
+                </div>
+
+                <!-- Back -->
+                <button id="submitBackBtn" class="btn-ghost w-full text-center text-gray-400 hover:text-gray-600 text-sm py-2">
+                    <i class="fas fa-arrow-left mr-1"></i>返回
+                </button>
+            </div>
+
+            <!-- Success state -->
+            <div id="submitSuccess" class="text-center py-12" style="display:none;">
+                <div class="success-icon mb-4">
+                    <i class="fas fa-check text-green-500 text-2xl"></i>
+                </div>
+                <p class="text-gray-800 font-semibold text-lg mb-1">评价成功</p>
+                <p class="text-gray-500 text-sm mb-8">感谢你的评价，这将帮助更多人</p>
+                <button id="successBackBtn" class="btn-ghost text-gray-500 hover:text-gray-700 text-sm">
+                    <i class="fas fa-arrow-left mr-1.5"></i>返回
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== MODE B: MY REVIEWS ===== -->
+        <div id="listMode" style="display:none;">
+
+            <!-- Loading -->
+            <div id="listLoading" class="flex flex-col items-center justify-center py-20">
+                <div class="w-8 h-8 border-2 border-[#FF7E67] border-t-transparent rounded-full animate-spin mb-3"></div>
+                <p class="text-sm text-gray-400">正在加载评价记录...</p>
+            </div>
+
+            <!-- Error -->
+            <div id="listError" class="text-center py-16" style="display:none;">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: #FEE2E2;">
+                    <i class="fas fa-exclamation-triangle text-red-400 text-xl"></i>
+                </div>
+                <p class="text-gray-600 font-medium mb-1">加载失败</p>
+                <p class="text-gray-400 text-sm mb-4" id="listErrorMsg">网络异常，请稍后重试</p>
+                <button id="listRetryBtn" class="btn-primary px-6 py-2 rounded-full text-sm font-medium shadow-sm">
+                    <i class="fas fa-redo mr-1"></i>重新加载
+                </button>
+            </div>
+
+            <!-- Empty -->
+            <div id="listEmpty" class="text-center py-16" style="display:none;">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: #f3f4f6;">
+                    <i class="fas fa-star text-gray-300 text-3xl"></i>
+                </div>
+                <p class="text-gray-500 font-medium">暂无评价</p>
+                <p class="text-gray-400 text-sm mt-1">完成咨询后可以评价咨询师</p>
+            </div>
+
+            <!-- Reviews list -->
+            <div id="reviewList" class="space-y-4" style="display:none;">
+                <!-- Dynamically rendered -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ==================== SCRIPTS ==================== -->
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        // ==================== LOGIN GUARD ====================
+        if (!checkLogin()) return;
+
+        // ==================== URL PARAMS ====================
+        var appointmentId = getQueryParam('appointmentId');
+        var counselorId = getQueryParam('counselorId');
+
+        // ==================== DOM REFS ====================
+        var pageTitle = document.getElementById('pageTitle');
+        var backBtn = document.getElementById('backBtn');
+
+        // Submit mode refs
+        var submitMode = document.getElementById('submitMode');
+        var submitLoading = document.getElementById('submitLoading');
+        var submitForm = document.getElementById('submitForm');
+        var submitSuccess = document.getElementById('submitSuccess');
+        var submitCounselorName = document.getElementById('submitCounselorName');
+        var starSelector = document.getElementById('starSelector');
+        var ratingText = document.getElementById('ratingText');
+        var reviewContent = document.getElementById('reviewContent');
+        var charCount = document.getElementById('charCount');
+        var submitError = document.getElementById('submitError');
+        var submitReviewBtn = document.getElementById('submitReviewBtn');
+        var submitBackBtn = document.getElementById('submitBackBtn');
+        var successBackBtn = document.getElementById('successBackBtn');
+
+        // List mode refs
+        var listMode = document.getElementById('listMode');
+        var listLoading = document.getElementById('listLoading');
+        var listError = document.getElementById('listError');
+        var listErrorMsg = document.getElementById('listErrorMsg');
+        var listEmpty = document.getElementById('listEmpty');
+        var reviewList = document.getElementById('reviewList');
+        var listRetryBtn = document.getElementById('listRetryBtn');
+
+        // ==================== BACK BUTTON ====================
+        backBtn.addEventListener('click', function () {
+            history.back();
+        });
+
+        // ==================== MODE DETECTION ====================
+        if (appointmentId && counselorId) {
+            // Mode A: Submit review
+            initSubmitMode();
+        } else {
+            // Mode B: My reviews list
+            initListMode();
+        }
+
+        // ==================== MODE A: SUBMIT REVIEW ====================
+        function initSubmitMode() {
+            pageTitle.textContent = '发表评价';
+            submitMode.style.display = 'block';
+            submitLoading.style.display = 'flex';
+
+            var selectedRating = 0;
+
+            // Fetch counselor name from the appointment/counselor
+            fetchCounselorInfo();
+
+            // Star click handler
+            var starButtons = starSelector.querySelectorAll('.star-btn');
+            starButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    selectedRating = parseInt(this.getAttribute('data-star'), 10);
+                    updateStars(selectedRating);
+                });
+
+                btn.addEventListener('mouseenter', function () {
+                    var hoverStar = parseInt(this.getAttribute('data-star'), 10);
+                    highlightStars(hoverStar);
+                });
+            });
+
+            starSelector.addEventListener('mouseleave', function () {
+                highlightStars(selectedRating);
+            });
+
+            // Character counter
+            reviewContent.addEventListener('input', function () {
+                var len = this.value.length;
+                charCount.textContent = len + '/200';
+                if (len >= 190) {
+                    charCount.style.color = '#F59E0B';
+                } else {
+                    charCount.style.color = '#9ca3af';
+                }
+            });
+
+            // Submit
+            submitReviewBtn.addEventListener('click', function () {
+                submitReview(selectedRating);
+            });
+
+            // Back buttons
+            submitBackBtn.addEventListener('click', function () {
+                history.back();
+            });
+            successBackBtn.addEventListener('click', function () {
+                history.back();
+            });
+
+            function highlightStars(count) {
+                starButtons.forEach(function (btn) {
+                    var star = parseInt(btn.getAttribute('data-star'), 10);
+                    if (star <= count) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+
+            function updateStars(count) {
+                highlightStars(count);
+                if (count > 0) {
+                    var labels = ['', '非常差', '比较差', '一般', '比较好', '非常好'];
+                    ratingText.textContent = labels[count];
+                    ratingText.style.color = '#F59E0B';
+                } else {
+                    ratingText.textContent = '请点击星星评分';
+                    ratingText.style.color = '#9ca3af';
+                }
+            }
+
+            function fetchCounselorInfo() {
+                api.get('/api/user/info')
+                    .then(function () {
+                        // We don't strictly need this; the counselor name might
+                        // come from the appointment. Try to get counselor detail.
+                        return api.get('/api/counselor/detail/' + counselorId);
+                    })
+                    .then(function (res) {
+                        var counselor = (res && res.data) ? res.data : res;
+                        var name = counselor.name || counselor.counselorName || counselor.realName || '咨询师';
+                        submitCounselorName.textContent = '咨询师：' + name;
+                        showSubmitForm();
+                    })
+                    .catch(function () {
+                        // Still show the form even if we can't get the name
+                        submitCounselorName.textContent = '咨询师ID：' + counselorId;
+                        showSubmitForm();
+                    });
+            }
+
+            function showSubmitForm() {
+                submitLoading.style.display = 'none';
+                submitForm.style.display = 'block';
+            }
+
+            function submitReview(rating) {
+                // Validate rating
+                if (!rating || rating < 1 || rating > 5) {
+                    showSubmitError('请选择评分（1-5星）');
+                    return;
+                }
+
+                hideSubmitError();
+                submitReviewBtn.disabled = true;
+                submitReviewBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>提交中...';
+
+                var content = reviewContent.value.trim();
+
+                api.post('/api/review/add', {
+                    appointmentId: appointmentId,
+                    counselorId: counselorId,
+                    rating: rating,
+                    content: content || ''
+                })
+                .then(function (res) {
+                    if (res.code === 200) {
+                        submitForm.style.display = 'none';
+                        submitSuccess.style.display = 'block';
+                    } else {
+                        showSubmitError(res.msg || res.message || '提交失败，请重试');
+                        resetSubmitButton();
+                    }
+                })
+                .catch(function (err) {
+                    console.error('Submit review error:', err);
+                    showSubmitError('网络异常，提交失败，请重试');
+                    resetSubmitButton();
+                });
+            }
+
+            function showSubmitError(msg) {
+                submitError.textContent = msg;
+                submitError.classList.remove('hidden');
+            }
+
+            function hideSubmitError() {
+                submitError.classList.add('hidden');
+            }
+
+            function resetSubmitButton() {
+                submitReviewBtn.disabled = false;
+                submitReviewBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>提交评价';
+            }
+        }
+
+        // ==================== MODE B: MY REVIEWS ====================
+        function initListMode() {
+            pageTitle.textContent = '我的评价';
+            listMode.style.display = 'block';
+            listLoading.style.display = 'flex';
+
+            listRetryBtn.addEventListener('click', loadReviews);
+            loadReviews();
+
+            function loadReviews() {
+                showListLoading();
+
+                api.get('/api/review/my')
+                    .then(function (res) {
+                        var records = parseRecords(res);
+
+                        hideAllListStates();
+
+                        if (!records || records.length === 0) {
+                            showListEmpty();
+                            return;
+                        }
+
+                        showReviewList();
+                        renderReviews(records);
+                    })
+                    .catch(function (err) {
+                        hideAllListStates();
+                        console.error('Failed to load reviews:', err);
+                        listErrorMsg.textContent = err.message || '网络异常，请稍后重试';
+                        showListError();
+                    });
+            }
+
+            function parseRecords(res) {
+                if (Array.isArray(res)) return res;
+                if (res && res.data) {
+                    if (Array.isArray(res.data)) return res.data;
+                    if (res.data.records) return res.data.records;
+                    if (res.data.list) return res.data.list;
+                }
+                if (res && res.records) return res.records;
+                return [];
+            }
+
+            function renderReviews(records) {
+                reviewList.innerHTML = '';
+
+                records.forEach(function (item) {
+                    var card = buildReviewCard(item);
+                    reviewList.appendChild(card);
+                });
+            }
+
+            function buildReviewCard(item) {
+                var counselorName = item.counselorName || (item.counselor && (item.counselor.name || item.counselor.counselorName || item.counselor.realName)) || '咨询师';
+                var rating = typeof item.rating === 'number' ? item.rating : parseFloat(item.rating) || 0;
+                var content = item.content || item.reviewContent || item.comment || '';
+                var dateStr = item.createTime || item.reviewTime || item.time || item.createdAt || item.date || '';
+
+                var avatarColor = getAvatarColor(counselorName);
+                var initial = (counselorName || '?').charAt(0);
+
+                var formattedDate = formatDateTime(dateStr);
+
+                var starHTML = starRating(rating);
+
+                // Truncate content
+                var displayContent = content || '';
+                var isLong = displayContent.length > 120;
+                if (isLong) {
+                    displayContent = displayContent.substring(0, 120) + '...';
+                }
+
+                var card = document.createElement('div');
+                card.className = 'review-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5';
+
+                card.innerHTML =
+                    '<div class="flex items-center justify-between mb-3">' +
+                        '<div class="flex items-center space-x-3 min-w-0">' +
+                            '<div class="avatar-placeholder w-10 h-10 text-white font-bold text-sm flex-shrink-0" style="background-color:' + avatarColor + ';">' +
+                                escapeHTML(initial) +
+                            '</div>' +
+                            '<h3 class="font-semibold text-gray-800 truncate">' + escapeHTML(counselorName) + '</h3>' +
+                        '</div>' +
+                        '<span class="text-xs text-gray-400 flex-shrink-0 ml-2">' + escapeHTML(formattedDate) + '</span>' +
+                    '</div>' +
+                    '<div class="mb-2">' + starHTML + '</div>' +
+                    (displayContent ? (
+                        '<p class="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">' + escapeHTML(displayContent) + '</p>'
+                    ) : (
+                        '<p class="text-sm text-gray-400 italic">用户未填写评价内容</p>'
+                    )) +
+                    '';
+
+                return card;
+            }
+
+            // ==================== LIST STATE HELPERS ====================
+            function showListLoading() {
+                listLoading.style.display = 'flex';
+                listError.style.display = 'none';
+                listEmpty.style.display = 'none';
+                reviewList.style.display = 'none';
+            }
+
+            function showListError() {
+                listLoading.style.display = 'none';
+                listError.style.display = 'block';
+                listEmpty.style.display = 'none';
+                reviewList.style.display = 'none';
+            }
+
+            function showListEmpty() {
+                listLoading.style.display = 'none';
+                listError.style.display = 'none';
+                listEmpty.style.display = 'block';
+                reviewList.style.display = 'none';
+            }
+
+            function showReviewList() {
+                listLoading.style.display = 'none';
+                listError.style.display = 'none';
+                listEmpty.style.display = 'none';
+                reviewList.style.display = 'block';
+            }
+
+            function hideAllListStates() {
+                listLoading.style.display = 'none';
+                listError.style.display = 'none';
+                listEmpty.style.display = 'none';
+                reviewList.style.display = 'none';
+            }
+        }
+
+        // ==================== UTILITY ====================
+        function escapeHTML(str) {
+            if (!str) return '';
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+        function getAvatarColor(name) {
+            var colors = [
+                '#FF7E67', '#FF9A76', '#F9A826', '#6C5CE7',
+                '#00B894', '#0984E3', '#E17055', '#D63031',
+                '#FDCB6E', '#00CEC9', '#A29BFE', '#55EFC4'
+            ];
+            var hash = 0;
+            for (var i = 0; i < (name || '').length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return colors[Math.abs(hash) % colors.length];
+        }
+
+    })();
+    </script>
+
+</body>
+</html>

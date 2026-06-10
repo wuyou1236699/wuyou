@@ -1,0 +1,15 @@
+<view class="container">
+  <view class="rating-section">
+    <text class="label">评分：</text>
+    <view class="stars">
+      <block wx:for="{{[1,2,3,4,5]}}" wx:key="*this">
+        <text class="star {{item <= rating ? 'star-filled' : 'star-empty'}}" bindtap="selectRating" data-rating="{{item}}">★</text>
+      </block>
+    </view>
+  </view>
+  <view class="content-section">
+    <textarea class="review-textarea" bindinput="onContentInput" placeholder="请填写您的评价（选填）" maxlength="200" value="{{content}}"></textarea>
+    <view class="counter">{{content.length}}/200</view>
+  </view>
+  <button class="submit-btn" bindtap="submitReview">提交评价</button>
+</view>

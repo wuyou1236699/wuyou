@@ -1,0 +1,45 @@
+<view class="chat-container">
+  <!-- 顶部导航 -->
+  <view class="chat-header">
+    <text class="back-btn" bindtap="goBack">←</text>
+    <text class="chat-title">在线咨询</text>
+    <text class="header-right"></text>
+  </view>
+
+  <!-- 消息列表 -->
+  <scroll-view class="message-list" scroll-y scroll-top="{{scrollTop}}" scroll-with-animation bindscrolltoupper="loadMore">
+    <view class="load-more-tip" wx:if="{{hasMore}}">
+      <text wx:if="{{!loadingMore}}" bindtap="loadMore">加载更早消息</text>
+      <text wx:else>加载中...</text>
+    </view>
+    <block wx:for="{{messages}}" wx:key="id">
+      <view class="message-item {{item.role === 'user' ? 'user-message' : 'ai-message'}}" bindlongpress="onDeleteMsg" data-index="{{index}}">
+        <view class="message-avatar">
+          <image wx:if="{{item.role === 'user'}}" src="/images/default-avatar.png" mode="aspectFill"></image>
+          <image wx:else src="/images/default-avatar.png" mode="aspectFill"></image>
+        </view>
+        <view class="message-content">
+          <view class="message-bubble {{item.role === 'user' ? 'user-bubble' : 'ai-bubble'}}">
+            <text class="message-text">{{item.content}}</text>
+          </view>
+          <text class="message-time">{{item.time}}</text>
+        </view>
+      </view>
+    </block>
+    <view id="bottom"></view>
+  </scroll-view>
+
+  <!-- 输入区域 -->
+  <view class="input-bar">
+    <input 
+      class="input-field" 
+      bindinput="onInput" 
+      value="{{inputText}}" 
+      placeholder="输入您的问题..." 
+      placeholder-class="input-placeholder"
+      confirm-type="send" 
+      bindconfirm="sendMessage" 
+    />
+    <button class="send-btn" bindtap="sendMessage" hover-class="send-btn-hover">发送</button>
+  </view>
+</view>

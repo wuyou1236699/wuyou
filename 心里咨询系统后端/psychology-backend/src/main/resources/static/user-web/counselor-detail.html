@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>咨询师详情</title>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #FDF8F5;
+            --primary: #FF7E67;
+            --primary-dark: #E8694F;
+            --primary-light: #FFF0ED;
+            --primary-50: #FFF5F3;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Roboto, sans-serif;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(255, 126, 103, 0.35);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-outline:hover {
+            background-color: var(--primary-50);
+        }
+        .btn-white {
+            background: #fff;
+            color: var(--primary);
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-white:hover {
+            border-color: var(--primary);
+            background-color: var(--primary-50);
+        }
+
+        /* Online dot */
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .online-dot.online {
+            background-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+        }
+        .online-dot.offline {
+            background-color: #d1d5db;
+        }
+        .online-dot.busy {
+            background-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+        }
+
+        /* Avatar placeholder */
+        .avatar-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* Expertise tags */
+        .expertise-tag {
+            display: inline-block;
+            background-color: var(--primary-50);
+            color: var(--primary);
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 50;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        .modal-panel {
+            background: #fff;
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-width: 500px;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        /* Time slot selector */
+        .time-slot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 1.5px solid #e5e7eb;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            background: #fff;
+            color: #374151;
+        }
+        .time-slot:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .time-slot.selected {
+            background-color: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .time-slot.disabled {
+            background-color: #f9fafb;
+            color: #d1d5db;
+            border-color: #f3f4f6;
+            cursor: not-allowed;
+        }
+
+        /* Date picker chip */
+        .date-chip {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 1.5px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            min-width: 60px;
+            background: #fff;
+        }
+        .date-chip:hover {
+            border-color: var(--primary);
+        }
+        .date-chip.selected {
+            background-color: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .date-chip .day-name {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+        .date-chip .day-num {
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .date-chip .day-month {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        /* Section title */
+        .section-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+
+        /* Loading skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Review card */
+        .review-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #f3f4f6;
+        }
+
+        /* Condition tags */
+        .condition-tag-btn {
+            background: #f5f5f5;
+            color: #666;
+            border-color: transparent;
+            cursor: pointer;
+        }
+        .condition-tag-btn:hover {
+            background: #e8f0fe;
+            color: #FF7E67;
+        }
+        .condition-tag-btn.active {
+            background: #FFF0ED;
+            color: #FF7E67;
+            border-color: #FF7E67;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- ==================== BACK BUTTON ==================== -->
+    <div class="max-w-lg mx-auto px-4 pt-4 pb-2">
+        <button onclick="window.history.back()" class="inline-flex items-center text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer px-0 py-2 text-sm font-medium transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>返回
+        </button>
+    </div>
+
+    <!-- ==================== LOADING STATE ==================== -->
+    <div id="loadingState" class="max-w-lg mx-auto px-4 pb-16">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-5">
+            <div class="flex items-start space-x-4 mb-4">
+                <div class="skeleton w-20 h-20 rounded-full flex-shrink-0"></div>
+                <div class="flex-1 space-y-2.5">
+                    <div class="skeleton h-5 w-24"></div>
+                    <div class="skeleton h-4 w-40"></div>
+                    <div class="flex gap-2">
+                        <div class="skeleton h-6 w-16 rounded-full"></div>
+                        <div class="skeleton h-6 w-20 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <div class="skeleton h-3 w-full"></div>
+                <div class="skeleton h-3 w-3/4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== COUNSELOR INFO CARD ==================== -->
+    <div id="mainContent" class="max-w-lg mx-auto px-4 pb-16" style="display:none;">
+
+        <!-- Info Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-5">
+            <!-- Top: Avatar + Basic Info -->
+            <div class="flex items-start space-x-4 mb-4">
+                <!-- Avatar -->
+                <div id="counselorAvatar" class="avatar-placeholder w-20 h-20 text-white text-2xl flex-shrink-0" style="background-color: var(--primary);">
+                    <span id="avatarText"></span>
+                </div>
+
+                <!-- Info -->
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center space-x-2 mb-1">
+                        <h1 id="counselorName" class="text-xl font-bold text-gray-800 truncate"></h1>
+                        <div class="flex items-center flex-shrink-0" id="onlineStatusContainer">
+                            <span id="onlineDot" class="online-dot offline"></span>
+                            <span id="onlineText" class="text-xs text-gray-400 ml-1">离线</span>
+                        </div>
+                    </div>
+                    <p id="counselorQualification" class="text-sm text-gray-500 mb-2"></p>
+                    <div class="flex items-center text-sm mb-2">
+                        <span id="starDisplay"></span>
+                    </div>
+                    <!-- Expertise Tags -->
+                    <div id="expertiseTags" class="flex flex-wrap gap-1.5 mb-2"></div>
+                    <!-- Stats -->
+                    <div class="flex items-center gap-4 text-xs text-gray-400">
+                        <span id="reviewCount"><i class="fas fa-comment-dots mr-1"></i></span>
+                        <span id="appointmentCount"><i class="fas fa-calendar-check mr-1"></i></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bio / Profile -->
+            <div class="border-t border-gray-100 pt-4">
+                <p class="text-sm text-gray-600 leading-relaxed" id="counselorBio"></p>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-3 mb-8">
+            <button id="chatBtn" class="btn-primary flex-1 py-3.5 rounded-xl text-sm font-semibold shadow-sm flex items-center justify-center">
+                <i class="fas fa-comment-dots mr-2"></i>发消息
+            </button>
+            <button id="bookBtn" class="btn-outline flex-1 py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center">
+                <i class="fas fa-calendar-plus mr-2"></i>预约咨询
+            </button>
+        </div>
+
+        <!-- ==================== REVIEWS SECTION ==================== -->
+        <div id="reviewsSection">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="section-title">用户评价</h2>
+                <span id="avgRatingDisplay" class="text-sm text-gray-500"></span>
+            </div>
+
+            <!-- Review List -->
+            <div id="reviewList">
+                <!-- Dynamically rendered -->
+            </div>
+
+            <!-- Load more reviews -->
+            <div id="reviewLoadMore" class="text-center mt-4" style="display:none;">
+                <button id="reviewLoadMoreBtn" class="btn-white px-8 py-2.5 rounded-full text-xs font-medium">
+                    加载更多 <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Reviews loading -->
+            <div id="reviewLoading" class="text-center py-8" style="display:none;">
+                <i class="fas fa-spinner fa-spin text-gray-300 text-xl"></i>
+            </div>
+
+            <!-- Reviews empty -->
+            <div id="reviewEmpty" class="text-center py-12" style="display:none;">
+                <div class="w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center" style="background: #f3f4f6;">
+                    <i class="fas fa-star text-gray-300 text-xl"></i>
+                </div>
+                <p class="text-gray-400 text-sm">暂无评价</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ERROR STATE ==================== -->
+    <div id="errorState" class="max-w-lg mx-auto px-4 pb-16" style="display:none;">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: #f3f4f6;">
+                <i class="fas fa-exclamation-triangle text-gray-300 text-3xl"></i>
+            </div>
+            <p class="text-gray-500 font-medium mb-1">加载失败</p>
+            <p class="text-gray-400 text-sm mb-6" id="errorMsg">无法获取咨询师信息</p>
+            <button onclick="window.location.reload()" class="btn-primary px-8 py-2.5 rounded-full text-sm">
+                重新加载
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== BOOKING MODAL ==================== -->
+    <div id="bookingModal" class="modal-overlay" style="display:none;">
+        <div class="modal-panel p-5">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-lg font-bold text-gray-800">预约咨询</h3>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600 bg-transparent border-0 cursor-pointer p-1">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="space-y-5">
+                <!-- Counselor name display -->
+                <div class="flex items-center space-x-3 bg-gray-50 rounded-xl px-4 py-3">
+                    <div id="modalAvatar" class="avatar-placeholder w-10 h-10 text-white text-sm" style="background-color: var(--primary);"></div>
+                    <div>
+                        <p id="modalCounselorName" class="text-sm font-semibold text-gray-800"></p>
+                        <p class="text-xs text-gray-400">请选择预约时间</p>
+                    </div>
+                </div>
+
+                <!-- Date Picker (horizontal scrollable chips) -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">选择日期</label>
+                    <div id="dateChips" class="flex gap-2 overflow-x-auto pb-2">
+                        <!-- Dynamically rendered -->
+                    </div>
+                </div>
+
+                <!-- Time Slots -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">选择时间</label>
+                    <div id="timeSlotContainer" class="flex flex-wrap gap-2">
+                        <p class="text-sm text-gray-400 w-full text-center py-4">请先选择日期</p>
+                    </div>
+                </div>
+
+                <!-- 病情选择 -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">病情类型</label>
+                    <div id="conditionTagContainer" class="flex flex-wrap gap-2 mb-1">
+                        <button class="condition-tag-btn px-3.5 py-2 rounded-full text-xs font-medium border transition" data-tag="抑郁">抑郁</button>
+                        <button class="condition-tag-btn px-3.5 py-2 rounded-full text-xs font-medium border transition" data-tag="焦虑">焦虑</button>
+                        <button class="condition-tag-btn px-3.5 py-2 rounded-full text-xs font-medium border transition" data-tag="婚恋">婚恋</button>
+                        <button class="condition-tag-btn px-3.5 py-2 rounded-full text-xs font-medium border transition" data-tag="情绪压力">情绪压力</button>
+                        <button class="condition-tag-btn px-3.5 py-2 rounded-full text-xs font-medium border transition" data-tag="青少年">青少年</button>
+                        <button class="condition-tag-btn px-3.5 py-2 rounded-full text-xs font-medium border transition" data-tag="职场">职场</button>
+                        <button class="condition-tag-btn px-3.5 py-2 rounded-full text-xs font-medium border transition" data-tag="人际关系">人际关系</button>
+                        <button class="condition-tag-btn px-3.5 py-2 rounded-full text-xs font-medium border transition" data-tag="睡眠障碍">睡眠障碍</button>
+                        <button class="condition-tag-btn px-3.5 py-2 rounded-full text-xs font-medium border transition" data-tag="学业压力">学业压力</button>
+                        <button class="condition-tag-btn px-3.5 py-2 rounded-full text-xs font-medium border transition" data-tag="自我成长">自我成长</button>
+                        <button class="condition-tag-btn px-3.5 py-2 rounded-full text-xs font-medium border transition" data-tag="原生家庭">原生家庭</button>
+                        <button class="condition-tag-btn px-3.5 py-2 rounded-full text-xs font-medium border transition" data-tag="其他">其他</button>
+                    </div>
+                </div>
+
+                <!-- Service Type -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">咨询类型</label>
+                    <select id="serviceType" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-2 focus:border-[var(--primary)] bg-white">
+                        <option value="">请选择咨询类型</option>
+                        <option value="1">电话咨询</option>
+                        <option value="2">网络咨询</option>
+                        <option value="3">门诊咨询</option>
+                    </select>
+                </div>
+
+                <!-- Problem Description -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">问题描述（可选补充）</label>
+                    <textarea id="problemDesc" rows="4" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-2 focus:border-[var(--primary)] resize-none" placeholder="可以补充更多细节..."></textarea>
+                </div>
+
+                <!-- Submit -->
+                <button id="submitBookingBtn" class="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold shadow-sm">
+                    确认预约
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SCRIPTS ==================== -->
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        // ==================== Login Guard ====================
+        if (!checkLogin()) return;
+
+        // ==================== State ====================
+        var counselorId = null;
+        var counselorData = null;
+        var scheduleData = null;
+        var reviewPage = 1;
+        var reviewTotalPages = 1;
+        var isLoadingReviews = false;
+        var selectedDate = null;
+        var selectedTimeSlot = null;
+        var selectedAppointmentTime = null; // Full datetime string
+        var selectedCondition = '';
+
+        // ==================== DOM Refs ====================
+        function $(sel) { return document.querySelector(sel); }
+
+        var loadingState = $('#loadingState');
+        var mainContent = $('#mainContent');
+        var errorState = $('#errorState');
+        var errorMsg = $('#errorMsg');
+        var bookingModal = $('#bookingModal');
+
+        // ==================== Init ====================
+        function init() {
+            // Read counselor ID from URL
+            var rawId = getQueryParam('id');
+            if (!rawId) {
+                showError('缺少咨询师ID参数');
+                return;
+            }
+            counselorId = parseInt(rawId, 10);
+            if (isNaN(counselorId)) {
+                showError('无效的咨询师ID');
+                return;
+            }
+
+            // Load data
+            loadAllData();
+        }
+
+        // ==================== Load All Data ====================
+        function loadAllData() {
+            // Get today and 7 days later for schedule request
+            var today = new Date();
+            var endDate = new Date(today);
+            endDate.setDate(endDate.getDate() + 7);
+
+            var todayStr = formatDateStr(today);
+            var endDateStr = formatDateStr(endDate);
+
+            // Fetch counselor detail, avg rating, reviews (page 1), schedule in parallel
+            Promise.all([
+                api.get('/api/counselor/detail/' + counselorId),
+                api.get('/api/review/avg?counselorId=' + counselorId),
+                api.get('/api/review/list?counselorId=' + counselorId + '&page=1&size=10'),
+                api.get('/api/counselor/schedule?counselorId=' + counselorId + '&startDate=' + todayStr + '&endDate=' + endDateStr)
+            ])
+            .then(function (results) {
+                var detailRes = results[0];
+                var avgRes = results[1];
+                var reviewRes = results[2];
+                var scheduleRes = results[3];
+
+                // Parse counselor detail
+                counselorData = parseDetail(detailRes);
+
+                // Parse avg rating
+                var avgRating = parseAvgRating(avgRes);
+
+                // Parse reviews
+                var reviews = parseReviewList(reviewRes);
+
+                // Parse schedule
+                scheduleData = parseSchedule(scheduleRes);
+                console.log('scheduleData after parse:', scheduleData, 'raw response:', scheduleRes);
+
+                // Hide loading, show main
+                loadingState.style.display = 'none';
+                mainContent.style.display = 'block';
+
+                // Render everything
+                renderCounselorInfo(avgRating);
+                renderReviews(reviews, reviewRes);
+                setupScheduleData(todayStr, endDateStr);
+
+                // Bind events
+                bindEvents();
+            })
+            .catch(function (err) {
+                console.error('Failed to load counselor data:', err);
+                showError('加载咨询师信息失败，请稍后重试');
+            });
+        }
+
+        // ==================== Parsers ====================
+        function parseDetail(res) {
+            // Handle different response formats
+            if (res && res.data) return res.data;
+            if (res && res.id !== undefined) return res;
+            return res || {};
+        }
+
+        function parseAvgRating(res) {
+            if (typeof res === 'number') return res;
+            if (res && typeof res.data === 'number') return res.data;
+            if (res && typeof res.avgRating === 'number') return res.avgRating;
+            if (res && typeof res.rating === 'number') return res.rating;
+            if (res && res.data && typeof res.data.avgRating === 'number') return res.data.avgRating;
+            if (res && res.data && typeof res.data.rating === 'number') return res.data.rating;
+            return 0;
+        }
+
+        function parseReviewList(res) {
+            var records = [];
+            if (Array.isArray(res)) {
+                records = res;
+            } else if (res && res.data) {
+                if (Array.isArray(res.data)) {
+                    records = res.data;
+                } else if (res.data.records) {
+                    records = res.data.records;
+                    reviewTotalPages = res.data.pages || 1;
+                }
+            }
+            return records;
+        }
+
+        function parseSchedule(res) {
+            var list = [];
+            if (Array.isArray(res)) list = res;
+            else if (res && res.data && Array.isArray(res.data)) list = res.data;
+            else if (res && Array.isArray(res.records)) list = res.records;
+            else if (res && res.data && Array.isArray(res.data.records)) list = res.data.records;
+            return list;
+        }
+
+        // ==================== Render Counselor Info ====================
+        function renderCounselorInfo(avgRating) {
+            var data = counselorData || {};
+
+            // Name
+            var name = data.name || '咨询师';
+            $('#counselorName').textContent = name;
+            document.title = name + ' - 咨询师详情';
+
+            // Avatar
+            var avatar = data.avatar || '';
+            var avatarContainer = $('#counselorAvatar');
+            var avatarTextEl = $('#avatarText');
+            var nameChar = name.charAt(0);
+            avatarTextEl.textContent = nameChar;
+
+            if (avatar && avatar.trim()) {
+                avatarTextEl.style.display = 'none';
+                avatarContainer.style.backgroundImage = 'url(' + escapeHTML(avatar) + ')';
+                avatarContainer.style.backgroundSize = 'cover';
+                avatarContainer.style.backgroundPosition = 'center';
+            } else {
+                avatarContainer.style.backgroundColor = getAvatarColor(name);
+            }
+
+            // Qualification
+            var qualification = data.qualification || data.title || '';
+            $('#counselorQualification').textContent = qualification || '';
+
+            // Rating stars
+            var rating = avgRating || data.avgRating || data.rating || 0;
+            $('#starDisplay').innerHTML = starRating(rating);
+
+            // Expertise tags
+            var expertise = data.expertise || '';
+            var expertiseList = [];
+            if (typeof expertise === 'string') {
+                expertiseList = expertise.split(/[,，、\s]+/).filter(Boolean);
+            } else if (Array.isArray(expertise)) {
+                expertiseList = expertise;
+            }
+            var tagsHTML = '';
+            expertiseList.forEach(function (tag) {
+                tagsHTML += '<span class="expertise-tag">' + escapeHTML(tag) + '</span>';
+            });
+            $('#expertiseTags').innerHTML = tagsHTML || '<span class="text-xs text-gray-400">暂无标签</span>';
+
+            // Bio / Profile
+            var bio = data.profile || data.bio || data.description || '暂无简介';
+            $('#counselorBio').textContent = bio;
+
+            // Stats
+            var reviewTotal = data.reviewCount || data.commentCount || 0;
+            var appointmentTotal = data.appointmentCount || data.consultCount || 0;
+            $('#reviewCount').innerHTML = '<i class="fas fa-comment-dots mr-1"></i>' + reviewTotal + ' 条评价';
+            $('#appointmentCount').innerHTML = '<i class="fas fa-calendar-check mr-1"></i>' + appointmentTotal + ' 次咨询';
+
+            // Online status
+            var isOnline = data.online === true || data.online === 'true' || data.online === 1 || data.status === 'online';
+            var isBusy = data.status === 'busy';
+            var dotEl = $('#onlineDot');
+            var textEl = $('#onlineText');
+            if (isBusy) {
+                dotEl.className = 'online-dot busy';
+                textEl.textContent = '忙碌';
+                textEl.className = 'text-xs text-yellow-600 ml-1';
+            } else if (isOnline) {
+                dotEl.className = 'online-dot online';
+                textEl.textContent = '在线';
+                textEl.className = 'text-xs text-green-600 ml-1';
+            } else {
+                dotEl.className = 'online-dot offline';
+                textEl.textContent = '离线';
+                textEl.className = 'text-xs text-gray-400 ml-1';
+            }
+
+            // Modal avatar + name
+            $('#modalCounselorName').textContent = name;
+            var modalAvatar = $('#modalAvatar');
+            modalAvatar.textContent = nameChar;
+            if (avatar && avatar.trim()) {
+                modalAvatar.textContent = '';
+                modalAvatar.style.backgroundImage = 'url(' + escapeHTML(avatar) + ')';
+                modalAvatar.style.backgroundSize = 'cover';
+                modalAvatar.style.backgroundPosition = 'center';
+            } else {
+                modalAvatar.style.backgroundColor = getAvatarColor(name);
+            }
+        }
+
+        // ==================== Render Reviews ====================
+        function renderReviews(records, rawRes) {
+            var listEl = $('#reviewList');
+            var emptyEl = $('#reviewEmpty');
+            var loadMoreEl = $('#reviewLoadMore');
+
+            listEl.innerHTML = '';
+
+            if (records.length === 0) {
+                emptyEl.style.display = 'block';
+                loadMoreEl.style.display = 'none';
+            } else {
+                emptyEl.style.display = 'none';
+                records.forEach(function (review) {
+                    listEl.appendChild(createReviewCard(review));
+                });
+
+                // Show load more if there are more pages
+                var totalPages = reviewTotalPages;
+                if (rawRes && rawRes.data && rawRes.data.pages) totalPages = rawRes.data.pages;
+                if (reviewPage < totalPages) {
+                    loadMoreEl.style.display = 'block';
+                } else {
+                    loadMoreEl.style.display = 'none';
+                }
+            }
+
+            // Avg rating display
+            var avgRating = parseAvgRating($('#avgRatingDisplay').dataset.avg);
+            var reviewTotal = (rawRes && rawRes.data && rawRes.data.total) ? rawRes.data.total : records.length;
+            if (reviewTotal > 0) {
+                $('#avgRatingDisplay').innerHTML = '<i class="fas fa-star text-yellow-500 mr-1"></i>共 <b>' + reviewTotal + '</b> 条评价';
+            }
+        }
+
+        function createReviewCard(review) {
+            var card = document.createElement('div');
+            card.className = 'review-card';
+
+            var rating = typeof review.rating === 'number' ? review.rating :
+                         parseFloat(review.rating || review.score || review.starRating) || 0;
+            var content = review.content || review.comment || review.review || '';
+            var userName = review.userName || review.nickname || review.username || '匿名用户';
+            var avatar = review.avatar || review.userAvatar || '';
+            var createTime = review.createTime || review.createdAt || review.time || '';
+
+            // Avatar fallback
+            var avatarHTML;
+            if (avatar && avatar.trim()) {
+                avatarHTML = '<div class="avatar-placeholder w-10 h-10 text-white text-sm flex-shrink-0" style="background-image:url(' + escapeHTML(avatar) + ');background-size:cover;background-position:center;"></div>';
+            } else {
+                avatarHTML = '<div class="avatar-placeholder w-10 h-10 text-white text-sm flex-shrink-0" style="background-color:' + getAvatarColor(userName) + ';">' + escapeHTML(userName.charAt(0)) + '</div>';
+            }
+
+            card.innerHTML =
+                '<div class="flex items-start space-x-3">' +
+                    avatarHTML +
+                    '<div class="flex-1 min-w-0">' +
+                        '<div class="flex items-center justify-between mb-1">' +
+                            '<span class="text-sm font-medium text-gray-800">' + escapeHTML(userName) + '</span>' +
+                            '<span class="text-xs text-gray-400">' + formatDateTime(createTime) + '</span>' +
+                        '</div>' +
+                        '<div class="mb-1.5">' + starRating(rating) + '</div>' +
+                        '<p class="text-sm text-gray-600 leading-relaxed">' + escapeHTML(content) + '</p>' +
+                    '</div>' +
+                '</div>';
+
+            return card;
+        }
+
+        // ==================== Schedule & Booking Modal ====================
+        function setupScheduleData(todayStr, endDateStr) {
+            // Build date chips for 7 days
+            var dates = [];
+            var start = new Date(todayStr);
+            var end = new Date(endDateStr);
+            var current = new Date(start);
+
+            while (current <= end) {
+                dates.push(new Date(current));
+                current.setDate(current.getDate() + 1);
+            }
+
+            // Build date chips
+            var dayNames = ['日', '一', '二', '三', '四', '五', '六'];
+            var chipsHTML = '';
+            dates.forEach(function (d, i) {
+                var dateStr = formatDateStr(d);
+                var dayName = dayNames[d.getDay()];
+                var month = d.getMonth() + 1;
+                var dayNum = d.getDate();
+
+                chipsHTML +=
+                    '<div class="date-chip" data-date="' + dateStr + '" data-index="' + i + '">' +
+                        '<span class="day-name">' + (i === 0 ? '今天' : dayName) + '</span>' +
+                        '<span class="day-num">' + dayNum + '</span>' +
+                        '<span class="day-month">' + month + '月</span>' +
+                    '</div>';
+            });
+            $('#dateChips').innerHTML = chipsHTML;
+
+            // Bind date chip clicks
+            var chips = document.querySelectorAll('#dateChips .date-chip');
+            chips.forEach(function (chip) {
+                chip.addEventListener('click', function () {
+                    var dateStr = chip.getAttribute('data-date');
+
+                    // Deselect all
+                    chips.forEach(function (c) { c.classList.remove('selected'); });
+
+                    // Select this
+                    chip.classList.add('selected');
+                    selectedDate = dateStr;
+                    selectedTimeSlot = null;
+                    selectedAppointmentTime = null;
+
+                    // Render time slots for this date
+                    renderTimeSlots(dateStr);
+                });
+            });
+
+            // Auto-select today
+            if (chips.length > 0) {
+                chips[0].click();
+            }
+        }
+
+        function renderTimeSlots(dateStr) {
+            var container = $('#timeSlotContainer');
+            console.log('renderTimeSlots called, dateStr:', dateStr, 'scheduleData:', scheduleData);
+
+            // Find schedule entries for this date
+            var daySchedules = [];
+            if (Array.isArray(scheduleData)) {
+                daySchedules = scheduleData.filter(function (s) {
+                    var sDate = s.date || s.scheduleDate || '';
+                    if (sDate && sDate !== dateStr) return false;
+
+                    // Accept entries with matching date or entries with no specific date (show all)
+                    // Actually, try to match by date field
+                    if (s.date && s.date !== dateStr) return false;
+
+                    return true;
+                });
+
+                // If filtering removed all, show all entries (server may not have filtered)
+                if (daySchedules.length === 0) {
+                    daySchedules = scheduleData.filter(function (s) {
+                        var d = s.date || s.scheduleDate || '';
+                        return d === dateStr || !d; // Include entries with no date as fallback
+                    });
+                }
+
+                // If still empty, show all from scheduleData with the matching date
+                if (daySchedules.length === 0) {
+                    daySchedules = scheduleData;
+                }
+            }
+
+            if (daySchedules.length === 0) {
+                console.log('daySchedules empty — showing 无排班. scheduleData:', scheduleData, 'dateStr:', dateStr);
+                container.innerHTML = '<p class="text-sm text-gray-400 w-full text-center py-4">该日期暂无可用时段</p>';
+                return;
+            }
+            console.log('daySchedules:', daySchedules);
+
+            // Generate time slots from startTime/endTime (30-min intervals)
+            var allSlots = [];
+            daySchedules.forEach(function (s) {
+                if (s.startTime && s.endTime) {
+                    var slots = generateTimeSlots(s.startTime, s.endTime, 30);
+                    slots.forEach(function (timeStr) {
+                        allSlots.push({ time: timeStr, booked: false });
+                    });
+                }
+            });
+
+            // Sort by time
+            allSlots.sort(function (a, b) {
+                return a.time.localeCompare(b.time);
+            });
+
+            // Deduplicate
+            var seen = {};
+            allSlots = allSlots.filter(function (s) {
+                if (seen[s.time]) return false;
+                seen[s.time] = true;
+                return true;
+            });
+
+            if (allSlots.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-400 w-full text-center py-4">该日期暂无可用时段</p>';
+                return;
+            }
+
+            // Render slots
+            var slotsHTML = '';
+            allSlots.forEach(function (slot) {
+                var cls = slot.booked ? 'time-slot disabled' : 'time-slot';
+                slotsHTML += '<div class="' + cls + '" data-time="' + slot.time + '"' + (slot.booked ? '' : '') + '>' + slot.time + (slot.booked ? ' (已约)' : '') + '</div>';
+            });
+            container.innerHTML = slotsHTML;
+
+            // Bind click events
+            var slotEls = container.querySelectorAll('.time-slot:not(.disabled)');
+            slotEls.forEach(function (el) {
+                el.addEventListener('click', function () {
+                    // Deselect all
+                    container.querySelectorAll('.time-slot').forEach(function (s) { s.classList.remove('selected'); });
+                    // Select this
+                    el.classList.add('selected');
+                    selectedTimeSlot = el.getAttribute('data-time');
+                    selectedAppointmentTime = selectedDate + 'T' + selectedTimeSlot + ':00';
+                });
+            });
+        }
+
+        // Generate 30-min slots from a time range
+        function generateTimeSlots(startTime, endTime, intervalMinutes) {
+            var slots = [];
+            var start = startTime.split(':');
+            var end = endTime.split(':');
+            var startMin = parseInt(start[0]) * 60 + parseInt(start[1]);
+            var endMin = parseInt(end[0]) * 60 + parseInt(end[1]);
+            intervalMinutes = intervalMinutes || 30;
+            for (var m = startMin; m + intervalMinutes <= endMin; m += intervalMinutes) {
+                var hh = Math.floor(m / 60);
+                var mm = m % 60;
+                slots.push(
+                    (hh < 10 ? '0' + hh : hh) + ':' + (mm < 10 ? '0' + mm : mm)
+                );
+            }
+            return slots;
+        }
+
+        // ==================== Event Bindings ====================
+        function bindEvents() {
+            // Chat button
+            $('#chatBtn').addEventListener('click', function () {
+                var name = counselorData ? (counselorData.name || '咨询师') : '咨询师';
+                window.location.href = 'chat.html?counselorId=' + counselorId + '&name=' + encodeURIComponent(name);
+            });
+
+            // Book button → open modal
+            $('#bookBtn').addEventListener('click', function () {
+                openBookingModal();
+            });
+
+            // Condition tag clicks
+            var conditionTagContainer = $('#conditionTagContainer');
+            conditionTagContainer.addEventListener('click', function (e) {
+                var btn = e.target.closest('.condition-tag-btn');
+                if (!btn) return;
+                var tag = btn.dataset.tag;
+                if (selectedCondition === tag) {
+                    selectedCondition = '';
+                } else {
+                    selectedCondition = tag;
+                }
+                // Update active states
+                conditionTagContainer.querySelectorAll('.condition-tag-btn').forEach(function (b) {
+                    b.classList.toggle('active', b.dataset.tag === selectedCondition);
+                });
+            });
+
+            // Close modal
+            $('#closeModalBtn').addEventListener('click', function () {
+                closeBookingModal();
+            });
+            bookingModal.addEventListener('click', function (e) {
+                if (e.target === bookingModal) closeBookingModal();
+            });
+
+            // Submit booking
+            $('#submitBookingBtn').addEventListener('click', function () {
+                submitBooking();
+            });
+
+            // Load more reviews
+            $('#reviewLoadMoreBtn').addEventListener('click', function () {
+                loadMoreReviews();
+            });
+        }
+
+        // ==================== Modal Controls ====================
+        function openBookingModal() {
+            bookingModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+
+            // Reset state
+            selectedDate = null;
+            selectedTimeSlot = null;
+            selectedAppointmentTime = null;
+            $('#serviceType').value = '';
+            $('#problemDesc').value = '';
+
+            // Re-select first date chip
+            var firstChip = document.querySelector('#dateChips .date-chip');
+            if (firstChip) firstChip.click();
+        }
+
+        function closeBookingModal() {
+            bookingModal.style.display = 'none';
+            document.body.style.overflow = '';
+            // Reset condition tags
+            selectedCondition = '';
+            var conditionTagContainer = $('#conditionTagContainer');
+            if (conditionTagContainer) {
+                conditionTagContainer.querySelectorAll('.condition-tag-btn').forEach(function (b) {
+                    b.classList.remove('active');
+                });
+            }
+        }
+
+        // ==================== Submit Booking ====================
+        function submitBooking() {
+            if (!selectedAppointmentTime) {
+                showToast('请选择预约时间', 'error');
+                return;
+            }
+
+            var serviceType = $('#serviceType').value;
+            if (!serviceType) {
+                showToast('请选择咨询类型', 'error');
+                return;
+            }
+
+            var problem = $('#problemDesc').value.trim();
+
+            // Combine condition tag + problem description
+            var fullProblem = '';
+            if (selectedCondition) {
+                fullProblem += '【' + selectedCondition + '】';
+            }
+            if (problem) {
+                fullProblem += (fullProblem ? ' ' : '') + problem;
+            }
+
+            var submitBtn = $('#submitBookingBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '提交中...';
+
+            var payload = {
+                counselorId: counselorId,
+                appointmentTime: selectedAppointmentTime,
+                serviceType: serviceType,
+                problem: fullProblem || ''
+            };
+
+            api.post('/api/appointment/create', payload)
+                .then(function (res) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '确认预约';
+
+                    if (res.code === 200 || res.code === 0 || res.success === true || res.id) {
+                        showToast('预约成功！', 'success');
+                        closeBookingModal();
+                    } else {
+                        var msg = res.msg || res.message || '预约失败，请重试';
+                        showToast(msg, 'error');
+                    }
+                })
+                .catch(function (err) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '确认预约';
+                    console.error('Booking error:', err);
+                    showToast('预约失败，请检查网络后重试', 'error');
+                });
+        }
+
+        // ==================== Load More Reviews ====================
+        function loadMoreReviews() {
+            if (isLoadingReviews) return;
+
+            isLoadingReviews = true;
+            var loadMoreBtn = $('#reviewLoadMoreBtn');
+            var loadingEl = $('#reviewLoading');
+
+            loadMoreBtn.style.display = 'none';
+            loadingEl.style.display = 'block';
+
+            reviewPage++;
+
+            api.get('/api/review/list?counselorId=' + counselorId + '&page=' + reviewPage + '&size=10')
+                .then(function (res) {
+                    loadingEl.style.display = 'none';
+
+                    var records = [];
+                    if (Array.isArray(res)) {
+                        records = res;
+                    } else if (res && res.data) {
+                        if (Array.isArray(res.data)) {
+                            records = res.data;
+                        } else if (res.data.records) {
+                            records = res.data.records;
+                            reviewTotalPages = res.data.pages || 1;
+                        }
+                    }
+
+                    if (records.length === 0) {
+                        loadMoreBtn.style.display = 'none';
+                        isLoadingReviews = false;
+                        return;
+                    }
+
+                    // Append to list
+                    var listEl = $('#reviewList');
+                    records.forEach(function (review) {
+                        listEl.appendChild(createReviewCard(review));
+                    });
+
+                    if (reviewPage < reviewTotalPages) {
+                        loadMoreBtn.style.display = 'block';
+                    } else {
+                        loadMoreBtn.style.display = 'none';
+                    }
+
+                    isLoadingReviews = false;
+                })
+                .catch(function (err) {
+                    loadingEl.style.display = 'none';
+                    loadMoreBtn.style.display = 'block';
+                    isLoadingReviews = false;
+                    reviewPage--;
+                    console.error('Failed to load more reviews:', err);
+                    showToast('加载更多评价失败', 'error');
+                });
+        }
+
+        // ==================== Helpers ====================
+        function formatDateStr(date) {
+            var y = date.getFullYear();
+            var m = (date.getMonth() + 1).toString().padStart(2, '0');
+            var d = date.getDate().toString().padStart(2, '0');
+            return y + '-' + m + '-' + d;
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+        function getAvatarColor(name) {
+            var colors = [
+                '#FF7E67', '#FF9A76', '#F9A826', '#6C5CE7',
+                '#00B894', '#0984E3', '#E17055', '#D63031',
+                '#FDCB6E', '#00CEC9', '#A29BFE', '#55EFC4'
+            ];
+            var hash = 0;
+            for (var i = 0; i < (name || '').length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return colors[Math.abs(hash) % colors.length];
+        }
+
+        function showError(msg) {
+            loadingState.style.display = 'none';
+            mainContent.style.display = 'none';
+            errorState.style.display = 'block';
+            $('#errorMsg').textContent = msg || '加载失败';
+        }
+
+        // ==================== Keyboard: Escape to close modal ====================
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && bookingModal.style.display === 'flex') {
+                closeBookingModal();
+            }
+        });
+
+        // ==================== Start ====================
+        init();
+
+    })();
+    </script>
+
+</body>
+</html>

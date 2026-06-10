@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理咨询系统 - 统计分析</title>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/admin.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+    <aside class="sidebar bg-gray-800 text-white w-64 h-screen fixed left-0 top-0 overflow-y-auto">
+        <div class="p-4 border-b border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="text-3xl">🧠</div>
+                <span class="font-bold text-xl">心理咨询系统</span>
+            </div>
+        </div>
+        
+        <nav class="p-4">
+            <div class="space-y-2">
+                <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-tachometer"></i>
+                    <span>控制台</span>
+                </a>
+                
+                <div class="menu-group">
+                    <button class="menu-toggle flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-700 rounded-lg">
+                        <i class="fa fa-users"></i>
+                        <span>用户管理</span>
+                        <i class="fa fa-chevron-down ml-auto"></i>
+                    </button>
+                    <div class="submenu ml-4 mt-2 space-y-1">
+                        <a href="users.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm">
+                            用户列表
+                        </a>
+                        <a href="counselors.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm">
+                            咨询师管理
+                        </a>
+                    </div>
+                </div>
+                
+                <a href="appointments.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-calendar"></i>
+                    <span>预约管理</span>
+                </a>
+                
+                <a href="records.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-file-text"></i>
+                    <span>咨询记录</span>
+                </a>
+                
+                <a href="schedule.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-clock-o"></i>
+                    <span>排班管理</span>
+                </a>
+                
+
+                
+                <a href="statistics.html" class="flex items-center gap-3 px-3 py-2 bg-purple-600 rounded-lg">
+                    <i class="fa fa-bar-chart"></i>
+                    <span>统计分析</span>
+                </a>
+                
+                <a href="tests.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-check-square"></i><span>测评管理</span></a>
+                <a href="science.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-book"></i><span>科普管理</span></a>
+                <a href="announcement.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-bullhorn"></i>
+                    <span>公告管理</span>
+                </a>
+            </div>
+        </nav>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
+            <button id="logoutBtn" class="flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-700 rounded-lg">
+                <i class="fa fa-sign-out"></i>
+                <span>退出登录</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-64 p-6">
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">统计分析</h1>
+                <p class="text-gray-500">查看系统数据统计</p>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <p class="text-gray-500 text-sm">总用户数</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2" id="totalUsers">0</p>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <p class="text-gray-500 text-sm">咨询师数</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2" id="totalCounselors">0</p>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <p class="text-gray-500 text-sm">预约总数</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2" id="totalAppointments">0</p>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <p class="text-gray-500 text-sm">满意度</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2" id="satisfaction">0</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <h3 class="font-semibold text-gray-800 mb-4">预约趋势（近7天）</h3>
+                <div class="flex items-end justify-between h-48" id="trendChart">
+                    <div class="flex flex-col items-center"><div class="w-10 bg-gray-300 rounded-t h-8"></div><span class="text-xs text-gray-500 mt-2">加载中...</span></div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <h3 class="font-semibold text-gray-800 mb-4">咨询类型分布</h3>
+                <div class="space-y-3" id="serviceDist">
+                    <div class="text-gray-400 text-sm">加载中...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
+            <h3 class="font-semibold text-gray-800 mb-4">患者病情分布</h3>
+            <div class="space-y-3" id="conditionDist">
+                <div class="text-gray-400 text-sm">加载中...</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 shadow-sm">
+            <h3 class="font-semibold text-gray-800 mb-4">咨询师排行</h3>
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-gray-200">
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">排名</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">咨询师</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">已完成</th>
+                        <th class="text-left py-3 px-4 text-gray-600 font-medium">预约总量</th>
+                    </tr>
+                </thead>
+                <tbody id="rankingBody">
+                    <tr><td colspan="4" class="text-center py-4 text-gray-400">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        if (!localStorage.getItem('admin_token')) { window.location.href = 'index.html'; }
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStatistics();
+            loadTrend();
+            loadServiceDistribution();
+            loadConditionDistribution();
+            loadCounselorRanking();
+            setupLogout();
+        });
+
+        function loadStatistics() {
+            fetch('http://localhost:8080/api/admin/statistics', {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200) {
+                    document.getElementById('totalUsers').textContent = (data.data.totalUsers || 0).toLocaleString();
+                    document.getElementById('totalCounselors').textContent = data.data.totalCounselors || 0;
+                    document.getElementById('totalAppointments').textContent = (data.data.totalAppointments || 0).toLocaleString();
+                    const avgRating = data.data.avgRating || data.data.averageRating || 0;
+                    document.getElementById('satisfaction').textContent = avgRating.toFixed(1) + '分';
+                }
+            })
+            .catch(err => console.error('加载统计数据失败:', err));
+        }
+
+        function loadTrend() {
+            fetch('http://localhost:8080/api/admin/statistics/trend?days=7', {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200 && data.data) {
+                    const trends = data.data;
+                    const maxCount = Math.max(...trends.map(t => t.count), 1);
+                    const weekdayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+                    const chartContainer = document.getElementById('trendChart');
+                    chartContainer.innerHTML = trends.map(t => {
+                        const date = new Date(t.date);
+                        const dayName = weekdayNames[date.getDay()];
+                        const height = Math.max((t.count / maxCount) * 140, 8);
+                        const barColor = t.count > 0 ? 'bg-blue-500' : 'bg-gray-300';
+                        return `<div class="flex flex-col items-center">
+                            <span class="text-xs text-gray-500 mb-1">${t.count}</span>
+                            <div class="w-10 ${barColor} rounded-t" style="height:${height}px"></div>
+                            <span class="text-xs text-gray-500 mt-2">${dayName}</span>
+                            <span class="text-xs text-gray-400">${t.date.substring(5)}</span>
+                        </div>`;
+                    }).join('');
+                }
+            })
+            .catch(err => console.error('加载趋势失败:', err));
+        }
+
+        function loadConditionDistribution() {
+            fetch('http://localhost:8080/api/admin/statistics/condition-distribution', {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200 && data.data) {
+                    const items = data.data;
+                    const maxCount = Math.max(...items.map(i => i.count), 1);
+                    const colors = [
+                        'bg-pink-500', 'bg-purple-500', 'bg-blue-500', 'bg-green-500',
+                        'bg-yellow-500', 'bg-red-400', 'bg-indigo-500', 'bg-teal-500',
+                        'bg-orange-400', 'bg-cyan-500', 'bg-rose-400', 'bg-amber-500'
+                    ];
+                    const container = document.getElementById('conditionDist');
+                    container.innerHTML = items.map((item, idx) => {
+                        const pct = Math.round(item.count / maxCount * 100);
+                        return `<div class="flex items-center gap-3">
+                            <span class="text-sm text-gray-600 w-20 text-right flex-shrink-0">${item.condition}</span>
+                            <div class="flex-1 h-7 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full ${colors[idx % colors.length]} rounded-full flex items-center justify-end pr-2 transition-all duration-500" style="width:${pct}%">
+                                    <span class="text-white text-xs font-medium">${item.count}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+            })
+            .catch(err => console.error('加载病情分布失败:', err));
+        }
+
+        function loadServiceDistribution() {
+            fetch('http://localhost:8080/api/admin/statistics/service-distribution', {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200 && data.data) {
+                    const items = data.data;
+                    const serviceNames = { 1: '电话咨询', 2: '网络咨询', 3: '门诊咨询' };
+                    const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500'];
+                    const total = items.reduce((sum, i) => sum + i.count, 0) || 1;
+                    const container = document.getElementById('serviceDist');
+                    container.innerHTML = items.map((item, idx) => {
+                        const pct = Math.round(item.count / total * 100);
+                        return `<div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm text-gray-600">${serviceNames[item.serviceType] || '其他'}</span>
+                                <span class="text-sm text-gray-600">${pct}%</span>
+                            </div>
+                            <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full ${colors[idx % 3]} rounded-full" style="width:${pct}%"></div>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+            })
+            .catch(err => console.error('加载服务分布失败:', err));
+        }
+
+        function loadCounselorRanking() {
+            fetch('http://localhost:8080/api/admin/statistics/counselor-ranking', {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200 && data.data) {
+                    const rankings = data.data;
+                    const tbody = document.getElementById('rankingBody');
+                    const medals = ['🏅', '🥈', '🥉'];
+                    tbody.innerHTML = rankings.map((r, idx) => {
+                        const badge = idx < 3 ? `<span class="text-lg">${medals[idx]}</span>` : `<span class="inline-block w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-xs leading-6 text-center font-bold">${idx + 1}</span>`;
+                        return `<tr class="border-b border-gray-100">
+                            <td class="py-3 px-4">${badge}</td>
+                            <td class="py-3 px-4 text-gray-800">${r.counselorName}</td>
+                            <td class="py-3 px-4 text-gray-800">${r.completedCount || 0}</td>
+                            <td class="py-3 px-4 text-gray-800">${r.appointmentCount || 0}</td>
+                        </tr>`;
+                    }).join('');
+                }
+            })
+            .catch(err => console.error('加载排行失败:', err));
+        }
+
+        function setupLogout() {
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('确定要退出登录吗？')) {
+                    localStorage.removeItem('admin_token');
+                    localStorage.removeItem('admin_user');
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

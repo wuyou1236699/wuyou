@@ -1,0 +1,132 @@
+<view class="container" wx:if="{{!loading && counselor}}">
+  <!-- 咨询师基本信息 -->
+  <view class="card">
+    <image class="avatar-large" src="{{counselor.avatar || '/images/default-avatar.png'}}"></image>
+    <view class="counselor-info">
+      <text class="name">{{counselor.name}}</text>
+      <text class="expertise">擅长：{{counselor.expertise}}</text>
+      <text class="qualification">{{counselor.qualification}}</text>
+      <text class="profile">{{counselor.profile}}</text>
+    </view>
+  </view>
+
+  <!-- 评分 -->
+  <view class="rating-info" wx:if="{{avgRating > 0}}">
+    <text class="avg-score">综合评分：{{avgRating}} 分</text>
+    <view class="stars-small">
+      <block wx:for="{{[1,2,3,4,5]}}" wx:key="*this">
+        <text class="star {{item <= avgRating ? 'star-filled' : 'star-empty'}}">★</text>
+      </block>
+    </view>
+  </view>
+  <view wx:else class="rating-info">暂无评分</view>
+
+  <!-- 评价列表 -->
+  <view class="reviews-section" wx:if="{{reviews.length > 0}}">
+    <view class="section-title">用户评价</view>
+    <view class="review-item" wx:for="{{reviews}}" wx:key="id" wx:for-item="review">
+      <view class="review-header">
+        <text class="reviewer">{{review.userName || '匿名用户'}}</text>
+        <view class="stars-small">
+          <block wx:for="{{[1,2,3,4,5]}}" wx:key="*this" wx:for-item="star">
+            <text class="star {{star <= review.rating ? 'star-filled' : 'star-empty'}}">★</text>
+          </block>
+        </view>
+      </view>
+      <text class="review-content">{{review.content}}</text>
+      <text class="review-time">{{formatReviewTime(review.createTime)}}</text>
+    </view>
+  </view>
+
+  <!-- 咨询案例展示 -->
+  <view class="cases-section" wx:if="{{cases.length > 0}}">
+    <view class="section-title">咨询案例</view>
+    <view class="case-item" wx:for="{{cases}}" wx:key="id">
+      <view class="case-header">
+        <text class="case-label">案例 {{index + 1}} · {{item.userName || '匿名用户'}}</text>
+        <text class="case-meta">{{item.duration}}分钟 / ¥{{item.fee}}</text>
+      </view>
+      <view class="case-block">
+        <text class="case-subtitle">问题描述</text>
+        <text class="case-text">{{item.problem}}</text>
+      </view>
+      <view class="case-block" wx:if="{{item.diagnosis}}">
+        <text class="case-subtitle">诊断评估</text>
+        <text class="case-text">{{item.diagnosis}}</text>
+      </view>
+      <view class="case-block" wx:if="{{item.suggestions}}">
+        <text class="case-subtitle">咨询方案</text>
+        <text class="case-text">{{item.suggestions}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 预约按钮（固定在底部） -->
+  <view class="bottom-bar">
+    <button class="btn-primary-fixed" bindtap="showBookDialog">立即预约</button>
+  </view>
+  <!-- 底部占位，防止内容被固定按钮遮挡 -->
+  <view class="bottom-placeholder"></view>
+  <!-- 预约弹窗 -->
+  <view class="dialog-mask" wx:if="{{showBookForm}}" bindtap="hideBookDialog"></view>
+  <view class="dialog" wx:if="{{showBookForm}}">
+    <view class="dialog-title">填写预约信息</view>
+
+    <!-- 日期选择器 -->
+    <view class="form-item">
+      <text>预约日期</text>
+      <picker mode="date" value="{{selectedDate}}" bindchange="onDateChange">
+        <view class="picker">{{selectedDate || '请选择日期'}}</view>
+      </picker>
+    </view>
+
+    <!-- 时间选择器 -->
+    <view class="form-item" wx:if="{{availableTimes.length > 0}}">
+      <text>预约时间</text>
+      <picker mode="selector" range="{{availableTimes}}" bindchange="onTimeChange">
+        <view class="picker">{{selectedTime || '请选择时间'}}</view>
+      </picker>
+    </view>
+
+    <!-- 服务类型 -->
+    <view class="form-item">
+      <text>服务类型</text>
+      <radio-group bindchange="onServiceTypeChange">
+        <label><radio value="1" checked/> 电话</label>
+        <label><radio value="2"/> 网络</label>
+        <label><radio value="3"/> 门诊</label>
+      </radio-group>
+    </view>
+
+    <!-- 病情选择 -->
+    <view class="form-item">
+      <text>病情类型</text>
+      <view class="condition-tags">
+        <view
+          class="condition-tag {{selectedCondition === item ? 'active' : ''}}"
+          wx:for="{{conditionTags}}"
+          wx:key="*this"
+          bindtap="selectCondition"
+          data-tag="{{item}}"
+        >{{item}}</view>
+      </view>
+    </view>
+
+    <!-- 问题描述 -->
+    <view class="form-item">
+      <text>问题简述（可选补充）</text>
+      <textarea bindinput="onProblemInput" placeholder="可以补充更多细节..." maxlength="200"></textarea>
+    </view>
+
+    <view class="dialog-buttons">
+      <button bindtap="hideBookDialog">取消</button>
+      <button bindtap="submitBooking">提交</button>
+    </view>
+  </view>
+</view>
+<view wx:else class="container">
+  <view class="empty-state">
+    <text class="empty-text">咨询师信息加载失败，请重试</text>
+    <button bindtap="onLoad">重新加载</button>
+  </view>
+</view>

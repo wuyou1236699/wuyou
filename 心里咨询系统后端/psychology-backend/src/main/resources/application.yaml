@@ -1,0 +1,44 @@
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-exception: true
+
+logging:
+  level:
+    com.psychology: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.web.client: DEBUG
+
+spring:
+  main:
+    allow-circular-references: true
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
+  web:
+    resources:
+      cache:
+        period: 0
+      static-locations: classpath:/static/
+  datasource:
+    url: jdbc:mysql://localhost:3306/psychology_db?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+wx:
+  appid: wx007e4f2eb71716c0
+  secret: f3daa194c4a8a357e86b3c7f844a78e6
+
+xf:
+  appid: efcbf953
+  apiSecret: YWQ1OTAwY2JkNTc5YTI0ZDY1Yzk3OTZm
+  apiKey: b20bd3c9ce14efff13d50f887c34d795
+  hostUrl: wss://spark-api.xf-yun.com/v4.0/chat   # Ultra-32K 使用 v4.0 地址
+

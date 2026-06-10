@@ -1,0 +1,179 @@
+/* 咨询案例展示 */
+.cases-section {
+  margin: 20rpx 24rpx;
+  padding: 24rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.05);
+}
+.case-item {
+  margin-bottom: 32rpx;
+  padding-bottom: 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.case-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+.case-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+.case-label {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #FF7E67;
+}
+.case-meta {
+  font-size: 22rpx;
+  color: #B8A0A0;
+}
+.case-block {
+  margin-bottom: 16rpx;
+}
+.case-subtitle {
+  display: block;
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #8C7373;
+  margin-bottom: 8rpx;
+}
+.case-text {
+  display: block;
+  font-size: 26rpx;
+  color: #3D2C2C;
+  line-height: 40rpx;
+}
+
+/* 预约弹窗样式 */
+.dialog-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 10;
+}
+.dialog {
+  position: fixed;
+  left: 5%;
+  right: 5%;
+  top: 50%;
+  transform: translateY(-50%);
+  max-height: 85vh;
+  overflow-y: scroll;
+  background: white;
+  border-radius: 20rpx;
+  padding: 32rpx 28rpx;
+  z-index: 11;
+}
+.dialog-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 24rpx;
+  text-align: center;
+  color: #3D2C2C;
+}
+.form-item {
+  margin-bottom: 20rpx;
+}
+.form-item > text {
+  display: block;
+  margin-bottom: 8rpx;
+  font-size: 26rpx;
+  color: #8C7373;
+}
+.form-item input, .form-item textarea {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 8rpx;
+  padding: 16rpx;
+  box-sizing: border-box;
+  font-size: 26rpx;
+}
+.form-item textarea {
+  height: 100rpx;
+}
+
+.condition-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 8rpx;
+}
+
+.condition-tag {
+  padding: 10rpx 20rpx;
+  border-radius: 32rpx;
+  background: #f5f5f5;
+  color: #666;
+  font-size: 24rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+}
+
+.condition-tag.active {
+  background: #e8f0fe;
+  color: #7C6FF7;
+  border-color: #7C6FF7;
+}
+.form-item radio-group {
+  display: flex;
+  gap: 24rpx;
+}
+.form-item radio-group label {
+  display: flex;
+  align-items: center;
+  font-size: 26rpx;
+  color: #3D2C2C;
+}
+.picker {
+  border: 1px solid #ddd;
+  border-radius: 8rpx;
+  padding: 16rpx;
+  background-color: #fff;
+  margin-top: 8rpx;
+  font-size: 26rpx;
+}
+.dialog-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24rpx;
+  gap: 20rpx;
+}
+.dialog-buttons button {
+  flex: 1;
+  margin: 0;
+}
+/* 固定在底部的预约按钮 */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  padding: 20rpx 40rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 20rpx rgba(0,0,0,0.06);
+  z-index: 9;
+}
+.btn-primary-fixed {
+  background: linear-gradient(135deg, #FF7E67, #E06952);
+  color: #fff;
+  border-radius: 48rpx;
+  padding: 24rpx 0;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 600;
+  border: none;
+  width: 100%;
+}
+.bottom-placeholder {
+  height: 140rpx;
+}
+.star-filled { color: #FFD700; }
+.star-empty { color: #ddd; }

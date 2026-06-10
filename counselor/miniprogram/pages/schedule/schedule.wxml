@@ -1,0 +1,29 @@
+<view class="container" wx:if="{{!loading}}">
+  <view class="schedule-calendar">
+    <view class="calendar-header">
+      <text class="calendar-title">我的排班</text>
+    </view>
+    <view class="schedule-list">
+      <view class="schedule-item" wx:for="{{scheduleList}}" wx:key="date">
+        <view class="date-section">
+          <text class="date-text">{{item.date ? (item.date.indexOf('-') > -1 ? item.date.substring(5) : item.date) : '未知日期'}}</text>
+        </view>
+        <view class="time-section">
+          <view class="time-item" wx:for="{{item.timeRanges}}" wx:key="index">
+            <text>{{item}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:if="{{scheduleList.length === 0}}">
+    <text class="empty-icon">📅</text>
+    <text class="empty-text">暂无排班安排</text>
+  </view>
+</view>
+
+<view class="loading-state" wx:if="{{loading}}">
+  <view class="loading-spinner"></view>
+  <text class="loading-text">加载中...</text>
+</view>

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理咨询系统 - 咨询师管理</title>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/admin.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+    <aside class="sidebar bg-gray-800 text-white w-64 h-screen fixed left-0 top-0 overflow-y-auto">
+        <div class="p-4 border-b border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="text-3xl">🧠</div>
+                <span class="font-bold text-xl">心理咨询系统</span>
+            </div>
+        </div>
+        
+        <nav class="p-4">
+            <div class="space-y-2">
+                <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-tachometer"></i>
+                    <span>控制台</span>
+                </a>
+                
+                <div class="menu-group">
+                    <button class="menu-toggle flex items-center gap-3 px-3 py-2 w-full bg-purple-600 rounded-lg">
+                        <i class="fa fa-users"></i>
+                        <span>用户管理</span>
+                        <i class="fa fa-chevron-down ml-auto"></i>
+                    </button>
+                    <div class="submenu ml-4 mt-2 space-y-1" style="display:block;">
+                        <a href="users.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm">
+                            用户列表
+                        </a>
+                        <a href="counselors.html" class="block px-3 py-2 hover:bg-gray-700 rounded-lg text-sm bg-gray-700">
+                            咨询师管理
+                        </a>
+                    </div>
+                </div>
+                
+                <a href="appointments.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-calendar"></i>
+                    <span>预约管理</span>
+                </a>
+                
+                <a href="records.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-file-text"></i>
+                    <span>咨询记录</span>
+                </a>
+                
+                <a href="schedule.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-clock-o"></i>
+                    <span>排班管理</span>
+                </a>
+                
+
+                
+                <a href="statistics.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-bar-chart"></i>
+                    <span>统计分析</span>
+                </a>
+                
+                <a href="tests.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-check-square"></i><span>测评管理</span></a>
+                <a href="science.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg"><i class="fa fa-book"></i><span>科普管理</span></a>
+                <a href="announcement.html" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 rounded-lg">
+                    <i class="fa fa-bullhorn"></i>
+                    <span>公告管理</span>
+                </a>
+            </div>
+        </nav>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
+            <button id="logoutBtn" class="flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-700 rounded-lg">
+                <i class="fa fa-sign-out"></i>
+                <span>退出登录</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-64 p-6">
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">咨询师管理</h1>
+                <p class="text-gray-500">管理平台咨询师信息</p>
+            </div>
+            <button id="addCounselorBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-2">
+                <i class="fa fa-plus"></i>
+                添加咨询师
+            </button>
+        </header>
+
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex gap-4 mb-6">
+                <div class="flex-1 relative">
+                    <input type="text" id="searchInput" placeholder="搜索咨询师姓名、专业..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <option value="">全部状态</option>
+                    <option value="online">在线</option>
+                    <option value="offline">离线</option>
+                    <option value="busy">忙碌</option>
+                </select>
+                <button id="searchBtn" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                    搜索
+                </button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i class="fa fa-user-md text-purple-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">总咨询师</p>
+                            <p class="text-2xl font-bold text-gray-800" id="totalCounselors">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                            <i class="fa fa-circle text-green-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">在线</p>
+                            <p class="text-2xl font-bold text-gray-800" id="onlineCount">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                            <i class="fa fa-star text-orange-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">平均评分</p>
+                            <p class="text-2xl font-bold text-gray-800" id="avgRating">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="text-left py-3 px-4 text-gray-600 font-medium">咨询师ID</th>
+                            <th class="text-left py-3 px-4 text-gray-600 font-medium">姓名</th>
+                            <th class="text-left py-3 px-4 text-gray-600 font-medium">专业</th>
+                            <th class="text-left py-3 px-4 text-gray-600 font-medium">状态</th>
+                            <th class="text-left py-3 px-4 text-gray-600 font-medium">评分</th>
+                            <th class="text-left py-3 px-4 text-gray-600 font-medium">咨询次数</th>
+                            <th class="text-left py-3 px-4 text-gray-600 font-medium">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="counselorTableBody">
+                        <tr><td colspan="7" class="text-center py-8 text-gray-500">加载中...</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="flex justify-between items-center mt-6" id="pagination">
+                    <p class="text-gray-500">显示 1-1 条，共 24 条</p>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100" id="prevPage">上一页</button>
+                        <button class="px-3 py-1 bg-purple-600 text-white rounded" id="currentPage">1</button>
+                        <button class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100" id="nextPage">下一页</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="counselorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl w-full max-w-lg p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modalTitle" class="text-xl font-bold text-gray-800">添加咨询师</h2>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="counselorForm">
+                <input type="hidden" id="counselorId">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">姓名</label>
+                    <input type="text" id="counselorName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">手机号</label>
+                    <input type="tel" id="counselorPhone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">密码</label>
+                    <input type="password" id="counselorPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <p class="text-xs text-gray-400 mt-1">编辑时留空则不修改密码</p>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">专业领域</label>
+                    <input type="text" id="counselorExpertise" placeholder="多个专业用逗号分隔" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">简介</label>
+                    <textarea id="counselorDesc" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">状态</label>
+                    <select id="counselorStatus" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="online">在线</option>
+                        <option value="offline">离线</option>
+                        <option value="busy">忙碌</option>
+                    </select>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" id="cancelBtn" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+                    <button type="submit" id="saveBtn" class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">保存</button>
+                    <button type="button" id="closeViewBtn" class="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 hidden">关闭</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        if (!localStorage.getItem('admin_token')) { window.location.href = 'index.html'; }
+        let currentPage = 1;
+        let totalPages = 1;
+        let totalRecords = 0;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCounselors();
+            loadStats();
+            setupLogout();
+            setupModal();
+            setupPagination();
+            setupSearch();
+        });
+
+        function setupSearch() {
+            document.getElementById('searchBtn').addEventListener('click', function() {
+                currentPage = 1;
+                loadCounselors(1);
+            });
+        }
+
+        function loadCounselors(page = 1) {
+            const keyword = document.getElementById('searchInput').value.trim();
+            let url = `http://localhost:8080/api/admin/counselors?page=${page}&size=10`;
+            if (keyword) url += '&keyword=' + encodeURIComponent(keyword);
+            fetch(url, {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200 && data.data.records) {
+                    currentPage = data.data.page || 1;
+                    totalRecords = data.data.total || 0;
+                    totalPages = Math.ceil(totalRecords / 10);
+
+                    const tbody = document.getElementById('counselorTableBody');
+                    tbody.innerHTML = data.data.records.map(counselor => {
+                        const counselorId = 'C' + String(counselor.id).padStart(3, '0');
+                        const statusMap = {
+                            1: { label: '在线', class: 'bg-green-100 text-green-600' },
+                            0: { label: '离线', class: 'bg-gray-100 text-gray-600' },
+                            2: { label: '忙碌', class: 'bg-orange-100 text-orange-600' }
+                        };
+                        const status = statusMap[counselor.status] || statusMap[0];
+                        return `
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="py-3 px-4 text-gray-800">${counselorId}</td>
+                                <td class="py-3 px-4 text-gray-800">${counselor.name}</td>
+                                <td class="py-3 px-4 text-gray-800">${counselor.expertise || '-'}</td>
+                                <td class="py-3 px-4"><span class="px-2 py-1 ${status.class} text-xs rounded-full flex items-center gap-1"><i class="fa fa-circle"></i>${status.label}</span></td>
+                                <td class="py-3 px-4 flex items-center gap-1"><i class="fa fa-star text-yellow-500"></i> ${counselor.rating || 0}</td>
+                                <td class="py-3 px-4 text-gray-800">${counselor.consultCount || 0}</td>
+                                <td class="py-3 px-4">
+                                    <button class="text-blue-600 hover:text-blue-800 mr-3" onclick="viewCounselor('${counselor.id}')">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+                                    <button class="text-orange-600 hover:text-orange-800 mr-3" onclick="editCounselor('${counselor.id}')">
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button class="text-red-600 hover:text-red-800" onclick="deleteCounselor('${counselor.id}')">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+
+                    updatePagination();
+                }
+            })
+            .catch(err => console.error('加载咨询师失败:', err));
+        }
+
+        function updatePagination() {
+            const pagination = document.getElementById('pagination');
+            const start = (currentPage - 1) * 10 + 1;
+            const end = Math.min(currentPage * 10, totalRecords);
+            pagination.querySelector('p').textContent = `显示 ${start}-${end} 条，共 ${totalRecords} 条`;
+            document.getElementById('currentPage').textContent = currentPage;
+            document.getElementById('prevPage').disabled = currentPage <= 1;
+            document.getElementById('nextPage').disabled = currentPage >= totalPages;
+        }
+
+        function setupPagination() {
+            document.getElementById('prevPage').addEventListener('click', function() {
+                if (currentPage > 1) {
+                    loadCounselors(currentPage - 1);
+                }
+            });
+            document.getElementById('nextPage').addEventListener('click', function() {
+                if (currentPage < totalPages) {
+                    loadCounselors(currentPage + 1);
+                }
+            });
+        }
+
+        function loadStats() {
+            fetch('http://localhost:8080/api/admin/statistics', {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200) {
+                    document.getElementById('totalCounselors').textContent = data.data.totalCounselors ?? '0';
+                    document.getElementById('onlineCount').textContent = data.data.onlineCounselors ?? '0';
+                    document.getElementById('avgRating').textContent = data.data.avgRating ?? '0';
+                }
+            })
+            .catch(err => console.error('加载统计数据失败:', err));
+        }
+
+        function setupLogout() {
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('确定要退出登录吗？')) {
+                    localStorage.removeItem('admin_token');
+                    localStorage.removeItem('admin_user');
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+
+        function setupModal() {
+            document.getElementById('addCounselorBtn').addEventListener('click', function() {
+                document.getElementById('modalTitle').textContent = '添加咨询师';
+                document.getElementById('counselorId').value = '';
+                document.getElementById('counselorName').value = '';
+                document.getElementById('counselorPhone').value = '';
+                document.getElementById('counselorPassword').value = '';
+                document.getElementById('counselorExpertise').value = '';
+                document.getElementById('counselorDesc').value = '';
+                document.getElementById('counselorStatus').value = 'offline';
+                setFormEditable(true);
+                document.getElementById('counselorModal').style.display = 'flex';
+            });
+
+            document.getElementById('closeModal').addEventListener('click', function() {
+                document.getElementById('counselorModal').style.display = 'none';
+            });
+
+            document.getElementById('closeViewBtn').addEventListener('click', function() {
+                document.getElementById('counselorModal').style.display = 'none';
+            });
+
+            document.getElementById('cancelBtn').addEventListener('click', function() {
+                document.getElementById('counselorModal').style.display = 'none';
+            });
+
+            document.getElementById('counselorForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const data = {
+                    name: document.getElementById('counselorName').value,
+                    phone: document.getElementById('counselorPhone').value,
+                    expertise: document.getElementById('counselorExpertise').value,
+                    description: document.getElementById('counselorDesc').value,
+                    status: document.getElementById('counselorStatus').value
+                };
+                if (document.getElementById('counselorPassword').value) {
+                    data.password = document.getElementById('counselorPassword').value;
+                }
+
+                const counselorId = document.getElementById('counselorId').value;
+                const url = counselorId ? `/api/admin/counselors/${counselorId}` : '/api/admin/counselors';
+                const method = counselorId ? 'PUT' : 'POST';
+
+                fetch('http://localhost:8080' + url, {
+                    method,
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token')
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        alert(counselorId ? '修改成功' : '添加成功');
+                        document.getElementById('counselorModal').style.display = 'none';
+                        loadCounselors();
+                        loadStats();
+                    } else {
+                        alert(data.msg || '操作失败');
+                    }
+                })
+                .catch(err => {
+                    console.error('操作失败:', err);
+                    alert('操作失败');
+                });
+            });
+        }
+
+        function setFormEditable(editable) {
+            ['counselorName', 'counselorPhone', 'counselorPassword', 'counselorExpertise', 'counselorDesc', 'counselorStatus'].forEach(function(id) {
+                document.getElementById(id).disabled = !editable;
+            });
+            document.getElementById('saveBtn').style.display = editable ? '' : 'none';
+            document.getElementById('closeViewBtn').style.display = editable ? 'none' : '';
+            document.getElementById('cancelBtn').style.display = editable ? '' : 'none';
+        }
+
+        function viewCounselor(id) {
+            fetch('http://localhost:8080/api/admin/counselors/' + id, {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200) {
+                    const counselor = data.data;
+                    document.getElementById('modalTitle').textContent = '查看咨询师';
+                    document.getElementById('counselorId').value = counselor.id;
+                    document.getElementById('counselorName').value = counselor.name;
+                    document.getElementById('counselorPhone').value = counselor.phone || '';
+                    document.getElementById('counselorPassword').value = '';
+                    document.getElementById('counselorExpertise').value = counselor.expertise || '';
+                    document.getElementById('counselorDesc').value = counselor.description || '';
+                    document.getElementById('counselorStatus').value = counselor.status || 'offline';
+                    setFormEditable(false);
+                    document.getElementById('counselorModal').style.display = 'flex';
+                }
+            })
+            .catch(err => console.error('查看咨询师失败:', err));
+        }
+
+        function editCounselor(id) {
+            fetch('http://localhost:8080/api/admin/counselors/' + id, {
+                headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200) {
+                    const counselor = data.data;
+                    document.getElementById('modalTitle').textContent = '编辑咨询师';
+                    document.getElementById('counselorId').value = counselor.id;
+                    document.getElementById('counselorName').value = counselor.name;
+                    document.getElementById('counselorPhone').value = counselor.phone || '';
+                    document.getElementById('counselorPassword').value = '';
+                    document.getElementById('counselorExpertise').value = counselor.expertise || '';
+                    document.getElementById('counselorDesc').value = counselor.description || '';
+                    document.getElementById('counselorStatus').value = counselor.status || 'offline';
+                    setFormEditable(true);
+                    document.getElementById('counselorModal').style.display = 'flex';
+                }
+            })
+            .catch(err => console.error('获取咨询师失败:', err));
+        }
+
+        function deleteCounselor(id) {
+            if (confirm('确定要删除这个咨询师吗？')) {
+                fetch('http://localhost:8080/api/admin/counselors/' + id, {
+                    method: 'DELETE',
+                    headers: { Authorization: 'Bearer ' + localStorage.getItem('admin_token') }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        alert('删除成功');
+                        loadCounselors();
+                        loadStats();
+                    } else {
+                        alert(data.msg || '删除失败');
+                    }
+                })
+                .catch(err => {
+                    console.error('删除失败:', err);
+                    alert('删除失败');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

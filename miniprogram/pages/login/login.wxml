@@ -1,0 +1,25 @@
+<view class="container">
+  <view class="header">
+    <text class="title">心理咨询系统</text>
+    <text class="subtitle">专业心理咨询，守护心理健康</text>
+  </view>
+
+  <view class="login-form">
+    <view class="form-item">
+      <text class="label">用户名</text>
+      <input class="input" placeholder="请输入用户名" value="{{username}}" bindinput="onUsernameInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="label">密码</text>
+      <input class="input" password placeholder="请输入密码" value="{{password}}" bindinput="onPasswordInput" />
+    </view>
+
+    <button class="btn-login" bindtap="handleLogin">登录</button>
+    
+    <view class="btn-register" bindtap="goToRegister">
+      <text class="register-text">还没有账号？</text>
+      <text class="register-link">立即注册</text>
+    </view>
+  </view>
+</view>

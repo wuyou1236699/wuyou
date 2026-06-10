@@ -1,0 +1,19 @@
+{
+  "name": "miniprogram-ts-less-quickstart",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "miniprogram-api-typings": "^2.8.3-1"
+  },
+  "main": "index.js",
+  "type": "commonjs",
+  "dependencies": {
+    "@tencentcloud/chat": "^3.6.6",
+    "@tencentcloud/chat-uikit-wechat": "^2.4.4",
+    "@tencentcloud/lite-chat": "^4.3.0"
+  }
+}

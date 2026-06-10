@@ -1,0 +1,53 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/register/register",
+    "pages/index/index",
+    "pages/counselor/detail/detail",
+    "pages/appointment/book/book",
+    "pages/appointment/my/my",
+    "pages/ai/chat/chat",
+    "pages/user/user",
+    "pages/chat/chat",
+    "pages/science/index",
+    "pages/science/detail",
+    "pages/test/index",
+    "pages/test/detail",
+    "pages/test/history",
+    "pages/review/review",
+    "pages/my-reviews/my-reviews",
+    "pages/consultation-record/consultation-record"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#FF7E67",
+    "navigationBarTitleText": "心理咨询",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#FDF8F5"
+  },
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#FF7E67",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/science/index",
+        "text": "科普"
+      },
+      {
+        "pagePath": "pages/test/index",
+        "text": "测评"
+      },
+      {
+        "pagePath": "pages/user/user",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

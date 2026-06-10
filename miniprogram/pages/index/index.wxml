@@ -1,0 +1,82 @@
+<view class="container">
+  <view class="header">
+    <text class="header-title">心理咨询服务</text>
+    <text class="header-subtitle">专业咨询师，为您提供贴心服务</text>
+  </view>
+
+  <view class="user-status-card {{isOnline ? 'online' : 'offline'}}">
+    <view class="status-indicator-wrapper">
+      <view class="pulse-ring {{isOnline ? 'active' : ''}}"></view>
+      <view class="status-dot-large {{isOnline ? 'online' : 'offline'}}"></view>
+    </view>
+    <view class="status-text-wrapper">
+      <text class="status-main-text">{{isOnline ? '在线' : '离线'}}</text>
+      <text class="status-desc-text">{{isOnline ? '可以接收咨询师消息' : '无法接收新消息'}}</text>
+    </view>
+  </view>
+
+  <view class="announcement-bar" wx:if="{{announcements.length > 0}}" bindtap="goToAnnouncement" data-id="{{announcements[0].id}}">
+    <text class="announcement-icon">📢</text>
+    <text class="announcement-text">{{announcements[0].title}}</text>
+  </view>
+
+
+  <view class="quick-access">
+    <view class="quick-item" bindtap="goToBook">
+      <text class="quick-icon">📝</text>
+      <text class="quick-text">预约咨询</text>
+    </view>
+    <view class="quick-item" bindtap="goToAppointment">
+      <text class="quick-icon">📅</text>
+      <text class="quick-text">我的预约</text>
+    </view>
+  </view>
+
+  <block wx:if="{{loading && counselors.length === 0}}">
+    <view class="loading-container">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </block>
+  <block wx:else>
+    <view class="section-title">
+      <text>咨询师列表</text>
+    </view>
+    <view class="counselor-list">
+      <view class="counselor-card" wx:for="{{counselors}}" wx:key="id" bindtap="goToDetail" data-id="{{item.id}}">
+        <view class="card-header">
+          <view class="avatar-wrapper">
+            <image class="avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+            <view class="online-status {{item.isOnline ? 'online' : 'offline'}}">
+              <view class="status-dot"></view>
+              <text class="status-text">{{item.isOnline ? '在线' : '离线'}}</text>
+            </view>
+          </view>
+          <view class="header-info">
+            <text class="name">{{item.name}}</text>
+            <text class="title">{{item.title}}</text>
+            <view class="rating-info">
+              <text class="rating">⭐ {{item.avgRating || 0}}分</text>
+              <text class="count">预约 {{item.appointmentCount || 0}}次</text>
+            </view>
+          </view>
+        </view>
+        <view class="card-body">
+          <text class="expertise">{{item.expertise}}</text>
+        </view>
+        <view class="card-footer">
+          <text class="price">{{item.displayPrice || '面议'}}</text>
+          <button class="consult-btn" hover-class="btn-hover" catchtap="goToDetail" data-id="{{item.id}}">查看详情</button>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{loading && counselors.length > 0}}" class="loading-more">
+      <view class="loading-spinner small"></view>
+      <text>加载更多...</text>
+    </view>
+    <view wx:if="{{!loading && counselors.length === 0}}" class="empty-state">
+      <text class="empty-icon">📭</text>
+      <text class="empty-text">暂无咨询师</text>
+    </view>
+  </block>
+</view>
