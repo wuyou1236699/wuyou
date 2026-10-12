@@ -34,7 +34,7 @@ mybatis-plus:
 
 wx:
   appid: wx007e4f2eb71716c0
-  secret: f3daa194c4a8a357e86b3c7f844a78e6
+  secret: ""
 
 xf:
   appid: efcbf953
