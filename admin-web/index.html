@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理咨询系统 - 登录</title>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/admin.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 p-8 text-white text-center">
+            <div class="text-5xl mb-4">🧠</div>
+            <h1 class="text-2xl font-bold">心理咨询系统</h1>
+
+        </div>
+        
+        <div class="p-8">
+            <form id="loginForm">
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">用户名</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                            <i class="fa fa-user"></i>
+                        </span>
+                        <input type="text" id="username" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition" placeholder="请输入用户名">
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">密码</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                            <i class="fa fa-lock"></i>
+                        </span>
+                        <input type="password" id="password" class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition" placeholder="请输入密码">
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer" id="togglePassword">
+                            <i class="fa fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition flex items-center justify-center gap-2">
+                    <i class="fa fa-sign-in"></i>
+                    登录
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center text-gray-500 text-sm">
+                <p>忘记密码？请联系管理员</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const password = document.getElementById('password');
+            const icon = this.querySelector('i');
+            if (password.type === 'password') {
+                password.type = 'text';
+                icon.className = 'fa fa-eye-slash';
+            } else {
+                password.type = 'password';
+                icon.className = 'fa fa-eye';
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                alert('请输入用户名和密码');
+                return;
+            }
+            
+            fetch('http://localhost:8080/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200) {
+                    localStorage.setItem('admin_token', data.data);
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert(data.msg || '登录失败');
+                }
+            })
+            .catch(err => {
+                console.error('登录失败:', err);
+                alert('登录失败，请检查网络连接');
+            });
+        });
+    </script>
+</body>
+</html>

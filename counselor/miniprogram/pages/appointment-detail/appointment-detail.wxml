@@ -1,0 +1,70 @@
+<view class="container">
+  <view class="detail-card" wx:if="{{appointment.id}}">
+    <view class="card-header">
+      <text class="header-title">预约详情</text>
+    </view>
+
+    <view class="info-section">
+      <view class="info-row">
+        <text class="info-label">预约编号</text>
+        <text class="info-value">{{appointment.id}}</text>
+      </view>
+
+      <view class="info-row">
+        <text class="info-label">用户姓名</text>
+        <text class="info-value">{{appointment.userName || '未知用户'}}</text>
+      </view>
+
+      <view class="info-row">
+        <text class="info-label">服务类型</text>
+        <text class="info-value service-tag {{appointment.serviceType === 1 ? 'phone' : (appointment.serviceType === 2 ? 'online' : 'clinic')}}">
+          {{appointment.serviceTypeText}}
+        </text>
+      </view>
+
+      <view class="info-row">
+        <text class="info-label">预约时间</text>
+        <text class="info-value">{{appointment.dateText}} {{appointment.timeText}}</text>
+      </view>
+
+      <view class="info-row">
+        <text class="info-label">预约状态</text>
+        <text class="info-value status-tag {{appointment.status === 0 ? 'pending' : (appointment.status === 1 ? 'confirmed' : (appointment.status === 2 ? 'completed' : 'cancelled'))}}">
+          {{appointment.statusText}}
+        </text>
+      </view>
+
+      <view class="info-row" wx:if="{{appointment.problem}}">
+        <text class="info-label">问题描述</text>
+        <text class="info-value problem-text">{{appointment.problem}}</text>
+      </view>
+
+      <view class="info-row" wx:if="{{appointment.createTime}}">
+        <text class="info-label">创建时间</text>
+        <text class="info-value">{{appointment.createTime}}</text>
+      </view>
+    </view>
+
+    <view class="action-section">
+      <button class="btn-start" wx:if="{{appointment.status === 1 && appointment.serviceType !== 3}}" bindtap="startConsultation">
+        开始咨询
+      </button>
+      <button class="btn-complete" wx:if="{{appointment.status === 1}}" bindtap="completeConsultation">
+        完成咨询
+      </button>
+      <button class="btn-cancel" wx:if="{{appointment.status !== 3 && appointment.status !== 2}}" bindtap="cancelAppointment">
+        取消预约
+      </button>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:else>
+    <text class="empty-icon">📅</text>
+    <text class="empty-text">暂无预约信息</text>
+  </view>
+
+  <view class="loading-state" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>

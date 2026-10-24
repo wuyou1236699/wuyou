@@ -1,0 +1,23 @@
+package com.psychology.psychology_backend;
+
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.client.RestTemplate;
+
+@SpringBootApplication
+@MapperScan("com.psychology.psychology_backend.mapper")
+@EnableScheduling
+public class PsychologyBackendApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(PsychologyBackendApplication.class, args);
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}

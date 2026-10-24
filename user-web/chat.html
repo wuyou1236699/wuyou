@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>咨询对话</title>
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        .bg-chat { background-color: #FDF8F5; }
+        .bubble-user { background-color: #FF7E67; }
+        .bubble-counselor { background-color: #FFFFFF; border: 1px solid #E5E7EB; }
+        .online-dot {
+            width: 8px; height: 8px;
+            background-color: #22C55E;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .offline-dot {
+            width: 8px; height: 8px;
+            background-color: #9CA3AF;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .message-area { scroll-behavior: smooth; }
+        .message-area::-webkit-scrollbar { width: 4px; }
+        .message-area::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 2px; }
+        .message-area::-webkit-scrollbar-track { background: transparent; }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin { animation: spin 0.8s linear infinite; }
+        .delete-btn { opacity: 0; transition: opacity 0.2s; }
+        .message-row:hover .delete-btn { opacity: 1; }
+        .bubble-user .delete-btn { color: rgba(255,255,255,0.7); }
+        .bubble-user .delete-btn:hover { color: #fff; }
+        .bubble-counselor .delete-btn { color: #9CA3AF; }
+        .bubble-counselor .delete-btn:hover { color: #EF4444; }
+
+        /* Long press ripple for mobile */
+        @media (hover: none) {
+            .message-row:active .delete-btn { opacity: 1; }
+        }
+
+        /* Date divider */
+        .date-divider {
+            display: flex; align-items: center; gap: 12px;
+            margin: 12px 0;
+        }
+        .date-divider::before,
+        .date-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #E5E7EB;
+        }
+        .date-divider span {
+            font-size: 12px;
+            color: #9CA3AF;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body class="bg-chat min-h-screen">
+
+    <div class="max-w-[600px] mx-auto min-h-screen flex flex-col bg-chat relative shadow-lg">
+
+        <!-- Header -->
+        <header class="sticky top-0 z-10 bg-white shadow-sm px-4 py-3 flex items-center gap-3">
+            <button id="backBtn" class="text-gray-600 hover:text-gray-800 text-lg px-1 flex-shrink-0">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span class="text-sm ml-1">返回</span>
+            </button>
+            <div id="counselorAvatar" class="w-10 h-10 rounded-full bg-[#FFE5E0] flex items-center justify-center text-[#FF7E67] font-bold text-lg flex-shrink-0">
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                    <span id="counselorName" class="font-medium text-gray-800 truncate">咨询师</span>
+                    <span id="onlineIndicator" class="offline-dot"></span>
+                </div>
+                <p id="onlineStatusText" class="text-xs text-gray-400">离线</p>
+            </div>
+        </header>
+
+        <!-- Message Area -->
+        <main id="messageArea" class="flex-1 overflow-y-auto px-4 py-4 message-area">
+
+            <!-- Load earlier messages button -->
+            <div id="loadMoreContainer" class="text-center mb-4 hidden">
+                <button id="loadMoreBtn" class="text-sm text-gray-500 hover:text-[#FF7E67] px-5 py-1.5 rounded-full border border-gray-200 bg-white transition-colors">
+                    加载更早消息
+                </button>
+            </div>
+
+            <!-- Date dividers + Messages container -->
+            <div id="messagesContainer" class="flex flex-col gap-1">
+                <!-- Messages rendered here -->
+            </div>
+
+            <!-- Empty state -->
+            <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20 text-gray-400">
+                <i class="fa-regular fa-comments text-5xl mb-4"></i>
+                <p class="text-sm">开始对话吧</p>
+            </div>
+
+            <!-- Loading spinner -->
+            <div id="loadingSpinner" class="flex justify-center py-10">
+                <div class="w-8 h-8 border-2 border-[#FF7E67] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        </main>
+
+        <!-- Ended notice -->
+        <div id="endedNotice" class="sticky bottom-0 bg-yellow-50 border-t border-yellow-200 px-4 py-3 text-center text-sm text-yellow-700" style="display:none;">
+            <i class="fa-solid fa-circle-exclamation mr-1"></i> <span id="endedNoticeText">预约已结束，不能继续发送消息</span>
+        </div>
+
+        <!-- Input Area -->
+        <div id="inputArea" class="sticky bottom-0 bg-white border-t border-gray-100 px-4 py-3">
+            <div class="flex items-center gap-2">
+                <input
+                    id="messageInput"
+                    type="text"
+                    placeholder="输入消息..."
+                    class="flex-1 px-4 py-2.5 bg-gray-50 rounded-full border border-gray-200 focus:outline-none focus:border-[#FF7E67] focus:ring-1 focus:ring-[#FF7E67] text-sm transition-shadow"
+                    maxlength="500"
+                    autocomplete="off"
+                >
+                <button id="sendBtn" class="w-10 h-10 rounded-full bubble-user text-white flex items-center justify-center hover:opacity-90 active:opacity-80 transition-opacity flex-shrink-0 shadow-sm">
+                    <i class="fa-solid fa-paper-plane text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Delete confirmation modal (hidden by default) -->
+    <div id="deleteModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div class="bg-white rounded-xl shadow-xl px-6 py-5 mx-4 max-w-sm w-full">
+            <p class="text-gray-800 text-center mb-4">确定要删除这条消息吗？</p>
+            <div class="flex gap-3">
+                <button id="deleteCancel" class="flex-1 py-2 rounded-lg border border-gray-200 text-gray-600 text-sm hover:bg-gray-50 transition-colors">
+                    取消
+                </button>
+                <button id="deleteConfirm" class="flex-1 py-2 rounded-lg bg-red-500 text-white text-sm hover:bg-red-600 transition-colors">
+                    删除
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/websocket.js"></script>
+    <script src="js/utils.js"></script>
+
+    <script>
+    (function() {
+        // ──────────────────────────────────────
+        // State
+        // ──────────────────────────────────────
+        let counselorId = null;
+        let counselorName = '';
+        let appointmentId = null;  // null=direct chat, >0=appointment chat
+        let userId = null;
+        let currentPage = 1;
+        let hasMore = false;
+        let isLoadingMore = false;
+        let isLoadingInitial = true;
+        let messageList = [];        // sorted oldest-first for display
+        let knownMessageIds = new Set();
+        let pollingTimer = null;
+        let wsCheckTimer = null;
+        let wsStatusInterval = null;
+        let wsActive = false;       // set to true once WS connects
+        let pendingDeleteId = null;
+
+        // ──────────────────────────────────────
+        // DOM refs
+        // ──────────────────────────────────────
+        const $ = (sel) => document.querySelector(sel);
+        const $$ = (sel) => document.querySelectorAll(sel);
+
+        const messageArea = $('#messageArea');
+        const messagesContainer = $('#messagesContainer');
+        const loadMoreContainer = $('#loadMoreContainer');
+        const loadMoreBtn = $('#loadMoreBtn');
+        const emptyState = $('#emptyState');
+        const loadingSpinner = $('#loadingSpinner');
+        const messageInput = $('#messageInput');
+        const sendBtn = $('#sendBtn');
+        const backBtn = $('#backBtn');
+        const counselorNameEl = $('#counselorName');
+        const onlineIndicator = $('#onlineIndicator');
+        const onlineStatusText = $('#onlineStatusText');
+        const counselorAvatar = $('#counselorAvatar');
+        const deleteModal = $('#deleteModal');
+        const deleteCancel = $('#deleteCancel');
+        const deleteConfirm = $('#deleteConfirm');
+
+        // ──────────────────────────────────────
+        // Helpers
+        // ──────────────────────────────────────
+        function parseCreateTime(val) {
+            if (!val) return null;
+            // ISO string "2025-01-15T14:30:00"
+            if (typeof val === 'string') return new Date(val);
+            // Jackson array [year, month, day, hour, minute, second]
+            if (Array.isArray(val) && val.length >= 3) {
+                return new Date(val[0], val[1] - 1, val[2],
+                    val[3] || 0, val[4] || 0, val[5] || 0);
+            }
+            return new Date(val);
+        }
+
+        function formatMessageDate(date) {
+            const now = new Date();
+            const d = new Date(date);
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const msgDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            const diffDays = Math.floor((today - msgDay) / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 0) return '今天';
+            if (diffDays === 1) return '昨天';
+            if (diffDays === 2) return '前天';
+            if (diffDays < 7) return diffDays + '天前';
+            const y = d.getFullYear();
+            const m = (d.getMonth() + 1).toString().padStart(2, '0');
+            const day = d.getDate().toString().padStart(2, '0');
+            if (y === now.getFullYear()) return m + '月' + day + '日';
+            return y + '年' + m + '月' + day + '日';
+        }
+
+        function formatMessageTime(val) {
+            if (!val) return '';
+            if (typeof val === 'string' && /^\d{2}:\d{2}$/.test(val)) return val;
+            const d = parseCreateTime(val);
+            if (!d || isNaN(d.getTime())) return '';
+            return d.getHours().toString().padStart(2, '0') + ':' +
+                   d.getMinutes().toString().padStart(2, '0');
+        }
+
+        function getDateKey(dateVal) {
+            const d = parseCreateTime(dateVal);
+            if (!d || isNaN(d.getTime())) return '';
+            return d.getFullYear() + '-' +
+                   (d.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                   d.getDate().toString().padStart(2, '0');
+        }
+
+        // ──────────────────────────────────────
+        // Initialization
+        // ──────────────────────────────────────
+        function init() {
+            // Check login
+            if (!checkLogin()) return;
+
+            // Read user info
+            const userInfo = getUserInfo();
+            if (!userInfo || !userInfo.userId) {
+                showToast('用户信息无效，请重新登录', 'error');
+                setTimeout(function() { window.location.href = 'index.html'; }, 1500);
+                return;
+            }
+            userId = userInfo.userId;
+
+            // Read URL params
+            const rawId = getQueryParam('counselorId');
+            counselorId = rawId ? parseInt(rawId, 10) : null;
+            counselorName = getQueryParam('name') || '咨询师';
+            const rawAptId = getQueryParam('appointmentId');
+            appointmentId = rawAptId ? parseInt(rawAptId, 10) : null;
+
+            if (!counselorId || isNaN(counselorId)) {
+                showToast('咨询师信息错误', 'error');
+                setTimeout(function() { window.history.back(); }, 1500);
+                return;
+            }
+
+            // Set page title and header
+            const modeLabel = appointmentId ? '预约对话 #' + appointmentId : '直接对话';
+            document.title = counselorName + ' - ' + modeLabel;
+            counselorNameEl.textContent = counselorName;
+
+            // Avatar initials
+            const initials = counselorName.charAt(0);
+            counselorAvatar.textContent = initials;
+
+            // 检查预约状态，已结束则禁用输入
+            if (appointmentId) {
+                checkAppointmentStatus();
+            }
+
+            // Bind events
+            bindEvents();
+
+            // Load initial messages
+            loadInitialMessages();
+
+            // 标记已读
+            markAsRead();
+
+            // Setup WebSocket with polling fallback
+            setupRealtime();
+        }
+
+        // ──────────────────────────────────────
+        // Event bindings
+        // ──────────────────────────────────────
+        function bindEvents() {
+            // Back button
+            backBtn.addEventListener('click', function() {
+                if (document.referrer && document.referrer.indexOf(window.location.host) !== -1) {
+                    window.history.back();
+                } else {
+                    window.location.href = 'home.html';
+                }
+            });
+
+            // Send message
+            sendBtn.addEventListener('click', handleSend);
+            messageInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                }
+            });
+
+            // Load more
+            loadMoreBtn.addEventListener('click', loadMoreMessages);
+
+            // Delete modal
+            deleteCancel.addEventListener('click', closeDeleteModal);
+            deleteConfirm.addEventListener('click', confirmDelete);
+            deleteModal.addEventListener('click', function(e) {
+                if (e.target === deleteModal) closeDeleteModal();
+            });
+        }
+
+        // ──────────────────────────────────────
+        // Load messages
+        // ──────────────────────────────────────
+        async function loadMessages(page, size) {
+            size = size || 30;
+            var url = '/api/chat/messages?userId=' + userId +
+                      '&counselorId=' + counselorId +
+                      '&page=' + page +
+                      '&size=' + size;
+            // 直接对话: appointmentId=0 只查直接消息；预约对话: 查指定预约
+            if (appointmentId) {
+                url += '&appointmentId=' + appointmentId;
+            } else {
+                url += '&appointmentId=0';
+            }
+
+            const res = await api.get(url);
+
+            if (res.code !== 200) {
+                throw new Error(res.msg || '加载消息失败');
+            }
+
+            const data = res.data;
+            return {
+                messages: data.messages || [],
+                hasMore: data.hasMore || false,
+                total: data.total || 0
+            };
+        }
+
+        async function loadInitialMessages() {
+            try {
+                const result = await loadMessages(1, 30);
+                hasMore = result.hasMore;
+                currentPage = 1;
+
+                // Messages come newest-first from API, reverse for display (oldest to newest)
+                messageList = (result.messages || []).slice().reverse();
+
+                // Track known IDs
+                knownMessageIds = new Set();
+                messageList.forEach(function(m) { knownMessageIds.add(m.id); });
+
+                // Render
+                renderAllMessages();
+            } catch (err) {
+                console.error('Failed to load messages:', err);
+                showToast('加载消息失败: ' + err.message, 'error');
+                messageList = [];
+                renderAllMessages();
+            } finally {
+                isLoadingInitial = false;
+            }
+        }
+
+        async function loadMoreMessages() {
+            if (isLoadingMore || !hasMore) return;
+
+            isLoadingMore = true;
+            loadMoreBtn.textContent = '加载中...';
+            loadMoreBtn.disabled = true;
+
+            try {
+                const nextPage = currentPage + 1;
+                const result = await loadMessages(nextPage, 30);
+
+                hasMore = result.hasMore;
+                currentPage = nextPage;
+
+                // Messages come newest-first, prepend to our list
+                const olderMessages = (result.messages || []).slice().reverse();
+                const newIds = [];
+                olderMessages.forEach(function(m) {
+                    if (!knownMessageIds.has(m.id)) {
+                        knownMessageIds.add(m.id);
+                        newIds.push(m.id);
+                    }
+                });
+
+                // Prepend only new messages
+                const toPrepend = olderMessages.filter(function(m) { return newIds.indexOf(m.id) !== -1; });
+                messageList = toPrepend.concat(messageList);
+
+                // Render prepended messages
+                renderPrependedMessages(toPrepend);
+
+                if (!hasMore) {
+                    loadMoreContainer.style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Failed to load more:', err);
+                showToast('加载失败', 'error');
+            } finally {
+                isLoadingMore = false;
+                loadMoreBtn.textContent = '加载更早消息';
+                loadMoreBtn.disabled = false;
+                if (!hasMore) {
+                    loadMoreContainer.style.display = 'none';
+                }
+            }
+        }
+
+        // ──────────────────────────────────────
+        // Render
+        // ──────────────────────────────────────
+        function renderAllMessages() {
+            loadingSpinner.style.display = 'none';
+
+            if (messageList.length === 0) {
+                emptyState.classList.remove('hidden');
+                messagesContainer.innerHTML = '';
+                loadMoreContainer.classList.add('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                if (hasMore) {
+                    loadMoreContainer.classList.remove('hidden');
+                } else {
+                    loadMoreContainer.classList.add('hidden');
+                }
+                messagesContainer.innerHTML = buildMessagesHTML(messageList);
+                bindDeleteButtons();
+            }
+
+            scrollToBottom();
+        }
+
+        function buildMessagesHTML(messages) {
+            if (!messages || messages.length === 0) return '';
+
+            let html = '';
+            let lastDateKey = null;
+
+            messages.forEach(function(msg) {
+                const dateKey = getDateKey(msg.createTime);
+                if (dateKey && dateKey !== lastDateKey) {
+                    html += '<div class="date-divider"><span>' +
+                            formatMessageDate(msg.createTime) + '</span></div>';
+                    lastDateKey = dateKey;
+                }
+
+                const timeStr = msg.time ? formatMessageTime(msg.time) :
+                                (msg.createTime ? formatMessageTime(msg.createTime) : '');
+
+                if (msg.sender === 'user') {
+                    html += buildUserBubble(msg, timeStr);
+                } else {
+                    html += buildCounselorBubble(msg, timeStr);
+                }
+            });
+
+            return html;
+        }
+
+        function buildUserBubble(msg, timeStr) {
+            return '<div class="message-row flex justify-end group" data-id="' + msg.id + '" data-sender="user">' +
+                   '  <div class="max-w-[75%]">' +
+                   '    <div class="bubble-user text-white px-4 py-2.5 rounded-2xl rounded-br-md text-sm leading-relaxed break-words relative">' +
+                   '      <span class="message-content">' + escapeHTML(msg.content) + '</span>' +
+                   '      <button class="delete-btn absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center shadow hover:bg-red-600 transition-colors" data-delete-id="' + msg.id + '" title="删除">' +
+                   '        <i class="fa-solid fa-xmark" style="font-size:10px;"></i>' +
+                   '      </button>' +
+                   '    </div>' +
+                   '    <p class="text-xs text-gray-400 mt-1 text-right mr-1">' + timeStr + '</p>' +
+                   '  </div>' +
+                   '</div>';
+        }
+
+        function buildCounselorBubble(msg, timeStr) {
+            return '<div class="message-row flex justify-start group" data-id="' + msg.id + '" data-sender="counselor">' +
+                   '  <div class="max-w-[75%]">' +
+                   '    <div class="bubble-counselor bg-white border border-gray-200 px-4 py-2.5 rounded-2xl rounded-bl-md text-sm leading-relaxed break-words text-gray-800">' +
+                   '      <span class="message-content">' + escapeHTML(msg.content) + '</span>' +
+                   '    </div>' +
+                   '    <p class="text-xs text-gray-400 mt-1 text-left ml-1">' + timeStr + '</p>' +
+                   '  </div>' +
+                   '</div>';
+        }
+
+        function renderPrependedMessages(newMessages) {
+            if (!newMessages || newMessages.length === 0) return;
+
+            const newHTML = buildMessagesHTML(newMessages);
+
+            // Preserve scroll position
+            const oldScrollHeight = messageArea.scrollHeight;
+            const oldScrollTop = messageArea.scrollTop;
+
+            // Insert before existing content
+            const existingHTML = messagesContainer.innerHTML;
+            messagesContainer.innerHTML = newHTML + existingHTML;
+
+            // Also update date dividers at the boundary if needed
+            // (simplified: rebuild contiguous segments if needed)
+
+            // Restore scroll position (adjust for added content)
+            const newScrollHeight = messageArea.scrollHeight;
+            messageArea.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight);
+
+            // Rebind delete buttons
+            bindDeleteButtons();
+
+            // Update load more button
+            if (!hasMore) {
+                loadMoreContainer.style.display = 'none';
+            }
+        }
+
+        function appendMessageToBottom(msg) {
+            // Check for date divider
+            let html = '';
+            if (messageList.length > 0) {
+                const lastMsg = messageList[messageList.length - 1];
+                const lastDateKey = getDateKey(lastMsg.createTime);
+                const newDateKey = getDateKey(msg.createTime);
+                if (newDateKey && newDateKey !== lastDateKey) {
+                    html += '<div class="date-divider"><span>' +
+                            formatMessageDate(msg.createTime) + '</span></div>';
+                }
+            } else {
+                // First message
+                const dateKey = getDateKey(msg.createTime);
+                if (dateKey) {
+                    html += '<div class="date-divider"><span>' +
+                            formatMessageDate(msg.createTime) + '</span></div>';
+                }
+            }
+
+            const timeStr = msg.time ? formatMessageTime(msg.time) :
+                            (msg.createTime ? formatMessageTime(msg.createTime) : '');
+
+            if (msg.sender === 'user') {
+                html += buildUserBubble(msg, timeStr);
+            } else {
+                html += buildCounselorBubble(msg, timeStr);
+            }
+
+            messagesContainer.insertAdjacentHTML('beforeend', html);
+
+            // Update empty state
+            if (messageList.length === 0 && msg) {
+                emptyState.classList.add('hidden');
+            }
+
+            bindDeleteButtons();
+            scrollToBottom();
+        }
+
+        async function checkAppointmentStatus() {
+            try {
+                const res = await api.get('/api/appointments/' + appointmentId);
+                if (res.code === 200 && res.data) {
+                    const status = res.data.status;
+                    if (status === 2 || status === 3) {
+                        document.getElementById('inputArea').style.display = 'none';
+                        document.getElementById('endedNotice').style.display = 'block';
+                        document.getElementById('endedNoticeText').textContent =
+                            status === 2 ? '预约已完成，不能继续发送消息' : '预约已取消，不能继续发送消息';
+                    }
+                }
+            } catch (err) { /* ignore */ }
+        }
+
+        async function markAsRead() {
+            try {
+                await api.put('/api/chat/read', {
+                    userId: userId,
+                    counselorId: counselorId
+                });
+            } catch (err) {
+                // 忽略标记已读失败
+            }
+        }
+
+        function scrollToBottom() {
+            requestAnimationFrame(function() {
+                messageArea.scrollTop = messageArea.scrollHeight;
+            });
+        }
+
+        // ──────────────────────────────────────
+        // Send message
+        // ──────────────────────────────────────
+        async function handleSend() {
+            const content = messageInput.value.trim();
+            if (!content) return;
+
+            // Disable send button to prevent double-send
+            sendBtn.disabled = true;
+            messageInput.disabled = true;
+
+            try {
+                const payload = {
+                    userId: userId,
+                    counselorId: counselorId,
+                    content: content,
+                    appointmentId: appointmentId || 0
+                };
+
+                const res = await api.post('/api/chat/send', payload);
+
+                if (res.code !== 200) {
+                    showToast(res.msg || '发送失败', 'error');
+                    return;
+                }
+
+                // Clear input
+                messageInput.value = '';
+                // Message will appear via WebSocket push or polling fallback
+
+            } catch (err) {
+                console.error('Send error:', err);
+                showToast('发送失败，请重试', 'error');
+            } finally {
+                sendBtn.disabled = false;
+                messageInput.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        // ──────────────────────────────────────
+        // WebSocket + Polling
+        // ──────────────────────────────────────
+        function setupRealtime() {
+            // Connect WebSocket
+            wsClient.connect(userId);
+
+            // Listen for new messages via WebSocket
+            wsClient.onMessage(handleWsMessage);
+
+            // After 3 seconds, if WebSocket not connected, start polling
+            wsCheckTimer = setTimeout(function() {
+                if (!wsClient.isConnected) {
+                    console.log('WebSocket not connected, starting polling fallback');
+                    startPolling();
+                }
+            }, 3000);
+
+            // Also monitor: if WS connects after timer fires, stop polling
+            checkWsConnection();
+        }
+
+        function checkWsConnection() {
+            wsStatusInterval = setInterval(function() {
+                if (wsClient.isConnected && !wsActive) {
+                    wsActive = true;
+                    // Stop polling if active
+                    if (pollingTimer) {
+                        clearInterval(pollingTimer);
+                        pollingTimer = null;
+                        console.log('WebSocket connected, polling stopped');
+                    }
+                    // Set online status
+                    onlineIndicator.className = 'online-dot';
+                    onlineStatusText.textContent = '在线';
+                    clearInterval(wsStatusInterval);
+                }
+            }, 1000);
+        }
+
+        function handleWsMessage(data) {
+            if (data.type !== 'new_message') return;
+            if (!wsActive) wsActive = true;
+
+            // Filter: only show messages for current counselor
+            // WS push doesn't include counselorId, so we check sender context
+            // The push comes from the server for both participants.
+            // We filter by checking if the message's counselorId matches.
+            // Since push doesn't include counselorId, we accept all and let
+            // the service filter. Actually, the push is sent to both userId and
+            // counselorId. So if we receive it as the user, it's for our chat.
+            // We can't easily determine which counselor, but we're only connected
+            // as this one user. If the user has multiple chats open, that's an edge case.
+            // For now, accept it if it's new.
+
+            if (data.messageId && !knownMessageIds.has(data.messageId)) {
+                knownMessageIds.add(data.messageId);
+
+                var msg = {
+                    id: data.messageId,
+                    content: data.content,
+                    sender: data.sender,
+                    time: data.time,
+                    createTime: new Date().toISOString()
+                };
+
+                messageList.push(msg);
+                appendMessageToBottom(msg);
+            }
+        }
+
+        function startPolling() {
+            if (pollingTimer) return;
+
+            pollingTimer = setInterval(async function() {
+                try {
+                    var result = await loadMessages(1, 5);
+
+                    // Find new messages (not in knownMessageIds)
+                    var newMsgs = (result.messages || []).filter(function(m) {
+                        return !knownMessageIds.has(m.id);
+                    });
+
+                    if (newMsgs.length > 0) {
+                        // Sort oldest first for consistent display
+                        newMsgs.sort(function(a, b) {
+                            return new Date(parseCreateTime(a.createTime)).getTime() -
+                                   new Date(parseCreateTime(b.createTime)).getTime();
+                        });
+
+                        newMsgs.forEach(function(m) {
+                            knownMessageIds.add(m.id);
+                            messageList.push(m);
+                            appendMessageToBottom(m);
+                        });
+                    }
+
+                    // If WebSocket is now connected, stop polling
+                    if (wsClient.isConnected && wsActive) {
+                        stopPolling();
+                    }
+                } catch (err) {
+                    console.error('Polling error:', err);
+                }
+            }, 5000);
+        }
+
+        function stopPolling() {
+            if (pollingTimer) {
+                clearInterval(pollingTimer);
+                pollingTimer = null;
+            }
+        }
+
+        // ──────────────────────────────────────
+        // Delete message
+        // ──────────────────────────────────────
+        function bindDeleteButtons() {
+            var btns = messagesContainer.querySelectorAll('[data-delete-id]');
+            btns.forEach(function(btn) {
+                // Remove old listener by cloning
+                var newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+                newBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    openDeleteModal(parseInt(newBtn.getAttribute('data-delete-id'), 10));
+                });
+            });
+        }
+
+        function openDeleteModal(messageId) {
+            pendingDeleteId = messageId;
+            deleteModal.classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            pendingDeleteId = null;
+            deleteModal.classList.add('hidden');
+        }
+
+        async function confirmDelete() {
+            if (!pendingDeleteId) return;
+
+            var idToDelete = pendingDeleteId;
+            closeDeleteModal();
+
+            try {
+                var res = await api.put('/api/chat/messages/' + idToDelete + '/delete');
+
+                if (res.code === 200) {
+                    // Remove from DOM
+                    var row = messagesContainer.querySelector('[data-id="' + idToDelete + '"]');
+                    if (row) {
+                        // Check if date divider above is now orphaned
+                        var prev = row.previousElementSibling;
+                        var next = row.nextElementSibling;
+                        row.remove();
+
+                        // If previous sibling was a date divider and next is also a date divider
+                        // (or there's no next message), remove the orphaned divider
+                        if (prev && prev.classList.contains('date-divider')) {
+                            if (!next || next.classList.contains('date-divider')) {
+                                prev.remove();
+                            }
+                        }
+
+                        // If we removed the only message between two dividers, remove the extra divider
+                        if (prev && prev.classList.contains('date-divider') &&
+                            next && next.classList.contains('date-divider')) {
+                            next.remove();
+                        }
+                    }
+
+                    // Remove from list
+                    messageList = messageList.filter(function(m) { return m.id !== idToDelete; });
+                    knownMessageIds.delete(idToDelete);
+
+                    // Show empty state if no messages left
+                    if (messageList.length === 0) {
+                        emptyState.classList.remove('hidden');
+                        loadMoreContainer.classList.add('hidden');
+                    }
+
+                    showToast('消息已删除', 'success');
+                } else {
+                    showToast(res.msg || '删除失败', 'error');
+                }
+            } catch (err) {
+                console.error('Delete error:', err);
+                showToast('删除失败，请重试', 'error');
+            }
+        }
+
+        // ──────────────────────────────────────
+        // Right-click / long press context menu for delete
+        // ──────────────────────────────────────
+        let longPressTimer = null;
+
+        messagesContainer.addEventListener('contextmenu', function(e) {
+            var row = e.target.closest('.message-row');
+            if (!row) return;
+            var sender = row.getAttribute('data-sender');
+            if (sender !== 'user') return;
+
+            e.preventDefault();
+            var id = parseInt(row.getAttribute('data-id'), 10);
+            openDeleteModal(id);
+        });
+
+        messagesContainer.addEventListener('touchstart', function(e) {
+            var row = e.target.closest('.message-row');
+            if (!row) return;
+            var sender = row.getAttribute('data-sender');
+            if (sender !== 'user') return;
+
+            longPressTimer = setTimeout(function() {
+                var id = parseInt(row.getAttribute('data-id'), 10);
+                openDeleteModal(id);
+            }, 600);
+        });
+
+        messagesContainer.addEventListener('touchend', function() {
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+        });
+
+        messagesContainer.addEventListener('touchmove', function() {
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+        });
+
+        // ──────────────────────────────────────
+        // Escape HTML
+        // ──────────────────────────────────────
+        function escapeHTML(str) {
+            if (!str) return '';
+            var div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ──────────────────────────────────────
+        // Cleanup on page unload
+        // ──────────────────────────────────────
+        window.addEventListener('beforeunload', function() {
+            stopPolling();
+            if (wsCheckTimer) clearTimeout(wsCheckTimer);
+            if (wsStatusInterval) clearInterval(wsStatusInterval);
+            wsClient.disconnect();
+        });
+
+        // ──────────────────────────────────────
+        // Start
+        // ──────────────────────────────────────
+        init();
+
+    })();
+    </script>
+
+</body>
+</html>

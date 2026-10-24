@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消息列表 - 心理咨询</title>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        :root { --bg: #FDF8F5; --primary: #FF7E67; --primary-dark: #E8694F; }
+        * { box-sizing: border-box; }
+        body {
+            background-color: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Roboto, sans-serif;
+            color: #333;
+        }
+        .unread-badge {
+            background: var(--primary); color: #fff; font-size: 11px;
+            min-width: 20px; height: 20px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .avatar-placeholder {
+            border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-weight: 600; flex-shrink: 0;
+        }
+        .conversation-card { transition: all 0.15s; }
+        .conversation-card:hover { background-color: #FFF9F8; }
+        .direct-badge { background: #FFF0ED; color: #FF7E67; font-size: 11px; padding: 2px 8px; border-radius: 8px; }
+        .appt-badge { background: #EDF0FF; color: #6C5CE7; font-size: 11px; padding: 2px 8px; border-radius: 8px; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <header class="sticky top-0 bg-white shadow-sm z-10">
+        <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="home.html" class="text-gray-500 hover:text-gray-700"><i class="fas fa-arrow-left"></i> 返回</a>
+            <h1 class="text-lg font-bold text-gray-800">消息</h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <main class="max-w-2xl mx-auto px-4 py-4">
+        <div id="loadingState" class="text-center py-12" style="display:none;">
+            <i class="fas fa-spinner fa-spin text-gray-300 text-3xl"></i>
+            <p class="text-gray-400 text-sm mt-3">加载中...</p>
+        </div>
+        <div id="errorState" class="text-center py-12" style="display:none;">
+            <p class="text-gray-500" id="errorMsg">加载失败</p>
+            <button onclick="loadConversations()" class="mt-4 px-6 py-2 rounded-full text-sm text-white" style="background:var(--primary);">重试</button>
+        </div>
+        <div id="emptyState" class="text-center py-16" style="display:none;">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                <i class="fas fa-comments text-gray-300 text-3xl"></i>
+            </div>
+            <p class="text-gray-500 font-medium">暂无消息</p>
+            <p class="text-gray-400 text-sm mt-1">去首页给咨询师发消息吧</p>
+            <a href="home.html" class="inline-block mt-4 px-6 py-2 rounded-full text-sm text-white" style="background:var(--primary);">去找咨询师</a>
+        </div>
+        <div id="conversationList" class="space-y-2" style="display:none;"></div>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+    (function() {
+        if (!checkLogin()) return;
+
+        function loadConversations() {
+            var loadingEl = document.getElementById('loadingState');
+            var errorEl = document.getElementById('errorState');
+            var emptyEl = document.getElementById('emptyState');
+            var listEl = document.getElementById('conversationList');
+
+            loadingEl.style.display = 'block'; errorEl.style.display = 'none';
+            emptyEl.style.display = 'none'; listEl.style.display = 'none';
+
+            api.get('/api/chat/user-list')
+                .then(function(res) {
+                    loadingEl.style.display = 'none';
+                    var conversations = [];
+                    if (Array.isArray(res)) conversations = res;
+                    else if (res && res.data && Array.isArray(res.data)) conversations = res.data;
+
+                    if (conversations.length === 0) { emptyEl.style.display = 'block'; return; }
+
+                    listEl.style.display = 'block';
+                    listEl.innerHTML = conversations.map(function(conv) {
+                        var cid = conv.counselorId;
+                        var name = conv.counselorName || '咨询师';
+                        var lastMsg = conv.lastMessage || '';
+                        var unread = conv.unreadCount || 0;
+                        var aptId = conv.appointmentId;
+                        var isDirect = !aptId || aptId === 0;
+
+                        var apptLabel = '';
+                        if (!isDirect) {
+                            var apptTime = conv.appointmentTime;
+                            if (apptTime) {
+                                var d = new Date(apptTime);
+                                var dateStr = (d.getMonth()+1) + '/' + d.getDate() + ' ' +
+                                    d.getHours().toString().padStart(2,'0') + ':' +
+                                    d.getMinutes().toString().padStart(2,'0');
+                                apptLabel = '预约 ' + dateStr;
+                            } else {
+                                apptLabel = '预约 #' + aptId;
+                            }
+                        }
+                        var typeBadge = isDirect
+                            ? '<span class="direct-badge">直接对话</span>'
+                            : '<span class="appt-badge">' + apptLabel + '</span>';
+
+                        var unreadBadge = unread > 0
+                            ? '<span class="unread-badge">' + (unread > 99 ? '99+' : unread) + '</span>'
+                            : '';
+
+                        var initial = name.charAt(0);
+                        var avatarBg = getAvatarColor(name);
+                        var lastMsgDisplay = lastMsg.length > 30 ? lastMsg.substring(0, 30) + '...' : (lastMsg || '点击开始对话');
+
+                        var chatUrl = 'chat.html?counselorId=' + cid + '&name=' + encodeURIComponent(name);
+                        if (!isDirect) chatUrl += '&appointmentId=' + aptId;
+
+                        return '<div class="conversation-card bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center space-x-4 cursor-pointer" onclick="location.href=\'' + chatUrl + '\'">' +
+                            '<div class="avatar-placeholder w-12 h-12 text-white text-base flex-shrink-0" style="background-color:' + avatarBg + ';">' + escapeHTML(initial) + '</div>' +
+                            '<div class="flex-1 min-w-0">' +
+                                '<div class="flex items-center justify-between mb-1">' +
+                                    '<span class="font-medium text-gray-800 truncate">' + escapeHTML(name) + '</span>' +
+                                    unreadBadge +
+                                '</div>' +
+                                '<div class="flex items-center gap-2 mb-1">' + typeBadge + '</div>' +
+                                '<p class="text-sm text-gray-400 truncate">' + escapeHTML(lastMsgDisplay) + '</p>' +
+                            '</div>' +
+                            '<i class="fas fa-chevron-right text-gray-300 text-sm"></i>' +
+                        '</div>';
+                    }).join('');
+                })
+                .catch(function(err) {
+                    loadingEl.style.display = 'none'; errorEl.style.display = 'block';
+                    document.getElementById('errorMsg').textContent = '加载失败: ' + (err.message || '网络错误');
+                });
+        }
+
+        function escapeHTML(str) {
+            var div = document.createElement('div'); div.textContent = str; return div.innerHTML;
+        }
+        function getAvatarColor(name) {
+            var colors = ['#FF7E67','#4ECDC4','#FFD93D','#6C5CE7','#A8E6CF','#FF8B94','#45B7D1','#F8B500'];
+            var hash = 0;
+            for (var i = 0; i < (name || '?').length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            return colors[Math.abs(hash) % colors.length];
+        }
+
+        loadConversations();
+    })();
+    </script>
+</body>
+</html>

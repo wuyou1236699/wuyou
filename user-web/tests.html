@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理测评 - 心理咨询</title>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #FDF8F5;
+            --primary: #FF7E67;
+            --primary-dark: #E8694F;
+            --primary-light: #FFF0ED;
+            --primary-50: #FFF5F3;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Roboto, sans-serif;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(255, 126, 103, 0.35);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-outline:hover {
+            background-color: var(--primary-50);
+        }
+
+        .btn-white {
+            background: #fff;
+            color: #666;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-white:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background-color: var(--primary-50);
+        }
+
+        /* Test card */
+        .test-card {
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            cursor: pointer;
+        }
+        .test-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(255, 126, 103, 0.12);
+        }
+
+        /* Dropdown */
+        .dropdown-menu {
+            display: none;
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .dropdown-menu.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Option card */
+        .option-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .option-card:hover {
+            border-color: var(--primary);
+            background-color: var(--primary-50);
+        }
+        .option-card.selected {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+            box-shadow: 0 0 0 2px rgba(255, 126, 103, 0.2);
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            transition: width 0.4s ease;
+        }
+
+        /* Result level badge */
+        .level-badge {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .level-normal { background: #D1FAE5; color: #065F46; }
+        .level-mild { background: #FEF3C7; color: #92400E; }
+        .level-moderate { background: #FED7AA; color: #9A3412; }
+        .level-severe { background: #FEE2E2; color: #991B1B; }
+
+        /* Tab styles */
+        .tab-btn {
+            position: relative;
+            transition: color 0.2s ease;
+        }
+        .tab-btn.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* Category icon colors */
+        .cat-red { background-color: #FEE2E2; color: #DC2626; }
+        .cat-blue { background-color: #DBEAFE; color: #2563EB; }
+        .cat-amber { background-color: #FEF3C7; color: #D97706; }
+        .cat-purple { background-color: #EDE9FE; color: #7C3AED; }
+        .cat-cyan { background-color: #CFFAFE; color: #0891B2; }
+        .cat-green { background-color: #D1FAE5; color: #059669; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+        /* Mobile nav */
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 40;
+            display: none;
+        }
+        .mobile-nav-overlay.show { display: block; }
+
+        .mobile-nav-panel {
+            position: fixed;
+            top: 0; right: 0;
+            width: 260px;
+            height: 100vh;
+            background: #fff;
+            z-index: 50;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.08);
+        }
+        .mobile-nav-panel.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- ==================== TOP NAVIGATION ==================== -->
+    <nav class="sticky top-0 bg-white shadow-sm z-30">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="home.html" class="flex items-center space-x-2 text-xl font-bold no-underline" style="color: var(--primary);">
+                <span class="text-2xl">&#x1F9E0;</span>
+                <span class="hidden sm:inline">心理咨询</span>
+            </a>
+
+            <div class="hidden md:flex items-center space-x-7">
+                <a href="home.html" class="text-sm text-gray-600 hover:text-gray-900 no-underline transition-colors">首页</a>
+                <a href="chat.html" class="text-sm text-gray-600 hover:text-gray-900 no-underline transition-colors">AI对话</a>
+                <a href="science.html" class="text-sm text-gray-600 hover:text-gray-900 no-underline transition-colors">科普</a>
+                <a href="tests.html" class="text-sm font-semibold no-underline" style="color: var(--primary);">测评</a>
+
+                <div class="relative" id="userDropdown">
+                    <button id="dropdownBtn" class="flex items-center space-x-2 focus:outline-none hover:opacity-80 transition-opacity bg-transparent border-0 cursor-pointer">
+                        <div id="navAvatar" class="flex items-center justify-center rounded-full w-8 h-8 text-white text-sm flex-shrink-0" style="background-color: var(--primary);">
+                            <span id="navAvatarText">用</span>
+                        </div>
+                        <span id="navNickname" class="text-sm text-gray-700 hidden lg:inline">用户</span>
+                        <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+                    </button>
+                    <div id="dropdownMenu" class="dropdown-menu absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5">
+                        <a href="profile.html" class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 no-underline transition-colors rounded-t-xl">
+                            <i class="fas fa-user-circle mr-3 text-gray-400"></i>个人中心
+                        </a>
+                        <hr class="my-1 border-gray-100">
+                        <button onclick="logout()" class="w-full flex items-center text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors rounded-b-xl bg-transparent border-0 cursor-pointer">
+                            <i class="fas fa-sign-out-alt mr-3"></i>退出登录
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <button id="mobileMenuBtn" class="md:hidden text-gray-600 hover:text-gray-900 focus:outline-none bg-transparent border-0 cursor-pointer p-2">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile nav -->
+    <div id="mobileOverlay" class="mobile-nav-overlay"></div>
+    <div id="mobilePanel" class="mobile-nav-panel">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <span class="font-bold text-lg" style="color: var(--primary);">&#x1F9E0; 心理咨询</span>
+            <button id="mobileCloseBtn" class="text-gray-400 hover:text-gray-600 bg-transparent border-0 cursor-pointer p-1">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="px-5 py-4 space-y-1">
+            <a href="home.html" class="block py-3 text-sm text-gray-700 hover:bg-gray-50 no-underline rounded-lg px-3 transition-colors">首页</a>
+            <a href="chat.html" class="block py-3 text-sm text-gray-700 hover:bg-gray-50 no-underline rounded-lg px-3 transition-colors">AI对话</a>
+            <a href="science.html" class="block py-3 text-sm text-gray-700 hover:bg-gray-50 no-underline rounded-lg px-3 transition-colors">科普</a>
+            <a href="tests.html" class="block py-3 text-sm font-semibold no-underline rounded-lg px-3" style="color: var(--primary); background: var(--primary-50);">测评</a>
+            <hr class="my-3 border-gray-100">
+            <a href="profile.html" class="block py-3 text-sm text-gray-700 hover:bg-gray-50 no-underline rounded-lg px-3 transition-colors">
+                <i class="fas fa-user-circle mr-2 text-gray-400"></i>个人中心
+            </a>
+            <button onclick="logout()" class="w-full flex items-center py-3 text-sm text-red-500 hover:bg-red-50 rounded-lg px-3 transition-colors bg-transparent border-0 cursor-pointer">
+                <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== PAGE HEADER ==================== -->
+    <section class="py-8 md:py-12" style="background: linear-gradient(160deg, #FFF0ED 0%, #FDF8F5 40%, #FFF8F6 70%, #FDF8F5 100%);">
+        <div class="max-w-6xl mx-auto px-4">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2" id="viewTitle">心理测评</h1>
+            <p class="text-sm md:text-base text-gray-500" id="viewSubtitle">科学的心理量表，帮助你更好地了解自己</p>
+        </div>
+    </section>
+
+    <!-- ==================== TEST LIST VIEW ==================== -->
+    <section id="testListView" class="max-w-6xl mx-auto px-4 pb-16">
+        <!-- Tabs -->
+        <div class="flex items-center space-x-6 mt-6 mb-6 border-b border-gray-200">
+            <button id="tabTests" class="tab-btn active pb-2 text-sm bg-transparent border-0 cursor-pointer" data-tab="tests">测评列表</button>
+            <button id="tabHistory" class="tab-btn pb-2 text-sm text-gray-500 bg-transparent border-0 cursor-pointer" data-tab="history">测评历史</button>
+        </div>
+
+        <!-- Test list content -->
+        <div id="testListContent">
+            <div id="testGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- Dynamically rendered -->
+            </div>
+            <div id="testLoading" class="text-center py-12" style="display:none;">
+                <div class="inline-flex items-center space-x-2 text-gray-400">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span class="text-sm">正在加载测评列表...</span>
+                </div>
+            </div>
+            <div id="testEmpty" class="text-center py-16" style="display:none;">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: #f3f4f6;">
+                    <i class="fas fa-clipboard-list text-gray-300 text-3xl"></i>
+                </div>
+                <p class="text-gray-500 font-medium">暂无测评量表</p>
+                <p class="text-gray-400 text-sm mt-1">请稍后再来查看</p>
+            </div>
+        </div>
+
+        <!-- History content -->
+        <div id="historyContent" style="display:none;">
+            <div id="historyList" class="space-y-3">
+                <!-- Dynamically rendered -->
+            </div>
+            <div id="historyLoading" class="text-center py-12" style="display:none;">
+                <div class="inline-flex items-center space-x-2 text-gray-400">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span class="text-sm">正在加载测评历史...</span>
+                </div>
+            </div>
+            <div id="historyEmpty" class="text-center py-16" style="display:none;">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: #f3f4f6;">
+                    <i class="fas fa-history text-gray-300 text-3xl"></i>
+                </div>
+                <p class="text-gray-500 font-medium">暂无测评记录</p>
+                <p class="text-gray-400 text-sm mt-1">完成一次测评后，记录会显示在这里</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== QUESTION VIEW ==================== -->
+    <section id="questionView" class="max-w-3xl mx-auto px-4 pb-16" style="display:none;">
+        <!-- Header with back button -->
+        <div class="flex items-center justify-between mt-6 mb-4">
+            <button id="btnBackToList" class="btn-white px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fas fa-arrow-left mr-2"></i>返回列表
+            </button>
+            <span id="testNameLabel" class="text-sm font-semibold text-gray-600"></span>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-sm text-gray-500">答题进度</span>
+                <span class="text-sm font-semibold" style="color: var(--primary);" id="progressText">1/10</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                <div id="progressBar" class="progress-bar h-full rounded-full" style="width: 0%; background-color: var(--primary);"></div>
+            </div>
+        </div>
+
+        <!-- Question card -->
+        <div id="questionCard" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+            <div class="mb-2">
+                <span id="questionIndex" class="text-xs font-semibold text-gray-400 uppercase tracking-wide">第 1 题</span>
+            </div>
+            <h3 id="questionText" class="text-lg md:text-xl font-semibold text-gray-800 mb-6 leading-relaxed"></h3>
+            <div id="optionsContainer" class="space-y-3">
+                <!-- Dynamically rendered -->
+            </div>
+            <div class="flex justify-between items-center mt-8">
+                <button id="btnPrev" class="btn-white px-5 py-2.5 rounded-lg text-sm font-medium" style="display:none;">
+                    <i class="fas fa-chevron-left mr-1.5"></i>上一题
+                </button>
+                <div class="flex-1"></div>
+                <button id="btnNext" class="btn-primary px-8 py-2.5 rounded-lg text-sm font-medium">
+                    下一题 <i class="fas fa-chevron-right ml-1.5"></i>
+                </button>
+                <button id="btnSubmit" class="btn-primary px-8 py-2.5 rounded-lg text-sm font-medium" style="display:none;">
+                    <i class="fas fa-check mr-1.5"></i>提交
+                </button>
+            </div>
+        </div>
+
+        <!-- Submit loading -->
+        <div id="submitLoading" class="text-center py-10" style="display:none;">
+            <div class="inline-flex flex-col items-center space-y-3 text-gray-400">
+                <i class="fas fa-spinner fa-spin text-3xl"></i>
+                <span class="text-sm">正在提交测评结果...</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== RESULT VIEW ==================== -->
+    <section id="resultView" class="max-w-2xl mx-auto px-4 pb-16" style="display:none;">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-10 text-center mt-6">
+            <!-- Score display -->
+            <div class="w-28 h-28 mx-auto rounded-full flex items-center justify-center mb-5" style="background: linear-gradient(135deg, #FFF0ED, #FFE8E3);">
+                <div>
+                    <span id="resultScore" class="text-4xl font-extrabold block" style="color: var(--primary);">0</span>
+                    <span class="text-xs text-gray-400">分</span>
+                </div>
+            </div>
+
+            <!-- Level badge -->
+            <div class="mb-4">
+                <span id="resultLevel" class="level-badge"></span>
+            </div>
+
+            <!-- Test name -->
+            <h2 id="resultTestName" class="text-xl font-bold text-gray-800 mb-4"></h2>
+
+            <!-- Suggestion -->
+            <div class="bg-gray-50 rounded-xl p-5 text-left mb-6">
+                <h4 class="text-sm font-semibold text-gray-600 mb-2">
+                    <i class="fas fa-lightbulb mr-1.5" style="color: var(--primary);"></i>专业建议
+                </h4>
+                <p id="resultSuggestion" class="text-sm text-gray-600 leading-relaxed"></p>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-3">
+                <button id="btnBackToList2" class="btn-primary px-8 py-2.5 rounded-lg text-sm font-medium w-full sm:w-auto">
+                    <i class="fas fa-list mr-1.5"></i>返回列表
+                </button>
+                <button id="btnRetake" class="btn-outline px-8 py-2.5 rounded-lg text-sm font-medium w-full sm:w-auto">
+                    <i class="fas fa-redo mr-1.5"></i>重新测评
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SCRIPTS ==================== -->
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        if (!checkLogin()) return;
+
+        // ==================== STATE ====================
+        var currentTab = 'tests'; // 'tests' | 'history'
+        var tests = [];
+        var currentTest = null; // The test being taken
+        var questions = [];
+        var answers = []; // [{ questionId, selectedOptionId }]
+        var currentQuestionIndex = 0;
+        var selectedOptionId = null;
+
+        // ==================== INIT USER ====================
+        var userInfo = getUserInfo();
+        if (userInfo) {
+            var nickname = userInfo.nickname || userInfo.username || userInfo.name || '用户';
+            document.getElementById('navNickname').textContent = nickname;
+            document.getElementById('navAvatarText').textContent = (nickname.charAt(0) || '用').toUpperCase();
+            if (userInfo.avatar) {
+                var navAvatar = document.getElementById('navAvatar');
+                navAvatar.style.backgroundImage = 'url(' + userInfo.avatar + ')';
+                navAvatar.style.backgroundSize = 'cover';
+                navAvatar.style.backgroundPosition = 'center';
+                document.getElementById('navAvatarText').style.display = 'none';
+            }
+        }
+
+        // ==================== DROPDOWN ====================
+        (function () {
+            var btn = document.getElementById('dropdownBtn');
+            var menu = document.getElementById('dropdownMenu');
+            var isOpen = false;
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                isOpen = !isOpen;
+                menu.classList.toggle('show', isOpen);
+            });
+            document.addEventListener('click', function () {
+                if (isOpen) { isOpen = false; menu.classList.remove('show'); }
+            });
+            menu.addEventListener('click', function (e) { e.stopPropagation(); });
+        })();
+
+        // ==================== MOBILE MENU ====================
+        (function () {
+            var menuBtn = document.getElementById('mobileMenuBtn');
+            var closeBtn = document.getElementById('mobileCloseBtn');
+            var overlay = document.getElementById('mobileOverlay');
+            var panel = document.getElementById('mobilePanel');
+            function open() {
+                overlay.classList.add('show');
+                panel.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+            function close() {
+                overlay.classList.remove('show');
+                panel.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+            menuBtn.addEventListener('click', open);
+            closeBtn.addEventListener('click', close);
+            overlay.addEventListener('click', close);
+        })();
+
+        // ==================== LOGOUT ====================
+        window.logout = function () {
+            localStorage.removeItem('user_token');
+            localStorage.removeItem('user_info');
+            window.location.href = 'index.html';
+        };
+
+        // ==================== CATEGORY ICON ====================
+        function getCategoryInfo(category) {
+            var cat = (category || '').toLowerCase();
+            var map = {
+                '焦虑': { icon: 'fa-heart-pulse', cls: 'cat-red', label: '焦虑' },
+                '抑郁': { icon: 'fa-cloud-rain', cls: 'cat-blue', label: '抑郁' },
+                '压力': { icon: 'fa-bolt', cls: 'cat-amber', label: '压力' },
+                '情绪': { icon: 'fa-face-smile', cls: 'cat-purple', label: '情绪' },
+                '睡眠': { icon: 'fa-moon', cls: 'cat-cyan', label: '睡眠' },
+                '人际关系': { icon: 'fa-people-arrows', cls: 'cat-green', label: '人际' }
+            };
+            for (var key in map) {
+                if (map.hasOwnProperty(key) && cat.indexOf(key) !== -1) {
+                    return map[key];
+                }
+            }
+            return { icon: 'fa-clipboard-question', cls: 'cat-purple', label: '综合' };
+        }
+
+        // ==================== ESCAPE HTML ====================
+        function escapeHTML(str) {
+            if (!str) return '';
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+        // ==================== PARSE ARRAY RESPONSE ====================
+        function parseArray(res) {
+            if (Array.isArray(res)) return res;
+            if (res && res.data) {
+                if (Array.isArray(res.data)) return res.data;
+                if (res.data.records) return res.data.records;
+            }
+            return [];
+        }
+
+        // ==================== TAB SWITCHING ====================
+        document.getElementById('tabTests').addEventListener('click', function () {
+            switchTab('tests');
+        });
+        document.getElementById('tabHistory').addEventListener('click', function () {
+            switchTab('history');
+        });
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('tabTests').classList.toggle('active', tab === 'tests');
+            document.getElementById('tabHistory').classList.toggle('active', tab === 'history');
+            document.getElementById('testListContent').style.display = tab === 'tests' ? '' : 'none';
+            document.getElementById('historyContent').style.display = tab === 'history' ? '' : 'none';
+            if (tab === 'history') loadHistory();
+        }
+
+        // ==================== LOAD TEST LIST ====================
+        function loadTests() {
+            document.getElementById('testLoading').style.display = 'block';
+            document.getElementById('testGrid').innerHTML = '';
+            document.getElementById('testEmpty').style.display = 'none';
+
+            api.get('/api/tests')
+                .then(function (res) {
+                    document.getElementById('testLoading').style.display = 'none';
+                    tests = parseArray(res);
+
+                    if (tests.length === 0) {
+                        document.getElementById('testEmpty').style.display = 'block';
+                        return;
+                    }
+                    renderTestCards(tests);
+                })
+                .catch(function (err) {
+                    document.getElementById('testLoading').style.display = 'none';
+                    document.getElementById('testEmpty').style.display = 'block';
+                    console.error('Failed to load tests:', err);
+                    showToast('加载测评列表失败', 'error');
+                });
+        }
+
+        function renderTestCards(list) {
+            var grid = document.getElementById('testGrid');
+            grid.innerHTML = '';
+
+            list.forEach(function (test) {
+                var id = test.id;
+                var title = test.title || test.name || '未命名测评';
+                var description = test.description || test.desc || '';
+                var questionCount = test.questionCount || test.questions || test.questionNum || 10;
+                var duration = test.duration || test.estimatedTime || 10;
+                var category = test.category || test.type || '';
+
+                var cat = getCategoryInfo(category);
+
+                var card = document.createElement('div');
+                card.className = 'test-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5';
+                card.innerHTML =
+                    '<div class="flex items-start space-x-4 mb-3">' +
+                        '<div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ' + cat.cls + '">' +
+                            '<i class="fas ' + cat.icon + '"></i>' +
+                        '</div>' +
+                        '<div class="flex-1 min-w-0">' +
+                            '<h3 class="text-base font-semibold text-gray-800 mb-1 truncate">' + escapeHTML(title) + '</h3>' +
+                            '<span class="text-xs font-medium px-2 py-0.5 rounded-full ' + cat.cls + '" style="font-size:11px;">' + cat.label + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<p class="text-sm text-gray-500 mb-4 line-clamp-2 leading-relaxed">' + escapeHTML(description) + '</p>' +
+                    '<div class="flex items-center justify-between">' +
+                        '<div class="flex items-center space-x-3 text-xs text-gray-400">' +
+                            '<span><i class="fas fa-list-ol mr-1"></i>' + questionCount + ' 题</span>' +
+                            '<span><i class="fas fa-clock mr-1"></i>' + duration + ' 分钟</span>' +
+                        '</div>' +
+                        '<button class="btn-primary px-4 py-1.5 rounded-lg text-xs font-medium" data-action="start" data-id="' + id + '" data-title="' + escapeHTML(title) + '">' +
+                            '开始测评' +
+                        '</button>' +
+                    '</div>';
+
+                card.querySelector('[data-action="start"]').addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    startTest(id, title);
+                });
+
+                // Also make the whole card clickable (except the button)
+                card.addEventListener('click', function () {
+                    startTest(id, title);
+                });
+
+                grid.appendChild(card);
+            });
+        }
+
+        // ==================== START TEST ====================
+        function startTest(testId, testTitle) {
+            currentTest = { id: testId, title: testTitle };
+            questions = [];
+            answers = [];
+            currentQuestionIndex = 0;
+            selectedOptionId = null;
+
+            document.getElementById('testNameLabel').textContent = testTitle;
+
+            // Show question view, hide list view and result view
+            document.getElementById('testListView').style.display = 'none';
+            document.getElementById('resultView').style.display = 'none';
+            document.getElementById('questionView').style.display = '';
+            document.getElementById('submitLoading').style.display = 'none';
+            document.getElementById('questionCard').style.display = '';
+            document.getElementById('viewTitle').textContent = testTitle;
+            document.getElementById('viewSubtitle').textContent = '请根据实际情况如实作答';
+
+            // Loading state
+            var qCard = document.getElementById('questionCard');
+            qCard.innerHTML = '<div class="text-center py-10"><i class="fas fa-spinner fa-spin text-2xl text-gray-300"></i><p class="text-sm text-gray-400 mt-3">正在加载题目...</p></div>';
+
+            api.get('/api/tests/' + testId + '/questions')
+                .then(function (res) {
+                    // Try to parse questions from response
+                    var list = [];
+                    if (Array.isArray(res)) {
+                        list = res;
+                    } else if (res && res.data) {
+                        if (Array.isArray(res.data)) {
+                            list = res.data;
+                        } else if (res.data.questions) {
+                            list = res.data.questions;
+                        }
+                    }
+
+                    if (list.length === 0) {
+                        showToast('该测评暂无题目', 'error');
+                        backToList();
+                        return;
+                    }
+
+                    questions = list;
+                    // Init answers array
+                    answers = questions.map(function (q) {
+                        return { questionId: q.id, selectedOptionId: null };
+                    });
+                    renderQuestion();
+                })
+                .catch(function (err) {
+                    console.error('Failed to load questions:', err);
+                    showToast('加载题目失败，请重试', 'error');
+                    backToList();
+                });
+        }
+
+        function renderQuestion() {
+            if (questions.length === 0) return;
+
+            var q = questions[currentQuestionIndex];
+            var questionId = q.id;
+            var questionText = q.questionText || q.question || q.text || q.title || q.content || '';
+            var options = q.options || q.choices || [];
+
+            // Find current selected option
+            var answer = answers[currentQuestionIndex];
+            selectedOptionId = answer ? answer.selectedOptionId : null;
+
+            // Update progress
+            var total = questions.length;
+            var current = currentQuestionIndex + 1;
+            var progress = (current / total) * 100;
+            document.getElementById('progressText').textContent = current + '/' + total;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // Build options HTML
+            var optsHTML = '';
+            options.forEach(function (opt) {
+                var optId = opt.id || opt.key || opt.value || opt;
+                var optText = opt.text || opt.label || opt.content || (typeof opt === 'string' ? opt : '');
+                var isSelected = selectedOptionId === optId;
+                optsHTML +=
+                    '<div class="option-card border rounded-xl px-5 py-4 flex items-center space-x-3' + (isSelected ? ' selected' : ' border-gray-200') + '" data-opt-id="' + escapeHTML(String(optId)) + '">' +
+                        '<div class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0' + (isSelected ? '' : ' border-gray-300') + '" style="' + (isSelected ? 'border-color: var(--primary); background: var(--primary);' : '') + '">' +
+                            (isSelected ? '<i class="fas fa-check text-white text-xs"></i>' : '') +
+                        '</div>' +
+                        '<span class="text-sm text-gray-700">' + escapeHTML(optText) + '</span>' +
+                    '</div>';
+            });
+
+            // Build button area HTML
+            var isFirst = currentQuestionIndex === 0;
+            var isLast = currentQuestionIndex === total - 1;
+            var btnHTML = '';
+            btnHTML += '<button id="btnPrev" class="btn-white px-5 py-2.5 rounded-lg text-sm font-medium"' + (isFirst ? ' style="display:none;"' : '') + '>';
+            btnHTML += '<i class="fas fa-chevron-left mr-1.5"></i>上一题</button>';
+            btnHTML += '<div class="flex-1"></div>';
+            if (isLast) {
+                btnHTML += '<button id="btnSubmit" class="btn-primary px-8 py-2.5 rounded-lg text-sm font-medium">';
+                btnHTML += '<i class="fas fa-check mr-1.5"></i>提交</button>';
+            } else {
+                btnHTML += '<button id="btnNext" class="btn-primary px-8 py-2.5 rounded-lg text-sm font-medium">';
+                btnHTML += '下一题 <i class="fas fa-chevron-right ml-1.5"></i></button>';
+            }
+
+            // Rebuild entire card
+            var card = document.getElementById('questionCard');
+            card.innerHTML =
+                '<div class="mb-2">' +
+                    '<span id="questionIndex" class="text-xs font-semibold text-gray-400 uppercase tracking-wide">第 ' + current + ' 题</span>' +
+                '</div>' +
+                '<h3 id="questionText" class="text-lg md:text-xl font-semibold text-gray-800 mb-6 leading-relaxed">' + escapeHTML(questionText) + '</h3>' +
+                '<div id="optionsContainer" class="space-y-3">' + optsHTML + '</div>' +
+                '<div class="flex justify-between items-center mt-8">' + btnHTML + '</div>';
+
+            // Bind option clicks
+            card.querySelectorAll('.option-card').forEach(function (el) {
+                el.addEventListener('click', function () {
+                    var optId = el.getAttribute('data-opt-id');
+                    selectOption(optId);
+                });
+            });
+
+            // Bind buttons
+            var prevBtn = document.getElementById('btnPrev');
+            if (prevBtn) prevBtn.addEventListener('click', prevQuestion);
+            var nextBtn = document.getElementById('btnNext');
+            if (nextBtn) nextBtn.addEventListener('click', nextQuestion);
+            var submitBtn = document.getElementById('btnSubmit');
+            if (submitBtn) submitBtn.addEventListener('click', submitTest);
+        }
+
+        function selectOption(optId) {
+            selectedOptionId = Number(optId);
+            if (answers[currentQuestionIndex]) {
+                answers[currentQuestionIndex].selectedOptionId = optId;
+            }
+
+            // Update visual
+            var container = document.getElementById('optionsContainer');
+            container.querySelectorAll('.option-card').forEach(function (el) {
+                var isSel = el.getAttribute('data-opt-id') === String(optId);
+                el.classList.toggle('selected', isSel);
+                var radio = el.querySelector('.rounded-full');
+                if (radio) {
+                    if (isSel) {
+                        radio.style.borderColor = 'var(--primary)';
+                        radio.style.background = 'var(--primary)';
+                        radio.innerHTML = '<i class="fas fa-check text-white text-xs"></i>';
+                    } else {
+                        radio.style.borderColor = '#d1d5db';
+                        radio.style.background = '';
+                        radio.innerHTML = '';
+                    }
+                }
+            });
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        function submitTest() {
+            // Check all questions are answered
+            var unanswered = answers.filter(function (a) { return !a.selectedOptionId; });
+            if (unanswered.length > 0) {
+                showToast('请完成所有题目后再提交', 'error');
+                return;
+            }
+
+            document.getElementById('questionCard').style.display = 'none';
+            document.getElementById('submitLoading').style.display = 'block';
+
+            var answersMap = {};
+            answers.forEach(function (a) {
+                if (a.selectedOptionId !== null) {
+                    answersMap[String(a.questionId)] = Number(a.selectedOptionId);
+                }
+            });
+
+            var payload = {
+                testId: currentTest.id,
+                testName: currentTest.title,
+                answers: answersMap
+            };
+
+            api.post('/api/tests/submit', payload)
+                .then(function (res) {
+                    document.getElementById('submitLoading').style.display = 'none';
+                    var data = res && res.data ? res.data : res;
+                    showResult(data);
+                })
+                .catch(function (err) {
+                    document.getElementById('submitLoading').style.display = 'none';
+                    document.getElementById('questionCard').style.display = '';
+                    console.error('Failed to submit test:', err);
+                    showToast('提交失败，请重试', 'error');
+                });
+        }
+
+        // ==================== RESULT DISPLAY ====================
+        function showResult(data) {
+            var score = data.score !== undefined ? data.score : (data.totalScore !== undefined ? data.totalScore : 0);
+            var level = data.level || data.resultLevel || data.riskLevel || '';
+            var suggestion = data.suggestions || data.suggestion || data.advice || data.recommendation || data.comment || '';
+
+            // Hide question view, show result
+            document.getElementById('questionView').style.display = 'none';
+            document.getElementById('resultView').style.display = '';
+            document.getElementById('viewTitle').textContent = '测评结果';
+            document.getElementById('viewSubtitle').textContent = currentTest ? currentTest.title : '';
+
+            // Score
+            document.getElementById('resultScore').textContent = score;
+
+            // Level badge
+            var levelEl = document.getElementById('resultLevel');
+            var levelLower = (level || '').toLowerCase();
+            var levelClass = 'level-mild';
+            var levelText = level || '未知';
+
+            if (levelLower.indexOf('正常') !== -1 || levelLower.indexOf('normal') !== -1 || levelLower.indexOf('无') !== -1) {
+                levelClass = 'level-normal';
+            } else if (levelLower.indexOf('轻度') !== -1 || levelLower.indexOf('mild') !== -1) {
+                levelClass = 'level-mild';
+            } else if (levelLower.indexOf('中度') !== -1 || levelLower.indexOf('moderate') !== -1 || levelLower.indexOf('中等') !== -1) {
+                levelClass = 'level-moderate';
+            } else if (levelLower.indexOf('重度') !== -1 || levelLower.indexOf('severe') !== -1 || levelLower.indexOf('严重') !== -1) {
+                levelClass = 'level-severe';
+            }
+
+            levelEl.className = 'level-badge ' + levelClass;
+            levelEl.textContent = levelText;
+
+            // Test name
+            document.getElementById('resultTestName').textContent = currentTest ? currentTest.title : '';
+
+            // Suggestion
+            document.getElementById('resultSuggestion').textContent = suggestion || '暂无建议，请关注自身心理健康。';
+        }
+
+        function backToList() {
+            currentTest = null;
+            questions = [];
+            answers = [];
+            currentQuestionIndex = 0;
+
+            document.getElementById('questionView').style.display = 'none';
+            document.getElementById('resultView').style.display = 'none';
+            document.getElementById('testListView').style.display = '';
+            document.getElementById('viewTitle').textContent = '心理测评';
+            document.getElementById('viewSubtitle').textContent = '科学的心理量表，帮助你更好地了解自己';
+        }
+
+        // ==================== LOAD HISTORY ====================
+        function loadHistory() {
+            document.getElementById('historyLoading').style.display = 'block';
+            document.getElementById('historyList').innerHTML = '';
+            document.getElementById('historyEmpty').style.display = 'none';
+
+            api.get('/api/tests/history')
+                .then(function (res) {
+                    document.getElementById('historyLoading').style.display = 'none';
+                    var list = parseArray(res);
+
+                    if (list.length === 0) {
+                        document.getElementById('historyEmpty').style.display = 'block';
+                        return;
+                    }
+                    renderHistory(list);
+                })
+                .catch(function (err) {
+                    document.getElementById('historyLoading').style.display = 'none';
+                    document.getElementById('historyEmpty').style.display = 'block';
+                    console.error('Failed to load history:', err);
+                    showToast('加载测评历史失败', 'error');
+                });
+        }
+
+        function renderHistory(list) {
+            var container = document.getElementById('historyList');
+            container.innerHTML = '';
+
+            list.forEach(function (record) {
+                var id = record.id;
+                var testTitle = record.testTitle || record.testName || record.title || '测评';
+                var score = record.score !== undefined ? record.score : (record.totalScore !== undefined ? record.totalScore : 0);
+                var level = record.level || record.result || record.resultLevel || '';
+                var date = formatDateTime(record.createdAt || record.createTime || record.date);
+
+                var levelLower = (level || '').toLowerCase();
+                var levelClass = 'level-mild';
+                if (levelLower.indexOf('正常') !== -1 || levelLower.indexOf('normal') !== -1 || levelLower.indexOf('无') !== -1) levelClass = 'level-normal';
+                else if (levelLower.indexOf('轻度') !== -1 || levelLower.indexOf('mild') !== -1) levelClass = 'level-mild';
+                else if (levelLower.indexOf('中度') !== -1 || levelLower.indexOf('moderate') !== -1) levelClass = 'level-moderate';
+                else if (levelLower.indexOf('重度') !== -1 || levelLower.indexOf('severe') !== -1) levelClass = 'level-severe';
+
+                var item = document.createElement('div');
+                item.className = 'bg-white rounded-xl shadow-sm border border-gray-100 px-5 py-4 flex items-center justify-between';
+                item.innerHTML =
+                    '<div class="flex items-center space-x-4">' +
+                        '<div class="w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0" style="background: var(--primary-light);">' +
+                            '<i class="fas fa-chart-simple" style="color: var(--primary);"></i>' +
+                        '</div>' +
+                        '<div>' +
+                            '<h4 class="text-sm font-semibold text-gray-800">' + escapeHTML(testTitle) + '</h4>' +
+                            '<span class="text-xs text-gray-400">' + date + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="flex items-center space-x-3">' +
+                        '<span class="level-badge ' + levelClass + '" style="font-size: 11px;">' + escapeHTML(level) + '</span>' +
+                        '<span class="text-sm font-bold" style="color: var(--primary);">' + score + ' 分</span>' +
+                    '</div>';
+
+                container.appendChild(item);
+            });
+        }
+
+        // ==================== EVENT BINDINGS ====================
+        document.getElementById('btnBackToList').addEventListener('click', backToList);
+        document.getElementById('btnBackToList2').addEventListener('click', backToList);
+        document.getElementById('btnRetake').addEventListener('click', function () {
+            if (currentTest) {
+                document.getElementById('resultView').style.display = 'none';
+                startTest(currentTest.id, currentTest.title);
+            }
+        });
+
+        // ==================== INIT ====================
+        loadTests();
+    })();
+    </script>
+</body>
+</html>

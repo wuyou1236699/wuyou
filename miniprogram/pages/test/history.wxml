@@ -1,0 +1,38 @@
+<view class="container">
+  <view class="header">
+    <text class="header-title">📋 测评记录</text>
+    <text class="header-subtitle">查看您的历史测评结果</text>
+  </view>
+
+  <view class="history-list">
+    <view 
+      wx:for="{{history}}" 
+      wx:key="id" 
+      class="history-card"
+      bindtap="goToDetail"
+      data-record="{{item}}"
+    >
+      <view class="history-info">
+        <text class="history-title">{{item.testName}}</text>
+        <text class="history-time">{{item.createTime}}</text>
+      </view>
+      <view class="history-result">
+        <text class="result-score">{{item.totalScore}}分</text>
+        <text class="result-level" style="color: {{item.levelColor}}">{{item.result}}</text>
+      </view>
+      <view class="history-arrow">
+        <text>→</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="empty-state" wx:if="{{!loading && history.length === 0}}">
+    <text class="empty-icon">📝</text>
+    <text class="empty-text">暂无测评记录</text>
+    <button class="empty-btn" bindtap="goBack">去测评</button>
+  </view>
+</view>

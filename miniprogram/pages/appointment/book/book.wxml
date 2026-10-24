@@ -1,0 +1,130 @@
+<view class="container">
+  <!-- 顶部 Tab 切换 -->
+  <view class="method-tabs">
+    <view class="tab {{activeTab==='condition'?'active':''}}" bindtap="switchTab" data-tab="condition">
+      <text class="tab-icon">🏥</text>
+      <text class="tab-text">按病情匹配</text>
+    </view>
+    <view class="tab {{activeTab==='counselor'?'active':''}}" bindtap="switchTab" data-tab="counselor">
+      <text class="tab-icon">👨‍⚕️</text>
+      <text class="tab-text">按咨询师预约</text>
+    </view>
+    <view class="tab {{activeTab==='time'?'active':''}}" bindtap="switchTab" data-tab="time">
+      <text class="tab-icon">⏰</text>
+      <text class="tab-text">按时间预约</text>
+    </view>
+  </view>
+
+  <!-- Tab 1: 按病情匹配 -->
+  <view class="tab-content" wx:if="{{activeTab==='condition'}}">
+    <view class="condition-card">
+      <text class="card-title">选择您的问题类型，系统为您精准匹配</text>
+      <view class="problem-grid">
+        <view class="problem-item {{selectedProblem===item?'active':''}}" wx:for="{{problemTypes}}" wx:key="*this" bindtap="selectProblem" data-type="{{item}}">
+          <text>{{item}}</text>
+        </view>
+      </view>
+      <button class="match-btn" bindtap="matchByProblem" disabled="{{!selectedProblem}}">
+        {{selectedProblem ? '匹配「' + selectedProblem + '」方向咨询师' : '请先选择问题类型'}}
+      </button>
+    </view>
+    <view class="result-list" wx:if="{{matchedList.length > 0 || matchDone}}">
+      <view class="section-title">{{matchedList.length > 0 ? '匹配结果' : '未找到匹配的咨询师'}}</view>
+      <view class="counselor-card" wx:for="{{matchedList}}" wx:key="id" bindtap="goToDetail" data-id="{{item.id}}">
+        <view class="card-left">
+          <image class="avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+          <view class="info">
+            <text class="name">{{item.name}}</text>
+            <text class="expertise">{{item.expertise}}</text>
+            <view class="rating-row">
+              <text class="star">⭐ {{item.avgRating || 0}}</text>
+              <text class="count">{{item.appointmentCount || 0}}次预约</text>
+            </view>
+          </view>
+        </view>
+        <view class="card-right">
+          <text class="price">{{item.displayPrice || '面议'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Tab 2: 按咨询师预约 -->
+  <view class="tab-content" wx:if="{{activeTab==='counselor'}}">
+    <view class="search-bar">
+      <input class="search-input" value="{{keyword}}" bindinput="onKeywordInput" placeholder="搜索咨询师姓名或擅长领域..."/>
+    </view>
+    <view class="counselor-list">
+      <view class="counselor-card" wx:for="{{filteredCounselors}}" wx:key="id" bindtap="goToDetail" data-id="{{item.id}}">
+        <view class="card-left">
+          <image class="avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+          <view class="info">
+            <text class="name">{{item.name}}</text>
+            <text class="expertise">{{item.expertise}}</text>
+            <view class="rating-row">
+              <text class="star">⭐ {{item.avgRating || 0}}</text>
+              <text class="count">{{item.appointmentCount || 0}}次预约</text>
+            </view>
+          </view>
+        </view>
+        <view class="card-right">
+          <text class="price">{{item.displayPrice || '面议'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+      <view wx:if="{{filteredCounselors.length === 0 && counselors.length > 0}}" class="empty-state">
+        <text>未找到匹配的咨询师</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Tab 3: 按时间预约 -->
+  <view class="tab-content" wx:if="{{activeTab==='time'}}">
+    <view class="time-picker-card">
+      <text class="card-title">选择您方便的时间，查看可约咨询师</text>
+      <view class="picker-row">
+        <text class="picker-label">日期</text>
+        <picker mode="date" value="{{selectedDate}}" bindchange="onDateChange">
+          <view class="picker-value">{{selectedDate || '请选择日期'}}</view>
+        </picker>
+      </view>
+      <view class="picker-row">
+        <text class="picker-label">时段</text>
+        <view class="time-chips">
+          <view class="time-chip {{selectedPeriod==='morning'?'active':''}}" bindtap="selectPeriod" data-period="morning"><text>上午</text></view>
+          <view class="time-chip {{selectedPeriod==='afternoon'?'active':''}}" bindtap="selectPeriod" data-period="afternoon"><text>下午</text></view>
+          <view class="time-chip {{selectedPeriod==='evening'?'active':''}}" bindtap="selectPeriod" data-period="evening"><text>晚上</text></view>
+        </view>
+      </view>
+      <button class="match-btn" bindtap="matchByTime" disabled="{{!selectedDate || !selectedPeriod}}">
+        {{selectedDate && selectedPeriod ? '查询可用咨询师' : '请选择日期和时段'}}
+      </button>
+    </view>
+    <view class="result-list" wx:if="{{timeMatchedList.length > 0 || timeMatchDone}}">
+      <view class="section-title">{{timeMatchedList.length > 0 ? '该时段可约咨询师' : '该时段暂无可用咨询师'}}</view>
+      <view class="counselor-card" wx:for="{{timeMatchedList}}" wx:key="id" bindtap="goToDetail" data-id="{{item.id}}">
+        <view class="card-left">
+          <image class="avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+          <view class="info">
+            <text class="name">{{item.name}}</text>
+            <text class="expertise">{{item.expertise}}</text>
+            <view class="rating-row">
+              <text class="star">⭐ {{item.avgRating || 0}}</text>
+              <text class="count">{{item.appointmentCount || 0}}次预约</text>
+            </view>
+          </view>
+        </view>
+        <view class="card-right">
+          <text class="price">{{item.displayPrice || '面议'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="loading-state" wx:if="{{loading}}">
+    <view class="spinner"></view>
+    <text>加载中...</text>
+  </view>
+</view>

@@ -1,0 +1,13 @@
+.container { padding: 20rpx; background: #FFF5F2; min-height: 100vh; }
+.page-title { font-size: 36rpx; font-weight: bold; padding: 20rpx 0; }
+.loading, .empty { text-align: center; color: #B8A0A0; padding: 100rpx 0; }
+.review-list { display: flex; flex-direction: column; gap: 20rpx; }
+.review-card { background: #fff; border-radius: 24rpx; padding: 24rpx; }
+.review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
+.counselor-name { font-size: 30rpx; font-weight: bold; }
+.stars { display: flex; gap: 4rpx; }
+.star { font-size: 32rpx; }
+.star.filled { color: #ffb400; }
+.star.empty { color: #ddd; }
+.review-content { font-size: 28rpx; color: #3D2C2C; margin-bottom: 12rpx; }
+.review-time { font-size: 24rpx; color: #B8A0A0; }

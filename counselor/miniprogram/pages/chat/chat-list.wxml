@@ -1,0 +1,115 @@
+<view class="container" wx:if="{{!loading}}">
+  <view class="online-bar">
+    <view class="message-stats">
+      <view class="stat-block">
+        <text class="stat-num">{{totalRead}}</text>
+        <text class="stat-label">已读</text>
+      </view>
+      <view class="stat-divider-v"></view>
+      <view class="stat-block">
+        <text class="stat-num">{{totalUnread}}</text>
+        <text class="stat-label">未读</text>
+      </view>
+    </view>
+    <view class="stats">
+      <text class="stat-item">共 {{chatList.length}} 个会话</text>
+    </view>
+  </view>
+
+  <view class="search-bar">
+    <view class="search-input-wrapper">
+      <text class="search-icon">🔍</text>
+      <input 
+        class="search-input" 
+        placeholder="搜索用户" 
+        value="{{searchKey}}"
+        bindinput="onSearch"
+      />
+      <text class="clear-btn" wx:if="{{searchKey}}" bindtap="clearSearch">✕</text>
+    </view>
+  </view>
+
+  <view class="filter-tabs">
+    <view
+      class="filter-tab {{filterType === 'all' ? 'active' : ''}}"
+      bindtap="switchFilter"
+      data-type="all"
+    >
+      <text>全部</text>
+    </view>
+    <view
+      class="filter-tab {{filterType === 'read' ? 'active' : ''}}"
+      bindtap="switchFilter"
+      data-type="read"
+    >
+      <text>已读</text>
+    </view>
+    <view
+      class="filter-tab {{filterType === 'unread' ? 'active' : ''}}"
+      bindtap="switchFilter"
+      data-type="unread"
+    >
+      <text>未读</text>
+    </view>
+  </view>
+
+  <scroll-view class="condition-bar" scroll-x="true" enhanced="true" show-scrollbar="{{false}}">
+    <view class="condition-item {{conditionFilter === 'all' ? 'active' : ''}}" bindtap="switchCondition" data-cond="all">全部</view>
+    <view class="condition-item {{conditionFilter === '抑郁' ? 'active' : ''}}" bindtap="switchCondition" data-cond="抑郁">抑郁</view>
+    <view class="condition-item {{conditionFilter === '焦虑' ? 'active' : ''}}" bindtap="switchCondition" data-cond="焦虑">焦虑</view>
+    <view class="condition-item {{conditionFilter === '婚恋' ? 'active' : ''}}" bindtap="switchCondition" data-cond="婚恋">婚恋</view>
+    <view class="condition-item {{conditionFilter === '青少年' ? 'active' : ''}}" bindtap="switchCondition" data-cond="青少年">青少年</view>
+    <view class="condition-item {{conditionFilter === '职场' ? 'active' : ''}}" bindtap="switchCondition" data-cond="职场">职场</view>
+    <view class="condition-item {{conditionFilter === '人际关系' ? 'active' : ''}}" bindtap="switchCondition" data-cond="人际关系">人际关系</view>
+    <view class="condition-item {{conditionFilter === '睡眠障碍' ? 'active' : ''}}" bindtap="switchCondition" data-cond="睡眠障碍">睡眠障碍</view>
+    <view class="condition-item {{conditionFilter === '学业压力' ? 'active' : ''}}" bindtap="switchCondition" data-cond="学业压力">学业压力</view>
+    <view class="condition-item {{conditionFilter === '情绪压力' ? 'active' : ''}}" bindtap="switchCondition" data-cond="情绪压力">情绪压力</view>
+    <view class="condition-item {{conditionFilter === '原生家庭' ? 'active' : ''}}" bindtap="switchCondition" data-cond="原生家庭">原生家庭</view>
+    <view class="condition-item {{conditionFilter === '自我成长' ? 'active' : ''}}" bindtap="switchCondition" data-cond="自我成长">自我成长</view>
+    <view class="condition-item {{conditionFilter === '直接对话' ? 'active' : ''}}" bindtap="switchCondition" data-cond="直接对话">直接对话</view>
+    <view class="condition-item {{conditionFilter === '其他' ? 'active' : ''}}" bindtap="switchCondition" data-cond="其他">其他</view>
+  </scroll-view>
+
+  <view class="chat-list" wx:if="{{filteredChatList.length > 0}}">
+    <view
+      class="chat-item"
+      wx:for="{{filteredChatList}}"
+      wx:key="userId"
+      bindtap="enterChat"
+      data-userid="{{item.userId}}"
+      data-username="{{item.userName}}"
+      data-appointmentid="{{item.appointmentId}}"
+      data-isdirect="{{item.isDirect}}"
+    >
+      <view class="chat-avatar">
+        <image wx:if="{{item.userAvatar}}" src="{{item.userAvatar}}" mode="aspectFill" class="avatar-img"></image>
+        <view wx:else class="avatar">{{item.initial}}</view>
+      </view>
+      <view class="chat-info">
+        <view class="chat-header">
+          <view class="chat-name-row">
+            <text class="chat-name">{{item.userName}}</text>
+            <text class="chat-tag" wx:if="{{item.isDirect}}">直接对话</text>
+            <text class="chat-tag date" wx:else>{{item.appointmentTime}}</text>
+            <text class="chat-tag condition">{{item.condition}}</text>
+          </view>
+          <text class="chat-time">{{item.lastTime}}</text>
+        </view>
+        <text class="chat-message">{{item.lastMessage}}</text>
+      </view>
+      <view class="chat-badge" wx:if="{{item.unreadCount > 0}}">
+        <text>{{item.unreadCount}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:else>
+    <text class="empty-icon">💬</text>
+    <text class="empty-text">{{searchKey ? '未找到匹配的用户' : '暂无消息'}}</text>
+  </view>
+</view>
+
+<view class="loading-state" wx:if="{{loading}}">
+  <view class="loading-spinner"></view>
+  <text class="loading-text">加载中...</text>
+</view>

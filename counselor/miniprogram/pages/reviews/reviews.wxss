@@ -1,0 +1,13 @@
+.container { padding: 16px; min-height: 100vh; background: #F8F7FC; }
+.review-card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+.review-card.unreviewed { opacity: 0.7; }
+.review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.user-name { font-weight: 600; font-size: 15px; color: #333; }
+.star { font-size: 16px; color: #ddd; }
+.star.active { color: #FF9500; }
+.no-review-tag { font-size: 13px; color: #faad14; background: #fffbe6; padding: 2px 10px; border-radius: 10px; }
+.review-content { font-size: 14px; color: #666; line-height: 1.6; display: block; margin-bottom: 8px; }
+.review-time { font-size: 12px; color: #999; display: block; }
+.empty-state { text-align: center; padding: 80px 0; }
+.empty-icon { font-size: 48px; display: block; margin-bottom: 12px; }
+.empty-text { font-size: 14px; color: #999; }

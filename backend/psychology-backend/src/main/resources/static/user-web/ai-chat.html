@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 心理助手</title>
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        .bg-chat { background-color: #FDF8F5; }
+        .bubble-user { background-color: #FF7E67; }
+        .bubble-ai { background-color: #FFFFFF; border: 1px solid #E5E7EB; }
+        .message-area { scroll-behavior: smooth; }
+        .message-area::-webkit-scrollbar { width: 4px; }
+        .message-area::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 2px; }
+        .message-area::-webkit-scrollbar-track { background: transparent; }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin { animation: spin 0.8s linear infinite; }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .typing-dot {
+            width: 6px; height: 6px;
+            background-color: #9CA3AF;
+            border-radius: 50%;
+            animation: pulse-dot 1.2s ease-in-out infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    </style>
+</head>
+<body class="bg-chat min-h-screen">
+
+    <div class="max-w-[600px] mx-auto min-h-screen flex flex-col bg-chat relative shadow-lg">
+
+        <!-- Header -->
+        <header class="sticky top-0 z-10 bg-white shadow-sm px-4 py-3 flex items-center gap-3">
+            <button id="backBtn" class="text-gray-600 hover:text-gray-800 text-lg px-1 flex-shrink-0">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span class="text-sm ml-1">返回</span>
+            </button>
+            <div class="w-10 h-10 rounded-full bg-[#FFF0ED] flex items-center justify-center text-[#FF7E67] flex-shrink-0">
+                <i class="fa-solid fa-brain text-lg"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h1 class="font-medium text-gray-800 text-base">AI 心理助手</h1>
+                <p class="text-xs text-gray-400">随时倾听，温暖陪伴</p>
+            </div>
+            <button id="clearBtn" class="text-xs text-gray-400 hover:text-red-500 px-3 py-1.5 rounded-full border border-gray-200 hover:border-red-200 bg-white transition-colors flex-shrink-0">
+                <i class="fa-solid fa-trash-can mr-1"></i>清除对话
+            </button>
+        </header>
+
+        <!-- Message Area -->
+        <main id="messageArea" class="flex-1 overflow-y-auto px-4 py-4 message-area">
+
+            <!-- Messages container -->
+            <div id="messagesContainer" class="flex flex-col gap-1">
+                <!-- Messages rendered here -->
+            </div>
+
+            <!-- Empty state -->
+            <div id="emptyState" class="flex flex-col items-center justify-center py-20 text-gray-400">
+                <div class="w-20 h-20 rounded-full bg-[#FFF0ED] flex items-center justify-center mb-5">
+                    <i class="fa-solid fa-brain text-3xl text-[#FF7E67]"></i>
+                </div>
+                <p class="text-sm text-gray-500 leading-relaxed text-center">
+                    你好，我是你的AI心理助手，有什么想聊的吗？
+                </p>
+                <p class="text-xs text-gray-400 mt-2">我在这里倾听你的一切</p>
+            </div>
+
+            <!-- Typing indicator -->
+            <div id="typingIndicator" class="hidden flex justify-start mb-2">
+                <div class="bubble-ai bg-white border border-gray-200 px-4 py-3 rounded-2xl rounded-bl-md flex items-center gap-2">
+                    <i class="fa-solid fa-robot text-[#FF7E67] text-sm"></i>
+                    <span class="text-sm text-gray-500 mr-1">AI正在思考</span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                </div>
+            </div>
+
+            <!-- Loading spinner (initial history load) -->
+            <div id="loadingSpinner" class="flex justify-center py-10">
+                <div class="w-8 h-8 border-2 border-[#FF7E67] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        </main>
+
+        <!-- Input Area -->
+        <div class="sticky bottom-0 bg-white border-t border-gray-100 px-4 py-3">
+            <div class="flex items-center gap-2">
+                <input
+                    id="messageInput"
+                    type="text"
+                    placeholder="说说你的想法..."
+                    class="flex-1 px-4 py-2.5 bg-gray-50 rounded-full border border-gray-200 focus:outline-none focus:border-[#FF7E67] focus:ring-1 focus:ring-[#FF7E67] text-sm transition-shadow"
+                    maxlength="500"
+                    autocomplete="off"
+                >
+                <button id="sendBtn" class="w-10 h-10 rounded-full bubble-user text-white flex items-center justify-center hover:opacity-90 active:opacity-80 transition-opacity flex-shrink-0 shadow-sm">
+                    <i class="fa-solid fa-paper-plane text-sm"></i>
+                </button>
+            </div>
+            <p class="text-xs text-gray-400 text-center mt-2">AI助手提供心理支持，但不能替代专业心理咨询</p>
+        </div>
+
+    </div>
+
+    <!-- Clear confirmation modal -->
+    <div id="clearModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div class="bg-white rounded-xl shadow-xl px-6 py-5 mx-4 max-w-sm w-full">
+            <div class="flex justify-center mb-3">
+                <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
+                    <i class="fa-solid fa-exclamation text-red-500 text-xl"></i>
+                </div>
+            </div>
+            <p class="text-gray-800 text-center font-medium mb-1">确定要清除对话记录吗？</p>
+            <p class="text-gray-400 text-center text-sm mb-5">清除后将无法恢复</p>
+            <div class="flex gap-3">
+                <button id="clearCancel" class="flex-1 py-2.5 rounded-lg border border-gray-200 text-gray-600 text-sm hover:bg-gray-50 transition-colors">
+                    取消
+                </button>
+                <button id="clearConfirm" class="flex-1 py-2.5 rounded-lg bg-red-500 text-white text-sm hover:bg-red-600 transition-colors">
+                    确认清除
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+
+    <script>
+    (function() {
+        // ──────────────────────────────────────
+        // State
+        // ──────────────────────────────────────
+        let messageList = [];        // sorted oldest-first
+        let isWaitingReply = false;  // waiting for AI response
+
+        // ──────────────────────────────────────
+        // DOM refs
+        // ──────────────────────────────────────
+        const $ = (sel) => document.querySelector(sel);
+        const messageArea = $('#messageArea');
+        const messagesContainer = $('#messagesContainer');
+        const emptyState = $('#emptyState');
+        const typingIndicator = $('#typingIndicator');
+        const loadingSpinner = $('#loadingSpinner');
+        const messageInput = $('#messageInput');
+        const sendBtn = $('#sendBtn');
+        const backBtn = $('#backBtn');
+        const clearBtn = $('#clearBtn');
+        const clearModal = $('#clearModal');
+        const clearCancel = $('#clearCancel');
+        const clearConfirm = $('#clearConfirm');
+
+        // ──────────────────────────────────────
+        // Initialization
+        // ──────────────────────────────────────
+        function init() {
+            if (!checkLogin()) return;
+
+            bindEvents();
+            loadHistory();
+        }
+
+        // ──────────────────────────────────────
+        // Event bindings
+        // ──────────────────────────────────────
+        function bindEvents() {
+            backBtn.addEventListener('click', function() {
+                if (document.referrer && document.referrer.indexOf(window.location.host) !== -1) {
+                    window.history.back();
+                } else {
+                    window.location.href = 'home.html';
+                }
+            });
+
+            sendBtn.addEventListener('click', handleSend);
+            messageInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                }
+            });
+
+            clearBtn.addEventListener('click', function() {
+                if (messageList.length === 0) {
+                    showToast('没有对话记录', 'info');
+                    return;
+                }
+                clearModal.classList.remove('hidden');
+            });
+
+            clearCancel.addEventListener('click', function() {
+                clearModal.classList.add('hidden');
+            });
+
+            clearConfirm.addEventListener('click', handleClear);
+
+            clearModal.addEventListener('click', function(e) {
+                if (e.target === clearModal) {
+                    clearModal.classList.add('hidden');
+                }
+            });
+        }
+
+        // ──────────────────────────────────────
+        // Load history
+        // ──────────────────────────────────────
+        async function loadHistory() {
+            try {
+                const res = await api.get('/api/ai/history?limit=50');
+
+                if (res.code !== 200) {
+                    throw new Error(res.msg || '加载历史记录失败');
+                }
+
+                const data = res.data;
+                const records = Array.isArray(data) ? data : [];
+
+                // 后端按 createTime 倒序，需反转为正序
+                const messages = [];
+                records.reverse().forEach(function(record) {
+                    if (record.content) {
+                        messages.push({
+                            role: record.role === 'ai' ? 'assistant' : 'user',
+                            content: record.content,
+                            createTime: record.createTime
+                        });
+                    }
+                });
+                messageList = messages;
+
+                renderAllMessages();
+            } catch (err) {
+                console.error('Failed to load AI history:', err);
+                showToast('加载记录失败', 'error');
+                messageList = [];
+                renderAllMessages();
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        // ──────────────────────────────────────
+        // Render
+        // ──────────────────────────────────────
+        function renderAllMessages() {
+            if (messageList.length === 0) {
+                emptyState.style.display = '';
+                messagesContainer.innerHTML = '';
+            } else {
+                emptyState.style.display = 'none';
+                messagesContainer.innerHTML = buildMessagesHTML(messageList);
+            }
+
+            scrollToBottom();
+        }
+
+        function buildMessagesHTML(messages) {
+            if (!messages || messages.length === 0) return '';
+
+            let html = '';
+            messages.forEach(function(msg) {
+                // Determine role: user vs assistant/ai
+                const role = msg.role || msg.sender || '';
+                const content = msg.content || msg.message || msg.reply || '';
+
+                if (role === 'user') {
+                    html += buildUserBubble(content, msg.createTime || msg.time);
+                } else {
+                    html += buildAiBubble(content, msg.createTime || msg.time);
+                }
+            });
+
+            return html;
+        }
+
+        function buildUserBubble(content, timeVal) {
+            const timeStr = formatMessageTime(timeVal);
+            return '<div class="message-row flex justify-end mb-1">' +
+                   '  <div class="max-w-[75%]">' +
+                   '    <div class="bubble-user text-white px-4 py-2.5 rounded-2xl rounded-br-md text-sm leading-relaxed break-words">' +
+                   '      <span>' + escapeHTML(content) + '</span>' +
+                   '    </div>' +
+                   '    <p class="text-xs text-gray-400 mt-1 text-right mr-1">' + (timeStr || '') + '</p>' +
+                   '  </div>' +
+                   '</div>';
+        }
+
+        function buildAiBubble(content, timeVal) {
+            const timeStr = formatMessageTime(timeVal);
+            return '<div class="message-row flex justify-start mb-1">' +
+                   '  <div class="max-w-[75%]">' +
+                   '    <div class="bubble-ai bg-white border border-gray-200 px-4 py-2.5 rounded-2xl rounded-bl-md text-sm leading-relaxed break-words text-gray-800">' +
+                   '      <div class="flex items-start gap-1.5">' +
+                   '        <i class="fa-solid fa-wand-magic-sparkles text-[#FF7E67] text-xs mt-0.5 flex-shrink-0"></i>' +
+                   '        <span>' + escapeHTML(content) + '</span>' +
+                   '      </div>' +
+                   '    </div>' +
+                   '    <p class="text-xs text-gray-400 mt-1 text-left ml-1">' + (timeStr || '') + '</p>' +
+                   '  </div>' +
+                   '</div>';
+        }
+
+        function appendMessage(role, content) {
+            // Hide empty state
+            emptyState.style.display = 'none';
+
+            const now = new Date().toISOString();
+            const msg = { role: role, content: content, createTime: now };
+            messageList.push(msg);
+
+            const roleToClass = role === 'user' ? buildUserBubble : buildAiBubble;
+            const html = roleToClass(content, now);
+            messagesContainer.insertAdjacentHTML('beforeend', html);
+
+            scrollToBottom();
+        }
+
+        function showTyping() {
+            typingIndicator.classList.remove('hidden');
+            scrollToBottom();
+        }
+
+        function hideTyping() {
+            typingIndicator.classList.add('hidden');
+        }
+
+        function scrollToBottom() {
+            requestAnimationFrame(function() {
+                messageArea.scrollTop = messageArea.scrollHeight;
+            });
+        }
+
+        // ──────────────────────────────────────
+        // Send message
+        // ──────────────────────────────────────
+        async function handleSend() {
+            if (isWaitingReply) return;
+
+            const content = messageInput.value.trim();
+            if (!content) return;
+
+            // Show user message immediately
+            appendMessage('user', content);
+            messageInput.value = '';
+
+            // Disable input while waiting
+            isWaitingReply = true;
+            sendBtn.disabled = true;
+            messageInput.disabled = true;
+
+            // Show typing indicator
+            showTyping();
+
+            try {
+                const res = await api.post('/api/ai/chat', { message: content });
+
+                hideTyping();
+
+                if (res.code !== 200) {
+                    throw new Error(res.msg || '请求失败');
+                }
+
+                const reply = res.data || res.reply || '抱歉，我现在无法回复，请稍后再试。';
+                appendMessage('assistant', reply);
+
+            } catch (err) {
+                hideTyping();
+                console.error('AI chat error:', err);
+                showToast(err.message || '发送失败，请重试', 'error');
+                // Remove the user message we optimistically added
+                messageList.pop();
+                // Re-render to remove orphan bubble
+                messagesContainer.innerHTML = buildMessagesHTML(messageList);
+                if (messageList.length === 0) {
+                    emptyState.style.display = '';
+                }
+            } finally {
+                isWaitingReply = false;
+                sendBtn.disabled = false;
+                messageInput.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        // ──────────────────────────────────────
+        // Clear history
+        // ──────────────────────────────────────
+        async function handleClear() {
+            clearModal.classList.add('hidden');
+
+            try {
+                const res = await api.del('/api/ai/history');
+
+                if (res.code !== 200) {
+                    throw new Error(res.msg || '清除失败');
+                }
+
+                // Clear local state
+                messageList = [];
+                messagesContainer.innerHTML = '';
+                emptyState.style.display = '';
+
+                showToast('对话记录已清除', 'success');
+
+            } catch (err) {
+                console.error('Clear history error:', err);
+                showToast(err.message || '清除失败，请重试', 'error');
+            }
+        }
+
+        // ──────────────────────────────────────
+        // Helpers
+        // ──────────────────────────────────────
+        function formatMessageTime(val) {
+            if (!val) return '';
+            let d;
+            if (typeof val === 'string') {
+                d = new Date(val);
+            } else if (Array.isArray(val) && val.length >= 3) {
+                d = new Date(val[0], val[1] - 1, val[2], val[3] || 0, val[4] || 0, val[5] || 0);
+            } else {
+                d = new Date(val);
+            }
+            if (!d || isNaN(d.getTime())) return '';
+            return d.getHours().toString().padStart(2, '0') + ':' +
+                   d.getMinutes().toString().padStart(2, '0');
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            var div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ──────────────────────────────────────
+        // Start
+        // ──────────────────────────────────────
+        init();
+
+    })();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+<view class="container" wx:if="{{!loading}}">
+  <view class="filter-bar">
+    <picker mode="selector" range="{{filterLabels}}" value="{{filterIndex}}" bindchange="onFilterChange">
+      <view class="picker-btn">
+        <text>{{filterLabels[filterIndex]}}</text>
+        <text class="picker-arrow">▼</text>
+      </view>
+    </picker>
+  </view>
+
+  <view class="record-list" wx:if="{{records.length > 0}}">
+    <view
+      class="record-item {{item.isPlaceholder ? 'placeholder' : ''}}"
+      wx:for="{{records}}"
+      wx:key="appointmentId"
+      bindtap="viewDetail"
+      data-id="{{item.id}}"
+      data-appointment-id="{{item.appointmentId}}"
+    >
+      <view class="record-header">
+        <view class="record-avatar">
+          <view class="avatar"></view>
+        </view>
+        <view class="record-info">
+          <text class="record-name">{{item.userName}}</text>
+          <view class="record-meta">
+            <text class="meta-item">{{item.serviceTypeText}}</text>
+            <text class="meta-dot">·</text>
+            <text class="meta-item">{{item.date}}</text>
+          </view>
+        </view>
+        <view class="record-status {{item.status}}">
+          <text>{{item.isPlaceholder ? '待填写' : (item.status === 'completed' ? '已完成' : '草稿')}}</text>
+        </view>
+      </view>
+      <view class="record-content">
+        <view class="record-row">
+          <text class="row-label">咨询问题：</text>
+          <text class="row-value">{{item.problem || '未填写'}}</text>
+        </view>
+        <view class="record-row" wx:if="{{item.diagnosis}}">
+          <text class="row-label">诊断结果：</text>
+          <text class="row-value">{{item.diagnosis}}</text>
+        </view>
+        <view class="record-row">
+          <text class="row-label">评价状态：</text>
+          <text class="row-value" style="color: {{item.hasReview ? '#52c41a' : '#faad14'}}">{{item.hasReview ? '已评价' : '未评价'}}</text>
+        </view>
+      </view>
+      <view class="record-footer">
+        <text class="record-fee">{{item.fee != null ? '¥' + item.fee : '未填写'}}</text>
+        <text class="record-arrow" wx:if="{{!item.isPlaceholder}}">›</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:else>
+    <text class="empty-icon">📝</text>
+    <text class="empty-text">暂无咨询记录</text>
+  </view>
+</view>
+
+<view class="loading-state" wx:if="{{loading}}">
+  <view class="loading-spinner"></view>
+  <text class="loading-text">加载中...</text>
+</view>
